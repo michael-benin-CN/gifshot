@@ -1,20 +1,14 @@
-define(function() {
+define(['utils'], function(utils) {
 
       // A couple of shims for having a common interface
-
-      window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
-
-      navigator.getMedia = ( navigator.getUserMedia ||
-          navigator.webkitGetUserMedia ||
-          navigator.mozGetUserMedia ||
-          navigator.msGetUserMedia
-      );
-
-      //
-
-      var video;
-      var cameraStream;
-
+      var video,
+          cameraStream,
+          URL = window.URL || window.webkitURL || window.mozURL || window.msURL,
+          getMedia = ( navigator.getUserMedia ||
+              navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia ||
+              navigator.msGetUserMedia
+          );
 
       /**
        * Requests permission for using the user's camera,
@@ -65,14 +59,14 @@ define(function() {
 
           videoElement.addEventListener('loadeddata', readyListener);
 
-          navigator.getMedia({ video: true }, function (stream) {
+          getMedia({ video: true }, function (stream) {
 
               onStreaming();
 
               if(videoElement.mozSrcObject) {
                   videoElement.mozSrcObject = stream;
               } else {
-                  videoElement.src = window.URL.createObjectURL(stream);
+                  videoElement.src = URL.createObjectURL(stream);
               }
 
               cameraStream = stream;
@@ -94,7 +88,7 @@ define(function() {
           var noGUMSupportTimeout;
           var timeoutLength = options.timeout !== undefined ? options.timeout : 0;
 
-          if(navigator.getMedia) {
+          if(getMedia) {
 
               // Some browsers apparently have support for video streaming because of the
               // presence of the getUserMedia function, but then do not answer our
@@ -167,4 +161,4 @@ define(function() {
 
       return GumHelper;
 
-}).call(this);
+});

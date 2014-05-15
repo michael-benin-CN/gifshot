@@ -1,11 +1,31 @@
-;(function() {var index;
-define('gumHelper', [], function () {
+;(function() {var utils, gumHelper, index;
+utils = {
+    isObject: function (obj) {
+        if (!obj) {
+            return false;
+        }
+        return Object.prototype.toString.call(obj) === '[object Object]';
+    },
+    isArray: function (arr) {
+        if (!arr) {
+            return false;
+        }
+        if ('isArray' in Array) {
+            return Array.isArray(arr);
+        } else {
+            return Object.prototype.toString.call(arr) === '[object Array]';
+        }
+    },
+    isFunction: function (func) {
+        if (!func) {
+            return false;
+        }
+        return Object.prototype.toString.call(func) === '[object Function]';
+    }
+};
+gumHelper = function () {
     // A couple of shims for having a common interface
-    window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
-    navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-    //
-    var video;
-    var cameraStream;
+    var video, cameraStream, URL = window.URL || window.webkitURL || window.mozURL || window.msURL, getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     /**
      * Requests permission for using the user's camera,
      * starts reading video from the selected camera, and calls
@@ -39,12 +59,12 @@ define('gumHelper', [], function () {
         videoElement = document.createElement('video');
         videoElement.autoplay = true;
         videoElement.addEventListener('loadeddata', readyListener);
-        navigator.getMedia({ video: true }, function (stream) {
+        getMedia({ video: true }, function (stream) {
             onStreaming();
             if (videoElement.mozSrcObject) {
                 videoElement.mozSrcObject = stream;
             } else {
-                videoElement.src = window.URL.createObjectURL(stream);
+                videoElement.src = URL.createObjectURL(stream);
             }
             cameraStream = stream;
             videoElement.play();
@@ -59,7 +79,7 @@ define('gumHelper', [], function () {
         options = options || {};
         var noGUMSupportTimeout;
         var timeoutLength = options.timeout !== undefined ? options.timeout : 0;
-        if (navigator.getMedia) {
+        if (getMedia) {
             // Some browsers apparently have support for video streaming because of the
             // presence of the getUserMedia function, but then do not answer our
             // calls for streaming.
@@ -104,7 +124,7 @@ define('gumHelper', [], function () {
             stopVideoStreaming: stopVideoStreaming
         };
     return GumHelper;
-}).call(this);    // gifshot.js
-index = function (gumHelper) {
+}();
+index = function () {
     console.log(gumHelper);
-}(gumHelper);}());
+}();}());
