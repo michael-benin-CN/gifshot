@@ -1,5 +1,5 @@
-;(function() {var index;
-define('gumHelper', [], function () {
+;(function() {var gumHelper, index;
+gumHelper = function () {
     // A couple of shims for having a common interface
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
     navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -104,7 +104,7 @@ define('gumHelper', [], function () {
             stopVideoStreaming: stopVideoStreaming
         };
     return GumHelper;
-}).call(this);    // gifshot.js
-index = function (gumHelper) {
+}();
+index = function () {
     console.log(gumHelper);
-}(gumHelper);}());
+}();}());
