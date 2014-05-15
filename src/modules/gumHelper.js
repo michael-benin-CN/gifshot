@@ -167,4 +167,4 @@ define(function() {
 
       return GumHelper;
 
-}).call(this);
+});
