@@ -1,4 +1,4 @@
 // gifshot.js
-define(function() {
-	console.log('come on man');
+define(['gumHelper'], function(gumHelper) {
+	console.log(gumHelper);
 });
