@@ -34,9 +34,9 @@
 
       gifshot.createGIF({
         'interval': parseInt(interval.value, 10) || 0.2,
-        'numFrames': parseInt(numFrames.value, 10) || 0.2,
-        'gifHeight': parseInt(gifHeight.value, 10) || 0.2,
-        'gifWidth':  parseInt(gifWidth.value, 10) || 0.2,
+        'numFrames': parseInt(numFrames.value, 10) || 15,
+        'gifHeight': parseInt(gifHeight.value, 10) || 400,
+        'gifWidth':  parseInt(gifWidth.value, 10) || 400,
         'progressCallback': function(captureProgress){
             console.log(captureProgress);
         }
