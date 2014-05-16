@@ -105,6 +105,7 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 
 			lastCameraStream = null;
 		}
+
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
 	if(typeof define === 'function' && define.amd) {
