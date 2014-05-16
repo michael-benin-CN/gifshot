@@ -308,8 +308,8 @@ screenShot = function () {
         }
     };
 }();
-index = function (util) {
-    var lastCameraStream, gifshot = {
+index = function () {
+    var lastCameraStream, lastVideoElement, gifshot = {
             'defaultOptions': {
                 'gifWidth': 135,
                 'gifHeight': 101,
@@ -323,7 +323,7 @@ index = function (util) {
             'createGIF': function (userOptions, callback) {
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
                 callback = utils.isFunction(userOptions) ? userOptions : callback;
-                var defaultOptions = gifshot.defaultOptions, options = utils.mergeOptions(defaultOptions, userOptions);
+                var self = this, defaultOptions = gifshot.defaultOptions, options = utils.mergeOptions(defaultOptions, userOptions);
                 videoStream.startVideoStreaming(function (obj) {
                     var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
                             'videoWidth': videoWidth,
@@ -332,6 +332,7 @@ index = function (util) {
                             'gifWidth': gifWidth
                         }), completeCallback = callback;
                     lastCameraStream = cameraStream;
+                    lastVideoElement = videoElement;
                     options.crop = cropDimensions;
                     options.videoElement = videoElement;
                     options.videoWidth = videoWidth;
@@ -354,7 +355,10 @@ index = function (util) {
                     // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
                     // is loaded, so we must manually trigger play after adding it, or the video will be frozen
                     videoElement.play();
-                    screenShot.getWebcamGif(options, completeCallback);
+                    screenShot.getWebcamGif(options, function () {
+                        self.stopVideoStreaming();
+                        completeCallback.apply(this, arguments);
+                    });
                 }, { 'lastCameraStream': lastCameraStream });
             },
             'takeSnapShot': function (callback) {
@@ -362,6 +366,14 @@ index = function (util) {
                     'interval': 0.1,
                     'numFrames': 2
                 }, callback);
+            },
+            'stopVideoStreaming': function (obj) {
+                obj = utils.isObject(obj) ? obj : {};
+                var cameraStream = obj.cameraStream || lastCameraStream, videoElement = obj.videoElement || lastVideoElement;
+                videoStream.stopVideoStreaming({
+                    'cameraStream': cameraStream,
+                    'videoElement': videoElement
+                });
             }
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
@@ -374,5 +386,5 @@ index = function (util) {
     } else {
         window.gifshot = gifshot;
     }
-}(utils);
+}();
 }(window, window.navigator, document));
