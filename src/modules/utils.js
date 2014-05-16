@@ -10,6 +10,14 @@ define({
             navigator.msGetUserMedia);
         return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
     }(),
+    'isLocalStorage': function(){
+      try{
+          return 'localStorage' in window && window.localStorage !== null;
+      }catch(e){
+        //Aint no local storage
+        return false;
+      }
+    },
     'isObject': function(obj) {
         if(!obj) {
             return false;
@@ -93,5 +101,15 @@ define({
                 elem.style[key] = val;
             });
         }
+    },
+    'set': function(name, value){
+      if(this.isLocalStorage()){
+          window.localStorage.setItem(name, value);
+      }
+    },
+    'get': function(name){
+      if(this.isLocalStorage()){
+        window.localStorage.getItem(name);
+      }
     }
 });
