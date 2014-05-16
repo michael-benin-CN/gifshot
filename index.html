@@ -9,9 +9,12 @@
   <script>
 	gifshot.createGIF({
 		'interval': .2,
-		'numFrames': 10,
+		'numFrames': 15,
 		'gifHeight': 400,
-		'gifWidth': 400
+		'gifWidth': 400,
+    'progressCallback': function(captureProgress){
+        console.log(captureProgress);
+    }
 	}, function(image) {
 		var animatedImage = document.createElement('img');
 		animatedImage.src = image;
@@ -23,6 +26,8 @@
 	// 	document.body.appendChild(animatedImage);
 	// });
   </script>
-  
+
+
+
   </body>
 </html>
