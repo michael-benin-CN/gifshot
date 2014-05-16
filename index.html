@@ -7,7 +7,10 @@
   <body>
   
   <script>
-	gifshot.createWebcamGif({}, function(image) {
+	gifshot.createGIF({
+		'interval': .2,
+		'numFrames': 10
+	}, function(image) {
 		var animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		document.body.appendChild(animatedImage);

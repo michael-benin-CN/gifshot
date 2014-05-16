@@ -10,7 +10,7 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			'progressCallback': function(captureProgress) {},
 			'completeCallback': function() {}
 		},
-		'createWebcamGif': function (userOptions, callback) {
+		'createGIF': function (userOptions, callback) {
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
 
