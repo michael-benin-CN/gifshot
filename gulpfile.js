@@ -42,7 +42,8 @@ gulp.task('clean', function() {
           'start': ';(function(window, navigator, document, undefined) {\n',
           'end': '\n}(window, window.navigator, document));'
         },
-        'aggressiveOptimizations': true
+        'aggressiveOptimizations': true,
+        'ignoreModules': ['gifshot']
       }));
     }
   }, function() {
