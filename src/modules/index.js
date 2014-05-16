@@ -1,52 +1,81 @@
 // gifshot.js
-define(['utils', 'videoStream', 'gifCodec'], function(util, videoStream, gifCodec) {
-	videoStream.startVideoStreaming(function(cameraStream, videoElement, width, height) {
+define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, screenShot) {
+	var lastCameraStream,
+		gifshot = {
+		'defaultOptions': {
+			'gifWidth': 135,
+			'gifHeight': 101,
+			'interval': 0.2,
+			'numFrames': 10,
+			'progressCallback': function(captureProgress) {},
+			'completeCallback': function() {}
+		},
+		'createWebcamGif': function (userOptions) {
+			userOptions = utils.isObject(userOptions) ? userOptions : {};
 
-		var codecWriter,
-				images = [],
-				i = 0,
-				canvas,
-				img;
+			var defaultOptions = gifshot.defaultOptions,
+				options = utils.mergeOptions(defaultOptions, userOptions);
 
-		if(!util.isCanvasSupported()){
-			utils.log('ERROR: Canvas not supported');
-			return;
-		}
+			videoStream.startVideoStreaming(function(obj) {
+				var cameraStream = obj.cameraStream,
+					videoElement = obj.videoElement,
+					videoWidth = obj.videoWidth,
+					videoHeight = obj.videoHeight,
+					gifWidth = options.gifWidth,
+					gifHeight = options.gifHeight,
+					cropDimensions = screenShot.getCropDimensions({
+						'videoWidth': videoWidth,
+						'videoHeight': videoHeight,
+						'gifHeight': gifHeight,
+						'gifWidth': gifWidth
+					}),
+					completeCallback = options.completeCallback;
 
-		img = document.createElement("img");
+				lastCameraStream = cameraStream;
 
-		canvas = document.createElement("canvas");
-		context = canvas.getContext('2d');
+				options.crop = cropDimensions;
+				options.videoElement = videoElement;
+				options.videoWidth = videoWidth;
+				options.videoHeight = videoHeight;
 
-		videoElement.onclick = snapShot;
-		document.body.appendChild(videoElement);
-		document.body.appendChild(img);
-
-		function snapShot(){
-
-			var imageData;
-
-			if (cameraStream) {
-				canvas.width = videoElement.videoWidth;
-				canvas.height = videoElement.videoHeight;
-
-				imageData = context.getImageData(0, 0, videoElement.videoWidth, videoElement.videoHeight);
-				images.push(imageData);
-
-				codec = new gifCodec.GifWriter(imageData, videoElement.videoWidth, videoElement.videoHeight);
-				console.log(codec);
-
-			}
-
-		}
-
-		/*setInterval(function(){
-			if(images.length){
-					var next = ++i;
-					i = images.length && next < images.length ? i : 0;
-					img.src = images[i];
+				if(!utils.isElement(videoElement)) {
+					return;
 				}
-		}, 100);*/
 
-	});
+				videoElement.src = utils.URL.createObjectURL(cameraStream);
+
+		        videoElement.width = gifWidth + cropDimensions.width;
+		        videoElement.height = gifHeight + cropDimensions.height;
+
+		        utils.setCSSAttr(videoElement, {
+					'position': 'absolute',
+					'width': gifWidth + cropDimensions.videoWidth + 'px',
+					'height': gifHeight + cropDimensions.videoHeight + 'px',
+					'left': -Math.floor(cropDimensions.videoWidth / 2) + 'px',
+					'top': -Math.floor(cropDimensions.videoHeight / 2) + 'px',
+					'opacity': '0'
+		        });
+
+		        document.body.appendChild(videoElement);
+
+		        // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
+		        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
+		        videoElement.play();
+
+		        screenShot.getWebcamGif(options, completeCallback);
+			}, {
+				'lastCameraStream': lastCameraStream
+			});
+		}
+	};
+	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
+	if(typeof define === 'function' && define.amd) {
+		define('gifshot', [], function() {
+			return gifshot
+		});
+	} else if (typeof exports !== 'undefined') {
+		module.exports = gifshot;
+	} else {
+		window.gifshot = gifshot;
+	}
 });

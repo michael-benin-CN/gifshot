@@ -18,9 +18,7 @@ gulp.task('minify', function() {
 
 gulp.task('lint', function() {
   gulp.src('src/gifshot.js')
-    .pipe(jshint({
-      'evil': true
-    }))
+    .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });
 
