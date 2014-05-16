@@ -41,8 +41,8 @@ gulp.task('clean', function() {
         'transformAMDChecks': false,
         // Wraps the library in an IIFE (Immediately Invoked Function Expression)
         'wrap': {
-          'start': ';(function() {',
-          'end': '}());'
+          'start': ';(function(window, navigator, document, undefined) {',
+          'end': '}(window, window.navigator, document));'
         },
         'aggressiveOptimizations': true
       }));
