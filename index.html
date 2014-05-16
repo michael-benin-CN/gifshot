@@ -9,12 +9,19 @@
   <script>
 	gifshot.createGIF({
 		'interval': .2,
-		'numFrames': 10
+		'numFrames': 10,
+		'gifHeight': 400,
+		'gifWidth': 400
 	}, function(image) {
 		var animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		document.body.appendChild(animatedImage);
 	});
+	// gifshot.takeSnapShot(function(image) {
+	// 	var animatedImage = document.createElement('img');
+	// 	animatedImage.src = image;
+	// 	document.body.appendChild(animatedImage);
+	// });
   </script>
   </body>
 </html>

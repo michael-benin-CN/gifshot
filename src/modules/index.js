@@ -67,6 +67,12 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			}, {
 				'lastCameraStream': lastCameraStream
 			});
+		},
+		'takeSnapShot': function(callback) {
+			this.createGIF({
+				'interval': .1,
+				'numFrames': 2
+			}, callback);
 		}
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
