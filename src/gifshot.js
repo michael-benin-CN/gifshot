@@ -276,7 +276,14 @@ screenShot = function () {
                 callback();
                 return;
             }
-            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({ workerPath: 'src/vendor/Animated_GIF.worker.js' }), sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
+            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, workerPath = obj.workerPath, useQuantizer = obj.useQuantizer, dithering = obj.dithering, palette = obj.palette, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({
+                    'sampleInterval': sampleInterval,
+                    'numWorkers': numWorkers,
+                    'workerPath': workerPath,
+                    'useQuantizer': useQuantizer,
+                    'dithering': dithering,
+                    'palette': palette
+                }), sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
                     if (numFrames !== framesLeft + 1) {
                         context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
@@ -335,7 +342,22 @@ index = function () {
                 'progressCallback': function (captureProgress) {
                 },
                 'completeCallback': function () {
-                }
+                },
+                // how many pixels to skip when creating the palette. Default is 10. Less is better, but slower.
+                'sampleInterval': 10,
+                // how many web workers to use. Default is 2.
+                'numWorkers': 2,
+                // path to the Animated_GIF.worker.js file (or Animated_GIF.worker.min.js). Default is dist/Animated_GIF.worker.js, change accordingly if you place the files somewhere else than dist.
+                'workerPath': 'src/vendor/Animated_GIF.worker.js',
+                // this is true by default, and provides the highest quality results, at the cost of slower processing and bigger files. When this is enabled, a neural network quantizer will be used to find the best palette for each frame. No dithering is available in this case, as the colours are chosen with the quantizer too.
+                'useQuantizer': true,
+                // selects how to best spread the error in colour mapping, to conceal the fact that we're using a palette and not true color. Note that using this option automatically disables the aforementioned quantizer. Best results if you pass in a palette, but if not we'll create one using the colours in the first frame. Possible options:
+                // bayer: creates a somewhat nice and retro 'x' hatched pattern
+                // floyd: creates another somewhat retro look where error is spread, using the Floyd-Steinberg algorithm
+                // closest: actually no dithering, just picks the closest colour from the palette per each pixel
+                'dithering': null,
+                // An array of integers containing a palette. E.g. [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ] contains red, green, blue and black. The length of a palette must be a power of 2, and contain between 2 and 256 colours.
+                'palette': null
             },
             'createGIF': function (userOptions, callback) {
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
