@@ -138,9 +138,9 @@ videoStream = function () {
 }();
 index = function () {
     videoStream.startVideoStreaming(function (cameraStream, videoElement, width, height) {
-        console.log('cameraStream', cameraStream);
-        console.log('videoElement', videoElement);
-        console.log('width', width);
-        console.log('height', height);
+        videoElement.onclick = function () {
+            console.log(this);
+        };
+        document.body.appendChild(videoElement);
     });
 }();}(window, window.navigator, document));
