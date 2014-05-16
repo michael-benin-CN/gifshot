@@ -2,7 +2,10 @@
 define(['utils', 'videoStream'], function(util, videoStream) {
 	videoStream.startVideoStreaming(function(cameraStream, videoElement, width, height) {
 
-		var canvas = document.createElement("canvas");
+		var images = [],
+				i = 0,
+				canvas,
+				img;
 
 		if(!util.isCanvasSupported()){
 				if(isConsoleSupported()){
@@ -11,19 +14,34 @@ define(['utils', 'videoStream'], function(util, videoStream) {
 				return;
 		}
 
+		img = document.createElement("img");
+
+		canvas = document.createElement("canvas");
+		context = canvas.getContext('2d');
+
 		videoElement.onclick = snapShot;
 		document.body.appendChild(videoElement);
+		document.body.appendChild(img);
 
 		function snapShot(){
 
 			if (cameraStream) {
-				canvas.width = video.videoWidth;
-				canvas.height = video.videoHeight;
-				ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+				canvas.width = videoElement.videoWidth;
+				canvas.height = videoElement.videoHeight;
+				context.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight);
+				console.log(context.getImageData(0, 0, videoElement.videoWidth, videoElement.videoHeight));
 				images.push(canvas.toDataURL('image/gif'));
 			}
 
 		}
+
+		setInterval(function(){
+			if(images.length){
+					var next = ++i;
+					i = images.length && next < images.length ? i : 0;
+					img.src = images[i];
+				}
+		}, 100);
 
 	});
 });
