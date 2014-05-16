@@ -69,7 +69,7 @@ define(['utils'], function(utils) {
         cameraStream = stream;
         videoElement.play();
         setTimeout(function checkLoadedData() {
-          checkLoadedData.count = checkLoadedData.count || 0
+          checkLoadedData.count = checkLoadedData.count || 0;
           if(self.loadedData === true) {
             self.findVideoSize({
               'videoElement': videoElement,
