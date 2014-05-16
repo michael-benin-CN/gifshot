@@ -104,7 +104,7 @@ define({
     },
     'set': function(name, value){
       if(this.isLocalStorage()){
-        window.localStorage.setItem(name, value);
+          window.localStorage.setItem(name, value);
       }
     },
     'get': function(name){
