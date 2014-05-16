@@ -37,11 +37,56 @@ define(['utils'], function(utils) {
       }
     },
     'onStreamingTimeout': function(callback) {
-        callback(new Error('Timed out while trying to start streaming'));
+      utils.log('Timed out while trying to start streaming');
+      if(utils.isFunction(callback)) {
+        callback({});
+      }
     },
-    'errorCallback': function(obj) {
+    'errorCallback': function(callback) {
       // ERROR!!!
-      new Error('getUserMedia cannot access the camera', obj);
+      utils.log('getUserMedia cannot access the camera');
+      if(utils.isFunction(callback)) {
+        callback({});
+      }
+    },
+    'stream': function(obj) {
+      var self = this,
+        videoElement = obj.videoElement,
+        cameraStream = obj.cameraStream,
+        streamedCallback = obj.streamedCallback,
+        completedCallback = obj.completedCallback;
+
+      streamedCallback();
+
+      if(videoElement.mozSrcObject) {
+          videoElement.mozSrcObject = cameraStream;
+      } else if(utils.URL) {
+          videoElement.src = utils.URL.createObjectURL(cameraStream);
+      }
+
+      videoElement.play();
+      setTimeout(function checkLoadedData() {
+        checkLoadedData.count = checkLoadedData.count || 0;
+        if(self.loadedData === true) {
+          self.findVideoSize({
+            'videoElement': videoElement,
+            'cameraStream': cameraStream,
+            'completedCallback': completedCallback
+          });
+          self.loadedData = false;
+        } else {
+          checkLoadedData.count += 1;
+          if(checkLoadedData.count > 10) {
+            self.findVideoSize({
+              'videoElement': videoElement,
+              'cameraStream': cameraStream,
+              'completedCallback': completedCallback
+            });
+          } else {
+            checkLoadedData();
+          }
+        }
+      }, 100);
     },
     'startStreaming': function(obj) {
       var self = this,
@@ -49,6 +94,7 @@ define(['utils'], function(utils) {
         streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop,
         completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop,
         videoElement = document.createElement('video'),
+        lastCameraStream = obj.lastCameraStream,
         cameraStream;
 
       videoElement.autoplay = true;
@@ -57,40 +103,23 @@ define(['utils'], function(utils) {
         self.loadedData = true;
       });
 
-      utils.getUserMedia({ 'video': true }, function (stream) {
-        streamedCallback();
-
-        if(videoElement.mozSrcObject) {
-            videoElement.mozSrcObject = stream;
-        } else if(utils.URL) {
-            videoElement.src = utils.URL.createObjectURL(stream);
-        }
-
-        cameraStream = stream;
-        videoElement.play();
-        setTimeout(function checkLoadedData() {
-          checkLoadedData.count = checkLoadedData.count || 0;
-          if(self.loadedData === true) {
-            self.findVideoSize({
-              'videoElement': videoElement,
-              'cameraStream': cameraStream,
-              'completedCallback': completedCallback
-            });
-            self.loadedData = false;
-          } else {
-            checkLoadedData.count += 1;
-            if(checkLoadedData.count > 10) {
-              self.findVideoSize({
-                'videoElement': videoElement,
-                'cameraStream': cameraStream,
-                'completedCallback': completedCallback
-              });
-            } else {
-              checkLoadedData();
-            }
-          }
-        }, 100);
-      }, errorCallback);
+      if(lastCameraStream) {
+        self.stream({
+          'videoElement': videoElement,
+          'cameraStream': lastCameraStream,
+          'streamedCallback': streamedCallback,
+          'completedCallback': completedCallback
+        });
+      } else {
+        utils.getUserMedia({ 'video': true }, function (stream) {
+          self.stream({
+            'videoElement': videoElement,
+            'cameraStream': stream,
+            'streamedCallback': streamedCallback,
+            'completedCallback': completedCallback
+          });
+        }, errorCallback);
+      }
     },
     startVideoStreaming: function(callback, options) {
       options = options || {};
@@ -113,22 +142,32 @@ define(['utils'], function(utils) {
           }
 
           this.startStreaming({
-            'error': self.errorCallback,
+            'error': function() {
+              self.errorCallback(callback);
+            },
             'streamed': function() {
               // The streaming started somehow, so we can assume there is getUserMedia support
               clearTimeout(noGetUserMediaSupportTimeout);
             },
             'completed': function(obj) {
-              var videoElement = this.videoElement = obj.videoElement,
-                cameraStream = this.cameraStream = obj.cameraStream,
-                width = obj.videoWidth,
-                height = obj.videoHeight;
-              callback(cameraStream, videoElement, width, height);
-            }
+              var cameraStream = this.cameraStream = obj.cameraStream,
+                videoElement = this.videoElement = obj.videoElement,
+                videoWidth = obj.videoWidth,
+                videoHeight = obj.videoHeight;
+
+              callback({
+                'cameraStream': cameraStream,
+                'videoElement': videoElement,
+                'videoWidth': videoWidth,
+                'videoHeight': videoHeight,
+              });
+            },
+            'lastCameraStream': options.lastCameraStream
           });
 
       } else {
-          callback(new Error('Native device media streaming (getUserMedia) not supported in this browser.'));
+          utils.log('Native device media streaming (getUserMedia) not supported in this browser.');
+          callback({});
       }
     },
     'stopVideoStreaming': function() {
