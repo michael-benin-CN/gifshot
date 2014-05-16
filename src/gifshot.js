@@ -300,7 +300,6 @@ screenShot = function () {
                 result.height = Math.round(height * (gifWidth / width)) - gifHeight;
                 result.scaledHeight = Math.round(result.height * (width / gifWidth));
             }
-            console.log('result', result);
             return result;
         }
     };
@@ -317,8 +316,9 @@ index = function (util) {
                 'completeCallback': function () {
                 }
             },
-            'createWebcamGif': function (userOptions) {
+            'createWebcamGif': function (userOptions, callback) {
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
+                callback = utils.isFunction(userOptions) ? userOptions : callback;
                 var defaultOptions = gifshot.defaultOptions, options = utils.mergeOptions(defaultOptions, userOptions);
                 videoStream.startVideoStreaming(function (obj) {
                     var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
@@ -326,7 +326,7 @@ index = function (util) {
                             'videoHeight': videoHeight,
                             'gifHeight': gifHeight,
                             'gifWidth': gifWidth
-                        }), completeCallback = options.completeCallback;
+                        }), completeCallback = callback;
                     lastCameraStream = cameraStream;
                     options.crop = cropDimensions;
                     options.videoElement = videoElement;

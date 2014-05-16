@@ -7,14 +7,10 @@
   <body>
   
   <script>
-	gifshot.createWebcamGif({
-		'gifWidth': 200,
-		'gifHeight': 200,
-		'completeCallback': function(image) {
-			var animatedImage = document.createElement('img');
-			animatedImage.src = image;
-		    document.body.appendChild(animatedImage);
-		}
+	gifshot.createWebcamGif({}, function(image) {
+		var animatedImage = document.createElement('img');
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
 	});
   </script>
   </body>

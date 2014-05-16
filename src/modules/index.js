@@ -10,8 +10,9 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			'progressCallback': function(captureProgress) {},
 			'completeCallback': function() {}
 		},
-		'createWebcamGif': function (userOptions) {
+		'createWebcamGif': function (userOptions, callback) {
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
+			callback = utils.isFunction(userOptions) ? userOptions : callback;
 
 			var defaultOptions = gifshot.defaultOptions,
 				options = utils.mergeOptions(defaultOptions, userOptions);
@@ -29,7 +30,7 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 						'gifHeight': gifHeight,
 						'gifWidth': gifWidth
 					}),
-					completeCallback = options.completeCallback;
+					completeCallback = callback;
 
 				lastCameraStream = cameraStream;
 
