@@ -1,5 +1,5 @@
 ;(function(window, navigator, document, undefined) {
-var utils, videoStream, screenShot, index, gifshot;
+var utils, videoStream, screenShot, index;
 utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
     'getUserMedia': function () {
@@ -357,9 +357,9 @@ index = function (util) {
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
     if (typeof define === 'function' && define.amd) {
-        gifshot = function () {
+        define('gifshot', [], function () {
             return gifshot;
-        }();
+        });
     } else if (typeof exports !== 'undefined') {
         module.exports = gifshot;
     } else {
