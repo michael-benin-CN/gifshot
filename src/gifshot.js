@@ -27,6 +27,14 @@ utils = {
         }
         return Object.prototype.toString.call(func) === '[object Function]';
     },
+    'isCanvasSupported': function () {
+        var el = document.createElement('canvas');
+        return !!(el.getContext && el.getContext('2d'));
+    },
+    'isConsoleSupported': function () {
+        var console = window.console;
+        return console && this.isFunction(console.log);
+    },
     'noop': function () {
     }
 };
@@ -154,11 +162,24 @@ videoStream = function () {
         }
     };
 }();
-index = function () {
+index = function (util) {
     videoStream.startVideoStreaming(function (cameraStream, videoElement, width, height) {
-        videoElement.onclick = function () {
-            console.log(this);
-        };
+        var canvas = document.createElement('canvas');
+        if (!util.isCanvasSupported()) {
+            if (isConsoleSupported()) {
+                console.log('ERROR: Canvas not supported');
+            }
+            return;
+        }
+        videoElement.onclick = snapShot;
         document.body.appendChild(videoElement);
+        function snapShot() {
+            if (cameraStream) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                images.push(canvas.toDataURL('image/gif'));
+            }
+        }
     });
-}();}(window, window.navigator, document));
+}(utils);}(window, window.navigator, document));
