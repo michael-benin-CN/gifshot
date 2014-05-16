@@ -75,6 +75,9 @@ videoStream = function () {
         'startStreaming': function (obj) {
             var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, videoElement = document.createElement('video'), cameraStream;
             videoElement.autoplay = true;
+            videoElement.addEventListener('loadeddata', function (event) {
+                self.loadedData = true;
+            });
             utils.getUserMedia({ 'video': true }, function (stream) {
                 streamedCallback();
                 if (videoElement.mozSrcObject) {
@@ -84,13 +87,28 @@ videoStream = function () {
                 }
                 cameraStream = stream;
                 videoElement.play();
-                videoElement.addEventListener('loadeddata', function (event) {
-                    self.findVideoSize({
-                        'videoElement': videoElement,
-                        'cameraStream': cameraStream,
-                        'completedCallback': completedCallback
-                    });
-                });
+                setTimeout(function checkLoadedData() {
+                    checkLoadedData.count = checkLoadedData.count || 0;
+                    if (self.loadedData === true) {
+                        self.findVideoSize({
+                            'videoElement': videoElement,
+                            'cameraStream': cameraStream,
+                            'completedCallback': completedCallback
+                        });
+                        self.loadedData = false;
+                    } else {
+                        checkLoadedData.count += 1;
+                        if (checkLoadedData.count > 10) {
+                            self.findVideoSize({
+                                'videoElement': videoElement,
+                                'cameraStream': cameraStream,
+                                'completedCallback': completedCallback
+                            });
+                        } else {
+                            checkLoadedData();
+                        }
+                    }
+                }, 100);
             }, errorCallback);
         },
         startVideoStreaming: function (callback, options) {

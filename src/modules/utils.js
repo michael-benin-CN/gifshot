@@ -32,5 +32,13 @@ define({
         }
         return Object.prototype.toString.call(func) === '[object Function]';
     },
+    'isCanvasSupported': function(){
+      var el = document.createElement("canvas");
+      return !!(el.getContext && el.getContext('2d'));
+    },
+    'isConsoleSupported': function(){
+      var console = window.console;
+      return console && this.isFunction(console.log);
+    },
     'noop': function() {}
 });
