@@ -6,6 +6,13 @@ utils = {
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
         return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
     }(),
+    'isLocalStorage': function () {
+        try {
+            return 'localStorage' in window && window.localStorage !== null;
+        } catch (e) {
+            return false;
+        }
+    },
     'isObject': function (obj) {
         if (!obj) {
             return false;
@@ -89,6 +96,16 @@ utils = {
             this.each(attr, function (key, val) {
                 elem.style[key] = val;
             });
+        }
+    },
+    'set': function (name, value) {
+        if (this.isLocalStorage()) {
+            window.localStorage.setItem(name, value);
+        }
+    },
+    'get': function (name) {
+        if (this.isLocalStorage()) {
+            window.localStorage.getItem(name);
         }
     }
 };
@@ -311,8 +328,8 @@ screenShot = function () {
 index = function () {
     var lastCameraStream, lastVideoElement, gifshot = {
             'defaultOptions': {
-                'gifWidth': 135,
-                'gifHeight': 101,
+                'gifWidth': 640,
+                'gifHeight': 480,
                 'interval': 0.2,
                 'numFrames': 10,
                 'progressCallback': function (captureProgress) {
