@@ -332,8 +332,6 @@ index = function (util) {
                 'gifHeight': 480,
                 'interval': 0.2,
                 'numFrames': 10,
-                'recordBy': 'interval',
-                //or click
                 'progressCallback': function (captureProgress) {
                 },
                 'completeCallback': function () {
@@ -344,7 +342,7 @@ index = function (util) {
                 callback = utils.isFunction(userOptions) ? userOptions : callback;
                 var defaultOptions = gifshot.defaultOptions, options = utils.mergeOptions(defaultOptions, userOptions);
                 videoStream.startVideoStreaming(function (obj) {
-                    var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, recordBy = options.recordBy, cropDimensions = screenShot.getCropDimensions({
+                    var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
                             'videoWidth': videoWidth,
                             'videoHeight': videoHeight,
                             'gifHeight': gifHeight,
@@ -375,12 +373,6 @@ index = function (util) {
                     videoElement.play();
                     screenShot.getWebcamGif(options, completeCallback);
                 }, { 'lastCameraStream': lastCameraStream });
-            },
-            'takeSnapShot': function (callback) {
-                this.createGIF({
-                    'interval': 0.1,
-                    'numFrames': 2
-                }, callback);
             }
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading

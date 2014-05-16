@@ -7,7 +7,6 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			'gifHeight': 480,
 			'interval': 0.2,
 			'numFrames': 10,
-			'recordBy': 'interval', //or click
 			'progressCallback': function(captureProgress) {},
 			'completeCallback': function() {}
 		},
@@ -25,7 +24,6 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 					videoHeight = obj.videoHeight,
 					gifWidth = options.gifWidth,
 					gifHeight = options.gifHeight,
-					recordBy = options.recordBy,
 					cropDimensions = screenShot.getCropDimensions({
 						'videoWidth': videoWidth,
 						'videoHeight': videoHeight,
@@ -69,12 +67,6 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			}, {
 				'lastCameraStream': lastCameraStream
 			});
-		},
-		'takeSnapShot': function(callback) {
-			this.createGIF({
-				'interval': .1,
-				'numFrames': 2
-			}, callback);
 		}
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
