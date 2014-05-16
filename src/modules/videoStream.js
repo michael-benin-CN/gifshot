@@ -53,6 +53,10 @@ define(['utils'], function(utils) {
 
       videoElement.autoplay = true;
 
+      videoElement.addEventListener('loadeddata', function(event) {
+        self.loadedData = true;
+      });
+
       utils.getUserMedia({ 'video': true }, function (stream) {
         streamedCallback();
 
@@ -64,13 +68,28 @@ define(['utils'], function(utils) {
 
         cameraStream = stream;
         videoElement.play();
-        videoElement.addEventListener('loadeddata', function(event) {
-          self.findVideoSize({
-            'videoElement': videoElement,
-            'cameraStream': cameraStream,
-            'completedCallback': completedCallback
-          });
-        });
+        setTimeout(function checkLoadedData() {
+          checkLoadedData.count = checkLoadedData.count || 0
+          if(self.loadedData === true) {
+            self.findVideoSize({
+              'videoElement': videoElement,
+              'cameraStream': cameraStream,
+              'completedCallback': completedCallback
+            });
+            self.loadedData = false;
+          } else {
+            checkLoadedData.count += 1;
+            if(checkLoadedData.count > 10) {
+              self.findVideoSize({
+                'videoElement': videoElement,
+                'cameraStream': cameraStream,
+                'completedCallback': completedCallback
+              });
+            } else {
+              checkLoadedData();
+            }
+          }
+        }, 100);
       }, errorCallback);
     },
     startVideoStreaming: function(callback, options) {
