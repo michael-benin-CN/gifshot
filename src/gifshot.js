@@ -391,6 +391,14 @@ index = function () {
                     'cameraStream': cameraStream,
                     'videoElement': videoElement
                 });
+            },
+            'startVideoStreaming': function (obj) {
+                obj = utils.isObject(obj) ? obj : {};
+                var cameraStream = obj.cameraStream || lastCameraStream, videoElement = obj.videoElement || lastVideoElement;
+                videoStream.startVideoStreaming({
+                    'cameraStream': cameraStream,
+                    'videoElement': videoElement
+                });
             }
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
