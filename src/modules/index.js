@@ -67,10 +67,7 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 		        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
 		        videoElement.play();
 
-		        screenShot.getWebcamGif(options, function() {
-					self.stopVideoStreaming();
-		        	completeCallback.apply(this, arguments);
-		        });
+		        screenShot.getWebcamGif(options, completeCallback);
 			}, {
 				'lastCameraStream': lastCameraStream
 			});
@@ -90,18 +87,8 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 				'cameraStream': cameraStream,
 				'videoElement': videoElement
 			});
-		},
-		'startVideoStreaming': function(obj){
-				obj = utils.isObject(obj) ? obj : {};
-				var cameraStream = obj.cameraStream || lastCameraStream,
 
-				videoElement = obj.videoElement || lastVideoElement;
-
-				videoStream.startVideoStreaming({
-					'cameraStream': cameraStream,
-					'videoElement': videoElement
-				});
-
+			lastCameraStream = null;
 		}
 
 	};
