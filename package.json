@@ -21,9 +21,14 @@
       "name": "Greg Franko"
     }
   ],
-  "scripts": {},
+  "scripts": {
+    "preview": "node server/server.js",
+    "build": "gulp",
+    "watch": "gulp watch"
+  },
   "devDependencies": {
     "amdclean": "^2.0.0",
+    "express": "^4.2.0",
     "gulp": "^3.6.2",
     "gulp-jshint": "^1.6.0",
     "gulp-rename": "^1.2.0",
