@@ -2,13 +2,11 @@
 define(['utils', 'videoStream'], function(util, videoStream) {
 	videoStream.startVideoStreaming(function(cameraStream, videoElement, width, height) {
 
-		var canvas = document.createElement("canvas");
+		var canvas = document.createElement('canvas');
 
 		if(!util.isCanvasSupported()){
-				if(isConsoleSupported()){
-						console.log("ERROR: Canvas not supported");
-				}
-				return;
+			utils.log('ERROR: Canvas not supported');
+			return;
 		}
 
 		videoElement.onclick = snapShot;
