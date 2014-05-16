@@ -251,8 +251,9 @@ videoStream = function () {
                 callback({});
             }
         },
-        'stopVideoStreaming': function () {
-            var cameraStream = this.cameraStream, videoElement = this.videoElement;
+        'stopVideoStreaming': function (obj) {
+            obj = utils.isObject(obj) ? obj : {};
+            var cameraStream = obj.cameraStream || this.cameraStream, videoElement = obj.videoElement || this.videoElement;
             if (cameraStream) {
                 cameraStream.stop();
             }
@@ -372,6 +373,12 @@ index = function (util) {
                     videoElement.play();
                     screenShot.getWebcamGif(options, completeCallback);
                 }, { 'lastCameraStream': lastCameraStream });
+            },
+            'takeSnapShot': function (callback) {
+                this.createGIF({
+                    'interval': 0.1,
+                    'numFrames': 2
+                }, callback);
             }
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
