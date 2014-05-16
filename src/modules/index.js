@@ -1,6 +1,7 @@
 // gifshot.js
-define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, screenShot) {
+define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, screenShot) {
 	var lastCameraStream,
+		lastVideoElement,
 		gifshot = {
 		'defaultOptions': {
 			'gifWidth': 135,
@@ -14,7 +15,8 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
 
-			var defaultOptions = gifshot.defaultOptions,
+			var self = this,
+				defaultOptions = gifshot.defaultOptions,
 				options = utils.mergeOptions(defaultOptions, userOptions);
 
 			videoStream.startVideoStreaming(function(obj) {
@@ -33,6 +35,8 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 					completeCallback = callback;
 
 				lastCameraStream = cameraStream;
+
+				lastVideoElement = videoElement;
 
 				options.crop = cropDimensions;
 				options.videoElement = videoElement;
@@ -63,7 +67,10 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 		        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
 		        videoElement.play();
 
-		        screenShot.getWebcamGif(options, completeCallback);
+		        screenShot.getWebcamGif(options, function() {
+					self.stopVideoStreaming();
+		        	completeCallback.apply(this, arguments);
+		        });
 			}, {
 				'lastCameraStream': lastCameraStream
 			});
@@ -73,6 +80,16 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 				'interval': .1,
 				'numFrames': 2
 			}, callback);
+		},
+		'stopVideoStreaming': function(obj) {
+			obj = utils.isObject(obj) ? obj : {};
+			var cameraStream = obj.cameraStream || lastCameraStream,
+				videoElement = obj.videoElement || lastVideoElement;
+
+			videoStream.stopVideoStreaming({
+				'cameraStream': cameraStream,
+				'videoElement': videoElement
+			});
 		}
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
