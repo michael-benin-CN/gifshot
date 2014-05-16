@@ -260,8 +260,10 @@ screenShot = function () {
             }
             var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({ workerPath: 'src/vendor/Animated_GIF.worker.js' }), sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
-                    context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
-                    ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+                    if (numFrames !== framesLeft + 1) {
+                        context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
+                        ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+                    }
                     pendingFrames = framesLeft;
                     // Call back with an r value indicating how far along we are in capture
                     progressCallback((numFrames - pendingFrames) / numFrames);
