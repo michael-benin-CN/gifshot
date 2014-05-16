@@ -30,11 +30,14 @@ define(['utils'], function(utils) {
 				captureFrame = function() {
 					var framesLeft = pendingFrames - 1;
 
-					context.drawImage(videoElement,
-					  sourceX, sourceY, sourceWidth, sourceHeight,
-					  0, 0, gifWidth, gifHeight);
+					if(numFrames !== (framesLeft + 1)) {
+						context.drawImage(videoElement,
+						  sourceX, sourceY, sourceWidth, sourceHeight,
+						  0, 0, gifWidth, gifHeight);
 
-					ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+						ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+					}
+
 					pendingFrames = framesLeft;
 
 					// Call back with an r value indicating how far along we are in capture
