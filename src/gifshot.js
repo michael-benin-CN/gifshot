@@ -372,10 +372,7 @@ index = function () {
                     // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
                     // is loaded, so we must manually trigger play after adding it, or the video will be frozen
                     videoElement.play();
-                    screenShot.getWebcamGif(options, function () {
-                        self.stopVideoStreaming();
-                        completeCallback.apply(this, arguments);
-                    });
+                    screenShot.getWebcamGif(options, completeCallback);
                 }, { 'lastCameraStream': lastCameraStream });
             },
             'takeSnapShot': function (callback) {
@@ -391,14 +388,7 @@ index = function () {
                     'cameraStream': cameraStream,
                     'videoElement': videoElement
                 });
-            },
-            'startVideoStreaming': function (obj) {
-                obj = utils.isObject(obj) ? obj : {};
-                var cameraStream = obj.cameraStream || lastCameraStream, videoElement = obj.videoElement || lastVideoElement;
-                videoStream.startVideoStreaming({
-                    'cameraStream': cameraStream,
-                    'videoElement': videoElement
-                });
+                lastCameraStream = null;
             }
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
