@@ -1,9 +1,21 @@
 <html>
   <head>
+  	<script src="src/vendor/Animated_GIF.js"></script>
     <script src="src/gifshot.js"></script>
   </head>
 
   <body>
   
+  <script>
+	gifshot.createWebcamGif({
+		'gifWidth': 200,
+		'gifHeight': 200,
+		'completeCallback': function(image) {
+			var animatedImage = document.createElement('img');
+			animatedImage.src = image;
+		    document.body.appendChild(animatedImage);
+		}
+	});
+  </script>
   </body>
 </html>
