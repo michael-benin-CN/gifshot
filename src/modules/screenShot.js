@@ -29,9 +29,6 @@ define(['utils'], function(utils) {
 				sourceHeight = videoHeight - crop.scaledHeight,
 				captureFrame = function() {
 					var framesLeft = pendingFrames - 1;
-					if (framesLeft > 0) {
-					  setTimeout(captureFrame, interval * 1000); // timeouts are in milliseconds
-					}
 
 					context.drawImage(videoElement,
 					  sourceX, sourceY, sourceWidth, sourceHeight,
@@ -42,6 +39,10 @@ define(['utils'], function(utils) {
 
 					// Call back with an r value indicating how far along we are in capture
 					progressCallback((numFrames - pendingFrames) / numFrames);
+
+					if (framesLeft > 0) {
+					  setTimeout(captureFrame, interval * 1000); // timeouts are in milliseconds
+					}
 
 					if (!pendingFrames) {
 					  ag.getBase64GIF(function(image) {

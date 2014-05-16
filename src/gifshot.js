@@ -1,4 +1,5 @@
-;(function(window, navigator, document, undefined) {var utils, videoStream, screenShot, index, gifshot;
+;(function(window, navigator, document, undefined) {
+var utils, videoStream, screenShot, index, gifshot;
 utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
     'getUserMedia': function () {
@@ -259,14 +260,14 @@ screenShot = function () {
             }
             var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({ workerPath: 'src/vendor/Animated_GIF.worker.js' }), sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
-                    if (framesLeft > 0) {
-                        setTimeout(captureFrame, interval * 1000);
-                    }
                     context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
                     ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
                     pendingFrames = framesLeft;
                     // Call back with an r value indicating how far along we are in capture
                     progressCallback((numFrames - pendingFrames) / numFrames);
+                    if (framesLeft > 0) {
+                        setTimeout(captureFrame, interval * 1000);
+                    }
                     if (!pendingFrames) {
                         ag.getBase64GIF(function (image) {
                             // Ensure workers are freed-so we avoid bug #103
@@ -316,7 +317,7 @@ index = function (util) {
                 'completeCallback': function () {
                 }
             },
-            'createWebcamGif': function (userOptions, callback) {
+            'createGIF': function (userOptions, callback) {
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
                 callback = utils.isFunction(userOptions) ? userOptions : callback;
                 var defaultOptions = gifshot.defaultOptions, options = utils.mergeOptions(defaultOptions, userOptions);
@@ -364,4 +365,5 @@ index = function (util) {
     } else {
         window.gifshot = gifshot;
     }
-}(utils);}(window, window.navigator, document));
+}(utils);
+}(window, window.navigator, document));
