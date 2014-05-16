@@ -1,5 +1,5 @@
 // gifshot.js
-define(['util', 'videoStream'], function(util, videoStream) {
+define(['utils', 'videoStream'], function(util, videoStream) {
 	videoStream.startVideoStreaming(function(cameraStream, videoElement, width, height) {
 
 		var canvas = document.createElement("canvas");
