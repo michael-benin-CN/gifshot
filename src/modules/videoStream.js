@@ -170,9 +170,10 @@ define(['utils'], function(utils) {
           callback({});
       }
     },
-    'stopVideoStreaming': function() {
-      var cameraStream = this.cameraStream,
-        videoElement = this.videoElement;
+    'stopVideoStreaming': function(obj) {
+      obj = utils.isObject(obj) ? obj : {};
+      var cameraStream = obj.cameraStream || this.cameraStream,
+        videoElement = obj.videoElement || this.videoElement;
 
       if(cameraStream) {
         cameraStream.stop();
