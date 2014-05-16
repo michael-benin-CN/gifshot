@@ -89,6 +89,7 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 			});
 
 			lastCameraStream = null;
+
 		}
 
 	};
