@@ -189,7 +189,6 @@ index = function (util) {
         setInterval(function () {
             if (images.length) {
                 var next = ++i;
-                console.log(next);
                 i = images.length && next < images.length ? i : 0;
                 img.src = images[i];
             }
