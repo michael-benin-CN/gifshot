@@ -3,8 +3,8 @@ define(['utils', 'videoStream', 'screenShot'], function(util, videoStream, scree
 	var lastCameraStream,
 		gifshot = {
 		'defaultOptions': {
-			'gifWidth': 135,
-			'gifHeight': 101,
+			'gifWidth': 640,
+			'gifHeight': 480,
 			'interval': 0.2,
 			'numFrames': 10,
 			'progressCallback': function(captureProgress) {},
