@@ -32,13 +32,18 @@ define({
         }
         return Object.prototype.toString.call(func) === '[object Function]';
     },
-    'isCanvasSupported': function(){
-      var el = document.createElement("canvas");
+    'isCanvasSupported': function() {
+      var el = document.createElement('canvas');
       return !!(el.getContext && el.getContext('2d'));
     },
-    'isConsoleSupported': function(){
+    'isConsoleSupported': function() {
       var console = window.console;
       return console && this.isFunction(console.log);
+    },
+    'log': function() {
+        if(this.isConsoleSupported()) {
+            console.log.apply(window.console, arguments);
+        }
     },
     'noop': function() {}
 });

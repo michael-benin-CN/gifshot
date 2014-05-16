@@ -35,6 +35,11 @@ utils = {
         var console = window.console;
         return console && this.isFunction(console.log);
     },
+    'log': function () {
+        if (this.isConsoleSupported()) {
+            console.log.apply(window.console, arguments);
+        }
+    },
     'noop': function () {
     }
 };
@@ -166,9 +171,7 @@ index = function (util) {
     videoStream.startVideoStreaming(function (cameraStream, videoElement, width, height) {
         var images = [], i = 0, canvas, img;
         if (!util.isCanvasSupported()) {
-            if (isConsoleSupported()) {
-                console.log('ERROR: Canvas not supported');
-            }
+            utils.log('ERROR: Canvas not supported');
             return;
         }
         img = document.createElement('img');
