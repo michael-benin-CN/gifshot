@@ -6,26 +6,70 @@
 
   <body>
 
+    <form action="">
+        <label for="interval">Interval</label>
+        <input name="interval" id="interval" value=".2"></input>
+
+        <label for="numFrames">Number of Frames</label>
+        <input name="numFrames" id="numFrames" value="15"></input>
+
+        <label for="gifHeight">GIF Height</label>
+        <input name="gifHeight" id="gifHeight" value="400"></input>
+
+        <label for="gifWidth">GIF Width</label>
+        <input name="gifWidth" id="gifWidth" value="400"></input>
+
+        <button type="submit">Create GIF</button>
+    </form>
+
   <script>
-  	console.time('gifs');
-	gifshot.createGIF({
-		'interval': .2,
-		'numFrames': 10,
-		'gifHeight': 400,
-		'gifWidth': 400,
-		'palette': [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ]
-	}, function(image) {
-		console.timeEnd('gifs');
-		var animatedImage = document.createElement('img');
-		animatedImage.src = image;
-		document.body.appendChild(animatedImage);
-	});
+    var form = document.querySelector("form"),
+        interval = document.querySelector("#interval"),
+        numFrames = document.querySelector("#numFrames"),
+        gifHeight = document.querySelector("#gifHeight"),
+        gifWidth = document.querySelector("#gifWidth");
+
+    form.onsubmit = function(e){
+      e.preventDefault();
+
+      gifshot.createGIF({
+        'interval': parseInt(interval.value, 10) || 0.2,
+        'numFrames': parseInt(numFrames.value, 10) || 15,
+        'gifHeight': parseInt(gifHeight.value, 10) || 400,
+        'gifWidth':  parseInt(gifWidth.value, 10) || 400,
+        'progressCallback': function(captureProgress){
+            console.log(captureProgress);
+        }
+      }, function(image) {
+        var animatedImage = document.createElement('img');
+        animatedImage.src = image;
+        document.body.appendChild(animatedImage);
+      });
+    }
+
+
+	// gifshot.createGIF({
+	// 	'interval': .2,
+	// 	'numFrames': 10,
+	// 	'gifHeight': 400,
+	// 	'gifWidth': 400,
+	// 	'palette': [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ]
+	// }, function(image) {
+	// 	console.timeEnd('gifs');
+	// 	var animatedImage = document.createElement('img');
+	// 	animatedImage.src = image;
+	// 	document.body.appendChild(animatedImage);
+	// });
+
+
 	// gifshot.takeSnapShot(function(image) {
 	// 	var animatedImage = document.createElement('img');
 	// 	animatedImage.src = image;
 	// 	document.body.appendChild(animatedImage);
 	// });
   </script>
-  
+
+
+
   </body>
 </html>
