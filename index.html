@@ -6,28 +6,39 @@
 
   <body>
 
+
     <form action="">
         <label for="interval">Interval</label>
-        <input name="interval" id="interval" value=".2"></input>
+        <input name="interval" id="interval" value=".2" size="5"></input>
 
         <label for="numFrames">Number of Frames</label>
-        <input name="numFrames" id="numFrames" value="15"></input>
+        <input name="numFrames" id="numFrames" value="15" size="5"></input>
 
         <label for="gifHeight">GIF Height</label>
-        <input name="gifHeight" id="gifHeight" value="400"></input>
+        <input name="gifHeight" id="gifHeight" value="400" size="5"></input>
 
         <label for="gifWidth">GIF Width</label>
-        <input name="gifWidth" id="gifWidth" value="400"></input>
+        <input name="gifWidth" id="gifWidth" value="400" size="5"></input>
+
+        <label for="dithering">Dithering</label>
+        <input name="dithering" id="dithering" value=""></input>
 
         <button type="submit">Create GIF</button>
+        <button type="button" id="snapShot">Take Snapshot</button>
+        <progress max="1" value="0"></progress>
     </form>
+
+
 
   <script>
     var form = document.querySelector("form"),
         interval = document.querySelector("#interval"),
         numFrames = document.querySelector("#numFrames"),
         gifHeight = document.querySelector("#gifHeight"),
-        gifWidth = document.querySelector("#gifWidth");
+        gifWidth = document.querySelector("#gifWidth"),
+        dithering = document.querySelector("#dithering"),
+        progressBar = document.querySelector("progress"),
+        snapShot = document.querySelector("#snapShot");
 
     form.onsubmit = function(e){
       e.preventDefault();
@@ -37,10 +48,24 @@
         'numFrames': parseInt(numFrames.value, 10) || 15,
         'gifHeight': parseInt(gifHeight.value, 10) || 400,
         'gifWidth':  parseInt(gifWidth.value, 10) || 400,
+        'dithering': dithering.value === "" ? null : dithering.value,
         'progressCallback': function(captureProgress){
-            console.log(captureProgress);
+            progressBar.value = captureProgress;
         }
       }, function(image) {
+        var animatedImage = document.createElement('img');
+        animatedImage.src = image;
+        document.body.appendChild(animatedImage);
+      });
+    }
+
+    snapShot.onclick = function(e){
+      gifshot.takeSnapShot({
+        'interval': parseInt(interval.value, 10) || 0.2,
+        'numFrames': parseInt(numFrames.value, 10) || 15,
+        'gifHeight': parseInt(gifHeight.value, 10) || 400,
+        'gifWidth':  parseInt(gifWidth.value, 10) || 400
+      } ,function(image) {
         var animatedImage = document.createElement('img');
         animatedImage.src = image;
         document.body.appendChild(animatedImage);
@@ -62,11 +87,7 @@
 	// });
 
 
-	// gifshot.takeSnapShot(function(image) {
-	// 	var animatedImage = document.createElement('img');
-	// 	animatedImage.src = image;
-	// 	document.body.appendChild(animatedImage);
-	// });
+
   </script>
 
 
