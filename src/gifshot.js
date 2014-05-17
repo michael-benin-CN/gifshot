@@ -397,11 +397,12 @@ index = function () {
                     screenShot.getWebcamGif(options, completeCallback);
                 }, { 'lastCameraStream': lastCameraStream });
             },
-            'takeSnapShot': function (callback) {
-                this.createGIF({
-                    'interval': 0.1,
-                    'numFrames': 2
-                }, callback);
+            'takeSnapShot': function (obj, callback) {
+                var defaultOptions = utils.mergeOptions(gifshot.defaultOptions, obj), options = utils.mergeOptions(defaultOptions, {
+                        'interval': 0.1,
+                        'numFrames': 2
+                    });
+                this.createGIF(options, callback);
             },
             'stopVideoStreaming': function (obj) {
                 obj = utils.isObject(obj) ? obj : {};

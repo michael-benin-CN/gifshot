@@ -87,11 +87,13 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 				'lastCameraStream': lastCameraStream
 			});
 		},
-		'takeSnapShot': function(callback) {
-			this.createGIF({
-				'interval': .1,
-				'numFrames': 2
-			}, callback);
+		'takeSnapShot': function(obj, callback) {
+			var defaultOptions = utils.mergeOptions(gifshot.defaultOptions, obj),
+				options = utils.mergeOptions(defaultOptions, {
+					'interval': .1,
+					'numFrames': 2
+			});
+			this.createGIF(options, callback);
 		},
 		'stopVideoStreaming': function(obj) {
 			obj = utils.isObject(obj) ? obj : {};
@@ -104,6 +106,7 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 			});
 
 			lastCameraStream = null;
+
 		}
 
 	};
