@@ -3,7 +3,7 @@ gifshot
 
 JavaScript library that creates an animated gif(s) from a video stream (e.g. webcam)
 
-Heavily incluenced from [Meatspace Chat](https://chat.meatspac.es/)
+Heavily influenced from [Meatspace Chat](https://chat.meatspac.es/)
 
 
 ## How
