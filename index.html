@@ -38,7 +38,16 @@
     form.onsubmit = function(e){
       e.preventDefault();
 
-      gifshot.createGIF(function(obj) {
+      gifshot.createGIF({
+        'numWorkers': 10,
+        'interval': +interval.value || 0.2,
+        'numFrames': +numFrames.value || 15,
+        'gifHeight': +gifHeight.value || 400,
+        'gifWidth':  +gifWidth.value || 400,
+        'progressCallback': function(captureProgress){
+            progressBar.value = captureProgress;
+        }
+      }, function(obj) {
       	if(!obj.error) {
           var image = obj.image,
             animatedImage = document.createElement('img');
