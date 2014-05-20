@@ -1,38 +1,109 @@
 // gifshot.js
-define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, screenShot) {
-	var lastCameraStream,
-		lastVideoElement,
-		gifshot = {
+define([
+	'utils',
+	'videoStream',
+	'screenShot'
+], function(utils, videoStream, screenShot) {
+	var gifshot = {
 		'defaultOptions': {
-			'gifWidth': 640,
-			'gifHeight': 480,
-			'interval': 0.2,
+			'gifWidth': 200,
+			'gifHeight': 200,
+			'interval': 0.1,
 			'numFrames': 10,
+			'keepCameraOn': false,
 			'progressCallback': function(captureProgress) {},
-			'completeCallback': function() {},
-			// how many pixels to skip when creating the palette. Default is 10. Less is better, but slower.
-			'sampleInterval': 10,
-			// how many web workers to use. Default is 2.
-			'numWorkers': 2,
-			// path to the Animated_GIF.worker.js file (or Animated_GIF.worker.min.js). Default is dist/Animated_GIF.worker.js, change accordingly if you place the files somewhere else than dist.
-			'workerPath': 'src/vendor/Animated_GIF.worker.js',
-			// this is true by default, and provides the highest quality results, at the cost of slower processing and bigger files. When this is enabled, a neural network quantizer will be used to find the best palette for each frame. No dithering is available in this case, as the colours are chosen with the quantizer too.
-			'useQuantizer': true,
-			// selects how to best spread the error in colour mapping, to conceal the fact that we're using a palette and not true color. Note that using this option automatically disables the aforementioned quantizer. Best results if you pass in a palette, but if not we'll create one using the colours in the first frame. Possible options:
-			// bayer: creates a somewhat nice and retro 'x' hatched pattern
-			// floyd: creates another somewhat retro look where error is spread, using the Floyd-Steinberg algorithm
-			// closest: actually no dithering, just picks the closest colour from the palette per each pixel
-			'dithering': null,
-			// An array of integers containing a palette. E.g. [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ] contains red, green, blue and black. The length of a palette must be a power of 2, and contain between 2 and 256 colours.
-			'palette': null
+			'completeCallback': function() {}
 		},
+		'options': {},
 		'createGIF': function (userOptions, callback) {
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
 
+			if(!utils.isFunction(callback)) {
+				return;
+			} else if(!gifshot.isSupported()) {
+				if(!utils.isFunction(utils.getUserMedia)) {
+					return callback({
+						'error': true,
+						'errorCode': 'getUserMedia',
+						'errorMsg': 'The getUserMedia API is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isSupported.canvas()) {
+					return callback({
+						'error': true,
+						'errorCode': 'canvas',
+						'errorMsg': 'Canvas elements are not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isSupported.webworkers()) {
+					return callback({
+						'error': true,
+						'errorCode': 'webworkers',
+						'errorMsg': 'The Web Workers API is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.URL) {
+					return callback({
+						'error': true,
+						'errorCode': 'window.URL',
+						'errorMsg': 'The window.URL API is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isSupported.blob()) {
+					return callback({
+						'error': true,
+						'errorCode': 'window.Blob',
+						'errorMsg': 'The window.Blob File API is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isFunction(window.btoa)) {
+					return callback({
+						'error': true,
+						'errorCode': 'window.btoa',
+						'errorMsg': 'The window.btoa base-64 encoding method is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isFunction(Uint8Array)) {
+					return callback({
+						'error': true,
+						'errorCode': 'window.Uint8Array',
+						'errorMsg': 'The window.Uint8Array function constructor is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else if(!utils.isFunction(Uint32Array)) {
+					return callback({
+						'error': true,
+						'errorCode': 'window.Uint32Array',
+						'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser',
+						'image': null,
+						'cameraStream': {}
+					});
+				} else {
+					return callback({
+						'error': true,
+						'errorCode': 'unknown',
+						'errorMsg': 'Unknown error',
+						'image': null,
+						'cameraStream': {}
+					});
+				}
+			}
+
 			var self = this,
 				defaultOptions = gifshot.defaultOptions,
-				options = utils.mergeOptions(defaultOptions, userOptions);
+				options = this.options = utils.mergeOptions(defaultOptions, userOptions),
+				lastCameraStream = userOptions.cameraStream,
+				numFrames = options.numFrames,
+				interval = options.interval,
+				wait = interval * 10000;
 
 			videoStream.startVideoStreaming(function(obj) {
 				var cameraStream = obj.cameraStream,
@@ -49,14 +120,11 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 					}),
 					completeCallback = callback;
 
-				lastCameraStream = cameraStream;
-
-				lastVideoElement = videoElement;
-
 				options.crop = cropDimensions;
 				options.videoElement = videoElement;
 				options.videoWidth = videoWidth;
 				options.videoHeight = videoHeight;
+				options.cameraStream = cameraStream;
 
 				if(!utils.isElement(videoElement)) {
 					return;
@@ -82,33 +150,48 @@ define(['utils', 'videoStream', 'screenShot'], function(utils, videoStream, scre
 		        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
 		        videoElement.play();
 
-		        screenShot.getWebcamGif(options, completeCallback);
+		        setTimeout(function() {
+					screenShot.getWebcamGif(options, function(obj) {
+						gifshot.stopVideoStreaming(obj);
+						completeCallback(obj);
+					});
+		        }, wait);
 			}, {
-				'lastCameraStream': lastCameraStream
+				'lastCameraStream': lastCameraStream,
+				'callback': callback
 			});
 		},
 		'takeSnapShot': function(obj, callback) {
 			var defaultOptions = utils.mergeOptions(gifshot.defaultOptions, obj),
 				options = utils.mergeOptions(defaultOptions, {
 					'interval': .1,
-					'numFrames': 2
+					'numFrames': 1
 			});
 			this.createGIF(options, callback);
 		},
 		'stopVideoStreaming': function(obj) {
 			obj = utils.isObject(obj) ? obj : {};
-			var cameraStream = obj.cameraStream || lastCameraStream,
-				videoElement = obj.videoElement || lastVideoElement;
+			var self = this,
+				options = utils.isObject(self.options) ? self.options : {},
+				cameraStream = obj.cameraStream,
+				videoElement = obj.videoElement;
 
 			videoStream.stopVideoStreaming({
 				'cameraStream': cameraStream,
-				'videoElement': videoElement
+				'videoElement': videoElement,
+				'keepCameraOn': options.keepCameraOn
 			});
-
-			lastCameraStream = null;
-
+		},
+		'isSupported': function() {
+			return (utils.isFunction(utils.getUserMedia) &&
+				utils.isSupported.canvas() &&
+				utils.isSupported.webworkers() &&
+				utils.URL &&
+				utils.isSupported.blob() &&
+				utils.isFunction(window.btoa) &&
+				utils.isFunction(Uint8Array) &&
+				utils.isFunction(Uint32Array))
 		}
-
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
 	if(typeof define === 'function' && define.amd) {

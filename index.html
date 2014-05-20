@@ -1,6 +1,5 @@
 <html>
   <head>
-  	<script src="src/vendor/Animated_GIF.js"></script>
     <script src="src/gifshot.js"></script>
   </head>
 
@@ -44,16 +43,18 @@
       e.preventDefault();
 
       gifshot.createGIF({
-        'interval': parseInt(interval.value, 10) || 0.2,
-        'numFrames': parseInt(numFrames.value, 10) || 15,
-        'gifHeight': parseInt(gifHeight.value, 10) || 400,
-        'gifWidth':  parseInt(gifWidth.value, 10) || 400,
+        'interval': +interval.value || 0.2,
+        'numFrames': +numFrames.value || 15,
+        'gifHeight': +gifHeight.value || 400,
+        'gifWidth':  +gifWidth.value || 400,
         'dithering': dithering.value === "" ? null : dithering.value,
         'progressCallback': function(captureProgress){
             progressBar.value = captureProgress;
         }
-      }, function(image) {
-        var animatedImage = document.createElement('img');
+      }, function(obj) {
+      	console.log('obj', obj);
+      	var image = obj.image,
+      		animatedImage = document.createElement('img');
         animatedImage.src = image;
         document.body.appendChild(animatedImage);
       });
@@ -61,12 +62,13 @@
 
     snapShot.onclick = function(e){
       gifshot.takeSnapShot({
-        'interval': parseInt(interval.value, 10) || 0.2,
-        'numFrames': parseInt(numFrames.value, 10) || 15,
-        'gifHeight': parseInt(gifHeight.value, 10) || 400,
-        'gifWidth':  parseInt(gifWidth.value, 10) || 400
-      } ,function(image) {
-        var animatedImage = document.createElement('img');
+        'interval': +interval.value || 0.2,
+        'numFrames': +numFrames.value || 15,
+        'gifHeight': +gifHeight.value || 400,
+        'gifWidth':  +gifWidth.value || 400
+      } ,function(obj) {
+      	var image = obj.image,
+      		animatedImage = document.createElement('img');
         animatedImage.src = image;
         document.body.appendChild(animatedImage);
       });

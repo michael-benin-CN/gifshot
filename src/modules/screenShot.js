@@ -1,16 +1,15 @@
-define(['utils'], function(utils) {
+define([
+	'utils',
+	'animatedGif'
+], function(utils, Animated_GIF) {
 	return {
     	getWebcamGif: function (obj, callback) {
     		callback = utils.isFunction(callback) ? callback : function() {}
-			if(!utils.isCanvasSupported()){
-				utils.log('ERROR: Canvas not supported');
-				callback();
-				return;
-			}
 
 			var canvas = document.createElement('canvas'),
 				context,
 				videoElement = obj.videoElement,
+				cameraStream = obj.cameraStream,
 				gifWidth = obj.gifWidth,
 				gifHeight = obj.gifHeight,
 				videoWidth = obj.videoWidth,
@@ -41,13 +40,11 @@ define(['utils'], function(utils) {
 				captureFrame = function() {
 					var framesLeft = pendingFrames - 1;
 
-					if(numFrames !== (framesLeft + 1)) {
-						context.drawImage(videoElement,
-						  sourceX, sourceY, sourceWidth, sourceHeight,
-						  0, 0, gifWidth, gifHeight);
+					context.drawImage(videoElement,
+					  sourceX, sourceY, sourceWidth, sourceHeight,
+					  0, 0, gifWidth, gifHeight);
 
-						ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
-					}
+					ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
 
 					pendingFrames = framesLeft;
 
@@ -63,7 +60,13 @@ define(['utils'], function(utils) {
 					    // Ensure workers are freed-so we avoid bug #103
 					    // https://github.com/meatspaces/meatspace-chat/issues/103
 					    ag.destroy();
-					    callback(image);
+					    callback({
+					    	'error': false,
+					    	'errorCode': '',
+					    	'errorMsg': '',
+					    	'image': image,
+					    	'cameraStream': cameraStream
+					    });
 					  });
 					}
 				};

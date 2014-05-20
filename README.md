@@ -30,21 +30,36 @@ gifshot.js uses:
 gifshot.createGIF({
 	'gifHeight': 200,
 	'gifWidth': 200,
-}, function(image) {
-	var animatedImage = document.createElement('img');
+}, function(obj) {
+	var error = obj.error,
+		errorCode = obj.errorCode,
+		errorMsg = obj.errorMsg,
+		image = obj.image,
+		cameraStream = obj.cameraStream,
+		animatedImage = document.createElement('img');
+
 	animatedImage.src = image;
 	document.body.appendChild(animatedImage);
 });
 
 // Takes a snap shot (not animated)
-gifshot.takeSnapShot(function(image) {
-	var animatedImage = document.createElement('img');
+gifshot.takeSnapShot(function(obj) {
+	var error = obj.error,
+		errorCode = obj.errorCode,
+		errorMsg = obj.errorMsg,
+		image = obj.image,
+		cameraStream = obj.cameraStream,
+		animatedImage = document.createElement('img');
+
 	animatedImage.src = image;
 	document.body.appendChild(animatedImage);
 });
 
 // Turns off the user's webcam
 gifshot.stopVideoStreaming();
+
+// Helper method to determine if the user's browser supports the technology to create animated gifs in JavaScript
+gifshot.isSupported();
 ```
 
 
@@ -52,11 +67,13 @@ gifshot.stopVideoStreaming();
 
 ```javascript
 // Desired width of the image
-'gifWidth': 640,
+'gifWidth': 200,
 // Desired height of the image
-'gifHeight': 480,
+'gifHeight': 200,
+// Whether or not you would like the user's camera to stay on after the gif is created
+'keepCameraOn': false,
 // The interval (in milleseconds) that images are created
-'interval': 0.2,
+'interval': 0.1,
 // The number of frames to use
 'numFrames': 10,
 // Callback function that provides the current progress of the current image
@@ -66,18 +83,7 @@ gifshot.stopVideoStreaming();
 // how many pixels to skip when creating the palette. Default is 10. Less is better, but slower.
 'sampleInterval': 10,
 // how many web workers to use. Default is 2.
-'numWorkers': 2,
-// path to the Animated_GIF.worker.js file (or Animated_GIF.worker.min.js). Default is dist/Animated_GIF.worker.js, change accordingly if you place the files somewhere else than dist.
-'workerPath': 'src/vendor/Animated_GIF.worker.js',
-// this is true by default, and provides the highest quality results, at the cost of slower processing and bigger files. When this is enabled, a neural network quantizer will be used to find the best palette for each frame. No dithering is available in this case, as the colours are chosen with the quantizer too.
-'useQuantizer': true,
-// selects how to best spread the error in colour mapping, to conceal the fact that we're using a palette and not true color. Note that using this option automatically disables the aforementioned quantizer. Best results if you pass in a palette, but if not we'll create one using the colours in the first frame. Possible options:
-// bayer: creates a somewhat nice and retro 'x' hatched pattern
-// floyd: creates another somewhat retro look where error is spread, using the Floyd-Steinberg algorithm
-// closest: actually no dithering, just picks the closest colour from the palette per each pixel
-'dithering': null,
-// An array of integers containing a palette. E.g. [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ] contains red, green, blue and black. The length of a palette must be a power of 2, and contain between 2 and 256 colours.
-'palette': null
+'numWorkers': 2
 ```
 
 ## Contributors
