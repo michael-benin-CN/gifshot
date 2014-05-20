@@ -7,6 +7,8 @@ define([
 ], function(utils, videoStream, screenShot, animated_GIF) {
 	var gifshot = {
 		'defaultOptions': {
+			'sampleInterval': 10,
+			'numWorkers': 2,
 			'gifWidth': 200,
 			'gifHeight': 200,
 			'interval': 0.1,
