@@ -2,8 +2,9 @@
 define([
 	'utils',
 	'videoStream',
-	'screenShot'
-], function(utils, videoStream, screenShot) {
+	'screenShot',
+	'animatedGif'
+], function(utils, videoStream, screenShot, animated_GIF) {
 	var gifshot = {
 		'defaultOptions': {
 			'gifWidth': 200,
@@ -15,9 +16,10 @@ define([
 			'completeCallback': function() {}
 		},
 		'options': {},
+		'animated_GIF': animated_GIF,
 		'createGIF': function (userOptions, callback) {
-			userOptions = utils.isObject(userOptions) ? userOptions : {};
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
+			userOptions = utils.isObject(userOptions) ? userOptions : {};
 
 			if(!utils.isFunction(callback)) {
 				return;
