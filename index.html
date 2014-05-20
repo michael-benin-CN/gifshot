@@ -19,9 +19,6 @@
         <label for="gifWidth">GIF Width</label>
         <input name="gifWidth" id="gifWidth" value="400" size="5"></input>
 
-        <label for="dithering">Dithering</label>
-        <input name="dithering" id="dithering" value=""></input>
-
         <button type="submit">Create GIF</button>
         <button type="button" id="snapShot">Take Snapshot</button>
         <progress max="1" value="0"></progress>
@@ -35,7 +32,6 @@
         numFrames = document.querySelector("#numFrames"),
         gifHeight = document.querySelector("#gifHeight"),
         gifWidth = document.querySelector("#gifWidth"),
-        dithering = document.querySelector("#dithering"),
         progressBar = document.querySelector("progress"),
         snapShot = document.querySelector("#snapShot");
 
@@ -43,11 +39,11 @@
       e.preventDefault();
 
       gifshot.createGIF({
+        'keepCameraOn': false,
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,
         'gifHeight': +gifHeight.value || 400,
         'gifWidth':  +gifWidth.value || 400,
-        'dithering': dithering.value === "" ? null : dithering.value,
         'progressCallback': function(captureProgress){
             progressBar.value = captureProgress;
         }
