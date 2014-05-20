@@ -3,7 +3,7 @@ gifshot
 
 JavaScript library that creates an animated gif(s) from a video stream (e.g. webcam)
 
-Heavily incluenced from [Meatspace Chat](https://chat.meatspac.es/)
+Heavily influenced from [Meatspace Chat](https://chat.meatspac.es/)
 
 ## Demo
 
@@ -23,8 +23,9 @@ gifshot.js uses:
 2.  Install [Node.js](http://nodejs.org/)
 3.  Install the gulp module globally: `sudo npm install gulp -g`
 4.  Install all local dependencies: `npm install`
-5.  Start up the included node.js preview server: `node server/server.js`
-6.  Go to `localhost:8001` to try out gifshot.js.
+5.  Run the gulp build: `gulp`
+6.  Start up the included node.js preview server: `node server/server.js`
+7.  Go to `localhost:8001` to try out gifshot.js.
 
 ## API Methods
 
