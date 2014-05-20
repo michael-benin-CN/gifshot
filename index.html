@@ -48,6 +48,9 @@
             progressBar.value = captureProgress;
         }
       }, function(obj) {
+        console.log('obj.error', obj.error);
+        console.log('obj.errorCode', obj.errorCode);
+        console.log('obj.errorMsg', obj.errorMsg);
       	if(!obj.error) {
           var image = obj.image,
             animatedImage = document.createElement('img');
