@@ -38,21 +38,13 @@
     form.onsubmit = function(e){
       e.preventDefault();
 
-      gifshot.createGIF({
-        'keepCameraOn': false,
-        'interval': +interval.value || 0.2,
-        'numFrames': +numFrames.value || 15,
-        'gifHeight': +gifHeight.value || 400,
-        'gifWidth':  +gifWidth.value || 400,
-        'progressCallback': function(captureProgress){
-            progressBar.value = captureProgress;
+      gifshot.createGIF(function(obj) {
+      	if(!obj.error) {
+          var image = obj.image,
+            animatedImage = document.createElement('img');
+          animatedImage.src = image;
+          document.body.appendChild(animatedImage);
         }
-      }, function(obj) {
-      	console.log('obj', obj);
-      	var image = obj.image,
-      		animatedImage = document.createElement('img');
-        animatedImage.src = image;
-        document.body.appendChild(animatedImage);
       });
     }
 
@@ -63,10 +55,12 @@
         'gifHeight': +gifHeight.value || 400,
         'gifWidth':  +gifWidth.value || 400
       } ,function(obj) {
-      	var image = obj.image,
-      		animatedImage = document.createElement('img');
-        animatedImage.src = image;
-        document.body.appendChild(animatedImage);
+        if(!obj.error) {
+          var image = obj.image,
+            animatedImage = document.createElement('img');
+          animatedImage.src = image;
+          document.body.appendChild(animatedImage);
+        }
       });
     }
 
