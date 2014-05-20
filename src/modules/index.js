@@ -3,8 +3,9 @@ define([
 	'utils',
 	'videoStream',
 	'screenShot',
-	'animatedGif'
-], function(utils, videoStream, screenShot, animated_GIF) {
+	'animatedGif',
+	'error'
+], function(utils, videoStream, screenShot, animated_GIF, error) {
 	var gifshot = {
 		'defaultOptions': {
 			'sampleInterval': 10,
@@ -26,79 +27,7 @@ define([
 			if(!utils.isFunction(callback)) {
 				return;
 			} else if(!gifshot.isSupported()) {
-				if(!utils.isFunction(utils.getUserMedia)) {
-					return callback({
-						'error': true,
-						'errorCode': 'getUserMedia',
-						'errorMsg': 'The getUserMedia API is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isSupported.canvas()) {
-					return callback({
-						'error': true,
-						'errorCode': 'canvas',
-						'errorMsg': 'Canvas elements are not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isSupported.webworkers()) {
-					return callback({
-						'error': true,
-						'errorCode': 'webworkers',
-						'errorMsg': 'The Web Workers API is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.URL) {
-					return callback({
-						'error': true,
-						'errorCode': 'window.URL',
-						'errorMsg': 'The window.URL API is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isSupported.blob()) {
-					return callback({
-						'error': true,
-						'errorCode': 'window.Blob',
-						'errorMsg': 'The window.Blob File API is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isFunction(window.btoa)) {
-					return callback({
-						'error': true,
-						'errorCode': 'window.btoa',
-						'errorMsg': 'The window.btoa base-64 encoding method is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isFunction(Uint8Array)) {
-					return callback({
-						'error': true,
-						'errorCode': 'window.Uint8Array',
-						'errorMsg': 'The window.Uint8Array function constructor is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else if(!utils.isFunction(Uint32Array)) {
-					return callback({
-						'error': true,
-						'errorCode': 'window.Uint32Array',
-						'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser',
-						'image': null,
-						'cameraStream': {}
-					});
-				} else {
-					return callback({
-						'error': true,
-						'errorCode': 'unknown',
-						'errorMsg': 'Unknown error',
-						'image': null,
-						'cameraStream': {}
-					});
-				}
+				return callback(error.validate());
 			}
 
 			var self = this,
@@ -190,14 +119,7 @@ define([
 			});
 		},
 		'isSupported': function() {
-			return (utils.isFunction(utils.getUserMedia) &&
-				utils.isSupported.canvas() &&
-				utils.isSupported.webworkers() &&
-				utils.URL &&
-				utils.isSupported.blob() &&
-				utils.isFunction(window.btoa) &&
-				utils.isFunction(Uint8Array) &&
-				utils.isFunction(Uint32Array))
+			return error.isValid();
 		}
 	};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
