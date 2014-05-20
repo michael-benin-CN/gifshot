@@ -5,6 +5,9 @@ JavaScript library that creates an animated gif(s) from a video stream (e.g. web
 
 Heavily incluenced from [Meatspace Chat](https://chat.meatspac.es/)
 
+## Demo
+
+gifshot is currently set up here: http://pokedsoaked.corp.ne1.yahoo.com:8001/
 
 ## How
 
