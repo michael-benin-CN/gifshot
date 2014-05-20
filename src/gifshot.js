@@ -1208,8 +1208,11 @@ animatedGif = function (workerCode) {
         workerPath = options.workerPath || 'Animated_GIF.worker.js';
         // TODO possible to find our path?
         for (var i = 0; i < numWorkers; i++) {
-            var webWorkerObj = utils.createWebWorker(workerCode), w = webWorkerObj.worker;
-            workers.push(w);
+            var webWorkerObj = utils.createWebWorker(workerCode), objectUrl = webWorkerObj.objectUrl, w = webWorkerObj.worker;
+            workers.push({
+                'worker': w,
+                'objectUrl': objectUrl
+            });
             availableWorkers.push(w);
         }
         // ---
@@ -1407,8 +1410,10 @@ animatedGif = function (workerCode) {
         // and you'll need to create a new one.
         this.destroy = function () {
             // Explicitly ask web workers to die so they are explicitly GC'ed
-            workers.forEach(function (w) {
-                w.terminate();
+            workers.forEach(function (workerObj) {
+                var worker = workerObj.worker, objectUrl = workerObj.objectUrl;
+                worker.terminate();
+                utils.URL.revokeObjectURL(objectUrl);
             });
         };
     }
@@ -1476,7 +1481,7 @@ screenShot = function (Animated_GIF) {
         }
     };
 }(animatedGif);
-index = function () {
+index = function (animated_GIF) {
     var gifshot = {
             'defaultOptions': {
                 'gifWidth': 200,
@@ -1490,9 +1495,10 @@ index = function () {
                 }
             },
             'options': {},
+            'animated_GIF': animated_GIF,
             'createGIF': function (userOptions, callback) {
-                userOptions = utils.isObject(userOptions) ? userOptions : {};
                 callback = utils.isFunction(userOptions) ? userOptions : callback;
+                userOptions = utils.isObject(userOptions) ? userOptions : {};
                 if (!utils.isFunction(callback)) {
                     return;
                 } else if (!gifshot.isSupported()) {
@@ -1645,5 +1651,5 @@ index = function () {
     } else {
         window.gifshot = gifshot;
     }
-}();
+}(animatedGif);
 }(window, window.navigator, document));

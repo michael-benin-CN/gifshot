@@ -33,8 +33,12 @@ define([
 
 	    for(var i = 0; i < numWorkers; i++) {
 	    	var webWorkerObj = utils.createWebWorker(workerCode),
+	    		objectUrl = webWorkerObj.objectUrl,
 	        	w = webWorkerObj.worker;
-	        workers.push(w);
+	        workers.push({
+	        	'worker': w,
+	        	'objectUrl': objectUrl
+	        });
 	        availableWorkers.push(w);
 	    }
 
@@ -306,8 +310,13 @@ define([
 	    this.destroy = function() {
 
 	        // Explicitly ask web workers to die so they are explicitly GC'ed
-	        workers.forEach(function(w) {
-	            w.terminate();
+	        workers.forEach(function(workerObj) {
+	        	var worker = workerObj.worker,
+	        		objectUrl = workerObj.objectUrl;
+
+				worker.terminate();
+
+				utils.URL.revokeObjectURL(objectUrl);
 	        });
 
 	    };
