@@ -41,8 +41,10 @@ gifshot.createGIF({
 		cameraStream = obj.cameraStream,
 		animatedImage = document.createElement('img');
 
-	animatedImage.src = image;
-	document.body.appendChild(animatedImage);
+	if(!error) {
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
+	}
 });
 
 // Takes a snap shot (not animated)
@@ -54,8 +56,10 @@ gifshot.takeSnapShot(function(obj) {
 		cameraStream = obj.cameraStream,
 		animatedImage = document.createElement('img');
 
-	animatedImage.src = image;
-	document.body.appendChild(animatedImage);
+	if(!error) {
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
+	}
 });
 
 // Turns off the user's webcam
@@ -74,6 +78,9 @@ gifshot.isSupported();
 // Desired height of the image
 'gifHeight': 200,
 // Whether or not you would like the user's camera to stay on after the gif is created
+// If you keep the camera on, then you can reuse the returned cameraStream object to
+// create another gif and/or snapshot without asking for the user's permission to
+// access the camera again
 'keepCameraOn': false,
 // The interval (in milleseconds) that images are created
 'interval': 0.1,
