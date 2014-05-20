@@ -152,8 +152,8 @@ utils = function () {
 videoStream = function () {
     return {
         'defaultVideoDimensions': {
-            'height': 640,
-            'width': 480
+            'height': 200,
+            'width': 200
         },
         'loadedData': false,
         'findVideoSize': function findVideoSize(obj) {
@@ -184,9 +184,14 @@ videoStream = function () {
             }
         },
         'onStreamingTimeout': function (callback) {
-            utils.log('Timed out while trying to start streaming');
             if (utils.isFunction(callback)) {
-                callback({});
+                callback({
+                    'error': true,
+                    'errorCode': 'getUserMedia',
+                    'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
+                    'image': null,
+                    'cameraStream': {}
+                });
             }
         },
         'stream': function (obj) {
@@ -255,7 +260,7 @@ videoStream = function () {
             // conclude that there's no actual getUserMedia support.
             if (timeoutLength > 0) {
                 noGetUserMediaSupportTimeout = setTimeout(function () {
-                    self.onStreamingTimeout(callback);
+                    self.onStreamingTimeout(originalCallback);
                 }, 10000);
             }
             this.startStreaming({
@@ -294,9 +299,11 @@ videoStream = function () {
             if (utils.isElement(videoElement)) {
                 // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
                 videoElement.pause();
+                // Destroys the object url
                 if (utils.isFunction(utils.URL.revokeObjectURL)) {
                     utils.URL.revokeObjectURL(videoElement.src);
                 }
+                // Removes the video element from the DOM
                 utils.removeElement(videoElement);
             }
         }
@@ -1412,13 +1419,9 @@ screenShot = function (Animated_GIF) {
         getWebcamGif: function (obj, callback) {
             callback = utils.isFunction(callback) ? callback : function () {
             };
-            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, workerPath = obj.workerPath, useQuantizer = obj.useQuantizer, dithering = obj.dithering, palette = obj.palette, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({
+            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new Animated_GIF({
                     'sampleInterval': sampleInterval,
-                    'numWorkers': numWorkers,
-                    'workerPath': workerPath,
-                    'useQuantizer': useQuantizer,
-                    'dithering': dithering,
-                    'palette': palette
+                    'numWorkers': numWorkers
                 }), sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
                     context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
@@ -1439,7 +1442,8 @@ screenShot = function (Animated_GIF) {
                                 'errorCode': '',
                                 'errorMsg': '',
                                 'image': image,
-                                'cameraStream': cameraStream
+                                'cameraStream': cameraStream,
+                                'videoElement': videoElement
                             });
                         });
                     }
@@ -1600,7 +1604,9 @@ index = function () {
                     setTimeout(function () {
                         screenShot.getWebcamGif(options, function (obj) {
                             gifshot.stopVideoStreaming(obj);
-                            document.body.removeChild(videoElement);
+                            if (obj.videoElement) {
+                                delete obj.videoElement;
+                            }
                             completeCallback(obj);
                         });
                     }, wait);

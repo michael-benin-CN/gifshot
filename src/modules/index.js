@@ -153,7 +153,9 @@ define([
 		        setTimeout(function() {
 					screenShot.getWebcamGif(options, function(obj) {
 						gifshot.stopVideoStreaming(obj);
-						document.body.removeChild(videoElement);
+						if(obj.videoElement) {
+							delete obj.videoElement;
+						}
 						completeCallback(obj);
 					});
 		        }, wait);

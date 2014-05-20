@@ -3,8 +3,8 @@ define([
 ], function(utils) {
   return {
     'defaultVideoDimensions': {
-      'height': 640,
-      'width': 480
+      'height': 200,
+      'width': 200
     },
     'loadedData': false,
     'findVideoSize': function findVideoSize(obj) {
@@ -38,9 +38,14 @@ define([
       }
     },
     'onStreamingTimeout': function(callback) {
-      utils.log('Timed out while trying to start streaming');
       if(utils.isFunction(callback)) {
-        callback({});
+        callback({
+          'error': true,
+          'errorCode': 'getUserMedia',
+          'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
+          'image': null,
+          'cameraStream': {}
+        });
       }
     },
     'stream': function(obj) {
@@ -130,7 +135,7 @@ define([
       // conclude that there's no actual getUserMedia support.
       if(timeoutLength > 0) {
           noGetUserMediaSupportTimeout = setTimeout(function() {
-            self.onStreamingTimeout(callback);
+            self.onStreamingTimeout(originalCallback);
           }, 10000);
       }
 
@@ -178,9 +183,13 @@ define([
       if(utils.isElement(videoElement)) {
         // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
         videoElement.pause();
+
+        // Destroys the object url
         if(utils.isFunction(utils.URL.revokeObjectURL)) {
           utils.URL.revokeObjectURL(videoElement.src);
         }
+
+        // Removes the video element from the DOM
         utils.removeElement(videoElement);
       }
     }

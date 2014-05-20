@@ -16,10 +16,6 @@ define([
 				videoHeight = obj.videoHeight,
 				sampleInterval = obj.sampleInterval,
 				numWorkers = obj.numWorkers,
-				workerPath = obj.workerPath,
-				useQuantizer = obj.useQuantizer,
-				dithering = obj.dithering,
-				palette = obj.palette,
 				crop = obj.crop,
 				interval = obj.interval,
 				progressCallback = obj.progressCallback,
@@ -27,11 +23,7 @@ define([
 				pendingFrames = numFrames,
 				ag = new Animated_GIF({
 					'sampleInterval': sampleInterval,
-					'numWorkers': numWorkers,
-					'workerPath': workerPath,
-					'useQuantizer': useQuantizer,
-					'dithering': dithering,
-					'palette': palette
+					'numWorkers': numWorkers
 				}),
 				sourceX = Math.floor(crop.scaledWidth / 2),
 				sourceWidth = videoWidth - crop.scaledWidth,
@@ -65,7 +57,8 @@ define([
 					    	'errorCode': '',
 					    	'errorMsg': '',
 					    	'image': image,
-					    	'cameraStream': cameraStream
+					    	'cameraStream': cameraStream,
+					    	'videoElement': videoElement
 					    });
 					  });
 					}
