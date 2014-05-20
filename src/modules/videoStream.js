@@ -1,11 +1,12 @@
-define(['utils'], function(utils) {
+define([
+  'utils'
+], function(utils) {
   return {
-    'videoElement': undefined,
-    'cameraStream': undefined,
     'defaultVideoDimensions': {
       'height': 640,
       'width': 480
     },
+    'loadedData': false,
     'findVideoSize': function findVideoSize(obj) {
       var videoElement = obj.videoElement,
         cameraStream = obj.cameraStream,
@@ -38,13 +39,6 @@ define(['utils'], function(utils) {
     },
     'onStreamingTimeout': function(callback) {
       utils.log('Timed out while trying to start streaming');
-      if(utils.isFunction(callback)) {
-        callback({});
-      }
-    },
-    'errorCallback': function(callback) {
-      // ERROR!!!
-      utils.log('getUserMedia cannot access the camera');
       if(utils.isFunction(callback)) {
         callback({});
       }
@@ -126,64 +120,68 @@ define(['utils'], function(utils) {
 
       var self = this,
         noGetUserMediaSupportTimeout,
-        timeoutLength = options.timeout !== undefined ? options.timeout : 0;
+        timeoutLength = options.timeout !== undefined ? options.timeout : 0,
+        originalCallback = options.callback;
 
-      if(utils.isFunction(utils.getUserMedia)) {
-
-          // Some browsers apparently have support for video streaming because of the
-          // presence of the getUserMedia function, but then do not answer our
-          // calls for streaming.
-          // So we'll set up this timeout and if nothing happens after a while, we'll
-          // conclude that there's no actual getUserMedia support.
-          if(timeoutLength > 0) {
-              noGetUserMediaSupportTimeout = setTimeout(function() {
-                self.onStreamingTimeout(callback);
-              }, 10000);
-          }
-
-          this.startStreaming({
-            'error': function() {
-              self.errorCallback(callback);
-            },
-            'streamed': function() {
-              // The streaming started somehow, so we can assume there is getUserMedia support
-              clearTimeout(noGetUserMediaSupportTimeout);
-            },
-            'completed': function(obj) {
-              var cameraStream = this.cameraStream = obj.cameraStream,
-                videoElement = this.videoElement = obj.videoElement,
-                videoWidth = obj.videoWidth,
-                videoHeight = obj.videoHeight;
-
-              callback({
-                'cameraStream': cameraStream,
-                'videoElement': videoElement,
-                'videoWidth': videoWidth,
-                'videoHeight': videoHeight,
-              });
-            },
-            'lastCameraStream': options.lastCameraStream
-          });
-
-      } else {
-          utils.log('Native device media streaming (getUserMedia) not supported in this browser.');
-          callback({});
+      // Some browsers apparently have support for video streaming because of the
+      // presence of the getUserMedia function, but then do not answer our
+      // calls for streaming.
+      // So we'll set up this timeout and if nothing happens after a while, we'll
+      // conclude that there's no actual getUserMedia support.
+      if(timeoutLength > 0) {
+          noGetUserMediaSupportTimeout = setTimeout(function() {
+            self.onStreamingTimeout(callback);
+          }, 10000);
       }
+
+      this.startStreaming({
+        'error': function() {
+          originalCallback({
+            'error': true,
+            'errorCode': 'getUserMedia',
+            'errorMsg': 'There was an issue with the getUserMedia API - the user probably denied permission',
+            'image': null,
+            'cameraStream': {}
+          });
+        },
+        'streamed': function() {
+          // The streaming started somehow, so we can assume there is getUserMedia support
+          clearTimeout(noGetUserMediaSupportTimeout);
+        },
+        'completed': function(obj) {
+          var cameraStream = this.cameraStream = obj.cameraStream,
+            videoElement = this.videoElement = obj.videoElement,
+            videoWidth = obj.videoWidth,
+            videoHeight = obj.videoHeight;
+
+          callback({
+            'cameraStream': cameraStream,
+            'videoElement': videoElement,
+            'videoWidth': videoWidth,
+            'videoHeight': videoHeight,
+          });
+        },
+        'lastCameraStream': options.lastCameraStream
+      });
     },
     'stopVideoStreaming': function(obj) {
       obj = utils.isObject(obj) ? obj : {};
-      var cameraStream = obj.cameraStream || this.cameraStream,
-        videoElement = obj.videoElement || this.videoElement;
+      var cameraStream = obj.cameraStream,
+        videoElement = obj.videoElement,
+        keepCameraOn = obj.keepCameraOn;
 
-      if(cameraStream) {
+      if(!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
+        // Stops the camera stream
         cameraStream.stop();
       }
 
-      if(videoElement) {
+      if(utils.isElement(videoElement)) {
+        // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
         videoElement.pause();
-        // TODO free src url object
-        videoElement.src = null;
-        videoElement = null;
+        if(utils.isFunction(utils.URL.revokeObjectURL)) {
+          utils.URL.revokeObjectURL(videoElement.src);
+        }
+        utils.removeElement(videoElement);
       }
     }
   };
