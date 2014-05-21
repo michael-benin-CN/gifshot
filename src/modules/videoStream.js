@@ -154,8 +154,8 @@ define([
           clearTimeout(noGetUserMediaSupportTimeout);
         },
         'completed': function(obj) {
-          var cameraStream = this.cameraStream = obj.cameraStream,
-            videoElement = this.videoElement = obj.videoElement,
+          var cameraStream = obj.cameraStream,
+            videoElement = obj.videoElement,
             videoWidth = obj.videoWidth,
             videoHeight = obj.videoHeight;
 
