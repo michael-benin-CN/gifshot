@@ -1,7 +1,10 @@
 define([
 	'worker',
+	'NeuQuant',
 	'gifWriter'
-], function(workerCode, gifWriter) {
+], function(workerCode, NeuQuant, gifWriter) {
+
+	var workerCodeString = NeuQuant.toString() + workerCode.toString() + 'worker();'
 
 	// A library/utility for generating GIF files
 	// Uses Dean McNamee's omggif library
@@ -32,7 +35,7 @@ define([
 	    workerPath = options.workerPath || 'Animated_GIF.worker.js'; // TODO possible to find our path?
 
 	    for(var i = 0; i < numWorkers; i++) {
-	    	var webWorkerObj = utils.createWebWorker(workerCode),
+	    	var webWorkerObj = utils.createWebWorker(workerCodeString),
 	    		objectUrl = webWorkerObj.objectUrl,
 	        	w = webWorkerObj.worker;
 	        workers.push({
