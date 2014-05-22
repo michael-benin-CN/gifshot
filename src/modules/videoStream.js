@@ -2,21 +2,24 @@ define([
   'utils'
 ], function(utils) {
   return {
-    'defaultVideoDimensions': {
-      'height': 200,
-      'width': 200
-    },
     'loadedData': false,
-    'findVideoSize': function findVideoSize(obj) {
-      var videoElement = obj.videoElement,
+    'defaultVideoDimensions': {
+      'width': 640,
+      'height': 480
+    },
+    'findVideoSize': function findVideoSizeMethod(obj) {
+      findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
+      var self = this,
+        videoElement = obj.videoElement,
         cameraStream = obj.cameraStream,
         completedCallback = obj.completedCallback;
+
       if(!videoElement) {
         return;
       }
 
       if(videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-        videoElement.removeEventListener('loadeddata', this.findVideoSize);
+        videoElement.removeEventListener('loadeddata', self.findVideoSize);
         completedCallback({
           'videoElement': videoElement,
           'cameraStream': cameraStream,
@@ -24,15 +27,17 @@ define([
           'videoHeight': videoElement.videoHeight
         });
       } else {
-        if(findVideoSize.attempts < 10) {
-          findVideoSize.attempts += 1;
-          setTimeout(findVideoSize, 200);
+        if(findVideoSizeMethod.attempts < 10) {
+          findVideoSizeMethod.attempts += 1;
+          setTimeout(function() {
+            self.findVideoSize(obj);
+          }, 200);
         } else {
           completedCallback({
             'videoElement': videoElement,
             'cameraStream': cameraStream,
-            'videoWidth': this.defaultVideoDimensions.width,
-            'videoHeight': this.defaultVideoDimensions.height,
+            'videoWidth': self.defaultVideoDimensions.width,
+            'videoHeight': self.defaultVideoDimensions.height,
           });
         }
       }
