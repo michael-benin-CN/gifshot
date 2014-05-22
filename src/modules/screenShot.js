@@ -1,7 +1,7 @@
 define([
 	'utils',
 	'animatedGif'
-], function(utils, Animated_GIF) {
+], function(utils, AnimatedGIF) {
 	return {
     	getWebcamGif: function (obj, callback) {
     		callback = utils.isFunction(callback) ? callback : function() {}
@@ -21,9 +21,12 @@ define([
 				progressCallback = obj.progressCallback,
 				numFrames = obj.numFrames,
 				pendingFrames = numFrames,
-				ag = new Animated_GIF({
+				ag = new AnimatedGIF({
 					'sampleInterval': sampleInterval,
-					'numWorkers': numWorkers
+					'numWorkers': numWorkers,
+					'width': gifWidth,
+					'height': gifHeight,
+					'delay': interval
 				}),
 				sourceX = Math.floor(crop.scaledWidth / 2),
 				sourceWidth = videoWidth - crop.scaledWidth,
@@ -44,23 +47,20 @@ define([
 					progressCallback((numFrames - pendingFrames) / numFrames);
 
 					if (framesLeft > 0) {
-					  setTimeout(captureFrame, interval * 1000); // timeouts are in milliseconds
+						setTimeout(captureFrame, interval * 1000); // timeouts are in milliseconds
 					}
 
 					if (!pendingFrames) {
-					  ag.getBase64GIF(function(image) {
-					    // Ensure workers are freed-so we avoid bug #103
-					    // https://github.com/meatspaces/meatspace-chat/issues/103
-					    ag.destroy();
-					    callback({
-					    	'error': false,
-					    	'errorCode': '',
-					    	'errorMsg': '',
-					    	'image': image,
-					    	'cameraStream': cameraStream,
-					    	'videoElement': videoElement
-					    });
-					  });
+						ag.getBase64GIF(function(image) {
+							callback({
+								'error': false,
+								'errorCode': '',
+								'errorMsg': '',
+								'image': image,
+								'cameraStream': cameraStream,
+								'videoElement': videoElement
+							});
+						});
 					}
 				};
 
@@ -70,9 +70,6 @@ define([
 			canvas.width = gifWidth;
 			canvas.height = gifHeight;
 			context = canvas.getContext('2d');
-
-			ag.setSize(gifWidth, gifHeight);
-			ag.setDelay(interval);
 
 			captureFrame();
 		},

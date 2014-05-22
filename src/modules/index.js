@@ -5,7 +5,7 @@ define([
 	'screenShot',
 	'animatedGif',
 	'error'
-], function(utils, videoStream, screenShot, animated_GIF, error) {
+], function(utils, videoStream, screenShot, AnimatedGif, error) {
 	var gifshot = {
 		'_defaultOptions': {
 			'sampleInterval': 10,
@@ -15,11 +15,12 @@ define([
 			'interval': 0.1,
 			'numFrames': 10,
 			'keepCameraOn': false,
+			'images': [],
 			'progressCallback': function(captureProgress) {},
 			'completeCallback': function() {}
 		},
 		'_options': {},
-		'animated_GIF': animated_GIF,
+		'AnimatedGif': AnimatedGif,
 		'createGIF': function (userOptions, callback) {
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -32,14 +33,57 @@ define([
 
 			var defaultOptions = gifshot._defaultOptions,
 				options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions),
-				lastCameraStream = userOptions.cameraStream;
+				lastCameraStream = userOptions.cameraStream,
+				images = options.images;
 
-			videoStream.startVideoStreaming(function(obj) {
-				gifshot._createAndGetGIF(obj, callback);
-			}, {
-				'lastCameraStream': lastCameraStream,
-				'callback': callback
-			});
+			// If the user has passed in at least one image path or image DOM elements
+			if(images.length) {
+				// change workerPath to point to where Animated_GIF.worker.js is
+				var ag = new AnimatedGif(options),
+					x = -1,
+					currentImage,
+					tempImage;
+
+				while(++x < images.length) {
+					currentImage = images[x];
+					if(utils.isElement(currentImage)) {
+						ag.addFrame(currentImage);
+					} else if(utils.isString(currentImage)) {
+						tempImage = document.createElement('img');
+						tempImage.setAttribute('src', currentImage);
+						utils.setCSSAttr(tempImage, {
+							'position': 'fixed',
+							'opacity': '0'
+						});
+						document.body.appendChild(tempImage);
+						(function(tempImage) {
+							setTimeout(function() {
+								ag.addFrame(tempImage);
+								utils.removeElement(tempImage);
+							}, 100);
+						}(tempImage));
+					}
+				}
+
+				setTimeout(function() {
+					// This is asynchronous, rendered with WebWorkers
+					ag.getBase64GIF(function(image) {
+						callback({
+							'error': false,
+							'errorCode': '',
+							'errorMsg': '',
+							'image': image
+						});
+					});
+				}, 100);
+			} else {
+				videoStream.startVideoStreaming(function(obj) {
+					gifshot._createAndGetGIF(obj, callback);
+				}, {
+					'lastCameraStream': lastCameraStream,
+					'callback': callback
+				});
+			}
 		},
 		'takeSnapShot': function(obj, callback) {
 			var defaultOptions = utils.mergeOptions(gifshot._defaultOptions, obj),
@@ -99,11 +143,7 @@ define([
 	        videoElement.height = gifHeight + cropDimensions.height;
 
 	        utils.setCSSAttr(videoElement, {
-				'position': 'absolute',
-				'width': gifWidth + cropDimensions.videoWidth + 'px',
-				'height': gifHeight + cropDimensions.videoHeight + 'px',
-				'left': -Math.floor(cropDimensions.videoWidth / 2) + 'px',
-				'top': -Math.floor(cropDimensions.videoHeight / 2) + 'px',
+	        	'position': 'fixed',
 				'opacity': '0'
 	        });
 
