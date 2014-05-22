@@ -5,7 +5,6 @@
 
   <body>
 
-
     <form action="">
         <label for="interval">Interval</label>
         <input name="interval" id="interval" value=".2" size="5"></input>
@@ -39,7 +38,6 @@
       e.preventDefault();
 
       gifshot.createGIF({
-        'numWorkers': 10,
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,
         'gifHeight': +gifHeight.value || 400,
@@ -48,9 +46,6 @@
             progressBar.value = captureProgress;
         }
       }, function(obj) {
-        console.log('obj.error', obj.error);
-        console.log('obj.errorCode', obj.errorCode);
-        console.log('obj.errorMsg', obj.errorMsg);
       	if(!obj.error) {
           var image = obj.image,
             animatedImage = document.createElement('img');
@@ -75,22 +70,6 @@
         }
       });
     }
-
-
-	// gifshot.createGIF({
-	// 	'interval': .2,
-	// 	'numFrames': 10,
-	// 	'gifHeight': 400,
-	// 	'gifWidth': 400,
-	// 	'palette': [ 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 ]
-	// }, function(image) {
-	// 	console.timeEnd('gifs');
-	// 	var animatedImage = document.createElement('img');
-	// 	animatedImage.src = image;
-	// 	document.body.appendChild(animatedImage);
-	// });
-
-
 
   </script>
 
