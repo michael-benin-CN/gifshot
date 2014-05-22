@@ -64,7 +64,7 @@ define([
 					}
 				};
 
-			numFrames = numFrames !== undefined ? numFrames : 3;
+			numFrames = numFrames !== undefined ? numFrames : 10;
 			interval = interval !== undefined ? interval : 0.1; // In seconds
 
 			canvas.width = gifWidth;

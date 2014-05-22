@@ -16,6 +16,7 @@ define([
 			'numFrames': 10,
 			'keepCameraOn': false,
 			'images': [],
+			'video': null,
 			'progressCallback': function(captureProgress) {},
 			'completeCallback': function() {}
 		},
@@ -34,48 +35,48 @@ define([
 			var defaultOptions = gifshot._defaultOptions,
 				options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions),
 				lastCameraStream = userOptions.cameraStream,
-				images = options.images;
+				images = options.images,
+				imagesLength = images ? images.length : 0;
 
 			// If the user has passed in at least one image path or image DOM elements
-			if(images.length) {
+			if(imagesLength) {
 				// change workerPath to point to where Animated_GIF.worker.js is
 				var ag = new AnimatedGif(options),
 					x = -1,
 					currentImage,
-					tempImage;
+					tempImage,
+					loadedImages = 0;
 
-				while(++x < images.length) {
+				while(++x < imagesLength) {
 					currentImage = images[x];
 					if(utils.isElement(currentImage)) {
+						currentImage.crossOrigin = 'Anonymous';
 						ag.addFrame(currentImage);
+						loadedImages += 1;
+						if(loadedImages === imagesLength) {
+							gifshot._getBase64GIF(ag, callback);
+						}
 					} else if(utils.isString(currentImage)) {
 						tempImage = document.createElement('img');
-						tempImage.setAttribute('src', currentImage);
+						tempImage.crossOrigin = 'Anonymous';
+						tempImage.src = currentImage;
 						utils.setCSSAttr(tempImage, {
 							'position': 'fixed',
 							'opacity': '0'
 						});
-						document.body.appendChild(tempImage);
-						(function(tempImage) {
-							setTimeout(function() {
+						(function(tempImage, ag) {
+							tempImage.onload = function() {
 								ag.addFrame(tempImage);
 								utils.removeElement(tempImage);
-							}, 100);
-						}(tempImage));
+								loadedImages += 1;
+								if(loadedImages === imagesLength) {
+									gifshot._getBase64GIF(ag, callback);
+								}
+							};
+						}(tempImage, ag));
+						document.body.appendChild(tempImage);
 					}
 				}
-
-				setTimeout(function() {
-					// This is asynchronous, rendered with WebWorkers
-					ag.getBase64GIF(function(image) {
-						callback({
-							'error': false,
-							'errorCode': '',
-							'errorMsg': '',
-							'image': image
-						});
-					});
-				}, 100);
 			} else {
 				videoStream.startVideoStreaming(function(obj) {
 					gifshot._createAndGetGIF(obj, callback);
@@ -84,6 +85,17 @@ define([
 					'callback': callback
 				});
 			}
+		},
+		_getBase64GIF: function(animatedGifInstance, callback) {
+			// This is asynchronous, rendered with WebWorkers
+			animatedGifInstance.getBase64GIF(function(image) {
+				callback({
+					'error': false,
+					'errorCode': '',
+					'errorMsg': '',
+					'image': image
+				});
+			});
 		},
 		'takeSnapShot': function(obj, callback) {
 			var defaultOptions = utils.mergeOptions(gifshot._defaultOptions, obj),
@@ -138,9 +150,8 @@ define([
 			}
 
 			videoElement.src = utils.URL.createObjectURL(cameraStream);
-
-	        videoElement.width = gifWidth + cropDimensions.width;
-	        videoElement.height = gifHeight + cropDimensions.height;
+			videoElement.width = gifWidth + cropDimensions.width;
+			videoElement.height = gifHeight + cropDimensions.height;
 
 	        utils.setCSSAttr(videoElement, {
 	        	'position': 'fixed',
