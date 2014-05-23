@@ -136,16 +136,6 @@ define(function() {
               node.parentNode.removeChild(node);
             }
         },
-        'set': function(name, value){
-          if(utils.isSupported.localStorage()){
-              window.localStorage.setItem(name, value);
-          }
-        },
-        'get': function(name){
-          if(utils.isSupported.localStorage()){
-            window.localStorage.getItem(name);
-          }
-        },
         'createWebWorker': function(content) {
             if(!utils.isString(content)) {
                 return {};
