@@ -31,13 +31,13 @@ Influenced By:
 - [Meatspace Chat](https://chat.meatspac.es/)
 
 ## Quick Start
-1.  Include `gifshot.js` on your HTML page
+*  Include `gifshot.js` on your HTML page
 
 ```html
 <script src='gifshot.js'></script>
 ```
 
-2.  Start using the JavaScript API to create your animated GIFs
+*  Start using the JavaScript API to create your animated GIFs
 
 ```javascript
 gifshot.createGIF(function(obj) {
