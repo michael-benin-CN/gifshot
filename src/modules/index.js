@@ -34,28 +34,32 @@ define([
 				options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions),
 				lastCameraStream = userOptions.cameraStream,
 				images = options.images,
+				existingVideo = options.video,
 				imagesLength = images ? images.length : 0,
-				errorObj;
+				errorObj,
+				skipObj = {},
+				ag,
+				x = -1,
+				currentImage,
+				tempImage,
+				loadedImages = 0,
+				videoType,
+				videoSrc;
 
 			// If the user has passed in at least one image path or image DOM elements
 			if(imagesLength) {
-				errorObj = error.validate({
+				skipObj = {
 					'getUserMedia': true,
 					'window.URL': true
-				});
-
-				console.log('errorObj', errorObj);
+				};
+				errorObj = error.validate(skipObj);
 
 				if(errorObj.error) {
 					return callback(errorObj);
 				}
 
 				// change workerPath to point to where Animated_GIF.worker.js is
-				var ag = new AnimatedGif(options),
-					x = -1,
-					currentImage,
-					tempImage,
-					loadedImages = 0;
+				ag = new AnimatedGif(options);
 
 				while(++x < imagesLength) {
 					currentImage = images[x];
@@ -87,6 +91,42 @@ define([
 						document.body.appendChild(tempImage);
 					}
 				}
+			} else if(existingVideo) {
+				skipObj = {
+					'getUserMedia': true,
+					'window.URL': true
+				};
+				errorObj = error.validate(skipObj);
+
+				if(errorObj.error) {
+					return callback(errorObj);
+				}
+
+				if(utils.isElement(existingVideo) && existingVideo.src) {
+					videoSrc = existingVideo.src;
+					videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+
+					if(!utils.isSupported.videoCodecs[videoType]) {
+						return callback(error.messages.videoCodecs);
+					}
+				} else if(utils.isArray(existingVideo)) {
+					utils.each(existingVideo, function(iterator, videoSrc) {
+						videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+						if(utils.isSupported.videoCodecs[videoType]) {
+							existingVideo = videoSrc;
+							return false;
+						}
+					});
+				}
+
+				videoStream.startStreaming({
+					'completed': function(obj) {
+						gifshot._createAndGetGIF(obj, callback);
+					},
+					'existingVideo': existingVideo
+				});
+
+
 			} else {
  				if(!gifshot.isSupported()) {
 					return callback(error.validate());
@@ -137,7 +177,7 @@ define([
 			var options = gifshot._options,
 				numFrames = options.numFrames,
 				interval = options.interval,
-				wait = interval * 10000,
+				wait = options.video ? 0 : interval * 10000,
 				cameraStream = obj.cameraStream,
 				videoElement = obj.videoElement,
 				videoWidth = obj.videoWidth,
@@ -162,7 +202,6 @@ define([
 				return;
 			}
 
-			videoElement.src = utils.URL.createObjectURL(cameraStream);
 			videoElement.width = gifWidth + cropDimensions.width;
 			videoElement.height = gifHeight + cropDimensions.height;
 
