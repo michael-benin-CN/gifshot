@@ -51,8 +51,11 @@ utils = function () {
                 'blob': function () {
                     return utils.Blob;
                 },
-                'Uint8ClampedArray': function () {
-                    return window.Uint8ClampedArray;
+                'Uint8Array': function () {
+                    return window.Uint8Array;
+                },
+                'Uint32Array': function () {
+                    return window.Uint32Array;
                 }
             },
             'log': function () {
@@ -1540,9 +1543,14 @@ error = function () {
                     'errorMsg': 'The window.Blob File API is not supported in your browser'
                 },
                 {
-                    'condition': utils.isFunction(window.btoa),
-                    'errorCode': 'window.btoa',
-                    'errorMsg': 'The window.btoa base-64 encoding method is not supported in your browser'
+                    'condition': utils.isSupported.Uint8Array(),
+                    'errorCode': 'window.Uint8Array',
+                    'errorMsg': 'The window.Uint8Array function constructor is not supported in your browser'
+                },
+                {
+                    'condition': utils.isSupported.Uint32Array(),
+                    'errorCode': 'window.Uint32Array',
+                    'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser'
                 }
             ]
         };
