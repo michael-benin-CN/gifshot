@@ -28,18 +28,28 @@ define([
 
 			if(!utils.isFunction(callback)) {
 				return;
-			} else if(!gifshot.isSupported()) {
-				return callback(error.validate());
 			}
 
 			var defaultOptions = gifshot._defaultOptions,
 				options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions),
 				lastCameraStream = userOptions.cameraStream,
 				images = options.images,
-				imagesLength = images ? images.length : 0;
+				imagesLength = images ? images.length : 0,
+				errorObj;
 
 			// If the user has passed in at least one image path or image DOM elements
 			if(imagesLength) {
+				errorObj = error.validate({
+					'getUserMedia': true,
+					'window.URL': true
+				});
+
+				console.log('errorObj', errorObj);
+
+				if(errorObj.error) {
+					return callback(errorObj);
+				}
+
 				// change workerPath to point to where Animated_GIF.worker.js is
 				var ag = new AnimatedGif(options),
 					x = -1,
@@ -78,6 +88,9 @@ define([
 					}
 				}
 			} else {
+ 				if(!gifshot.isSupported()) {
+					return callback(error.validate());
+				}
 				videoStream.startVideoStreaming(function(obj) {
 					gifshot._createAndGetGIF(obj, callback);
 				}, {
@@ -117,8 +130,8 @@ define([
 				'keepCameraOn': options.keepCameraOn
 			});
 		},
-		'isSupported': function() {
-			return error.isValid();
+		'isSupported': function(skipObj) {
+			return error.isValid(skipObj);
 		},
 		'_createAndGetGIF': function(obj, callback) {
 			var options = gifshot._options,
