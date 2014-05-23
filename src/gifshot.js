@@ -1,5 +1,5 @@
 ;(function(window, navigator, document, undefined) {
-var utils, videoStream, NeuQuant, worker, gifWriter, animatedGif, screenShot, error, index;
+var utils, videoStream, NeuQuant, processFrameWorker, encodeGifWorker, gifWriter, animatedGif, screenShot, error, index;
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -46,11 +46,13 @@ utils = function () {
                     return console && utils.isFunction(console.log);
                 },
                 'webworkers': function () {
-                    var worker = window.Worker;
-                    return utils.isFunction(worker);
+                    return window.Worker;
                 },
                 'blob': function () {
                     return utils.Blob;
+                },
+                'Uint8ClampedArray': function () {
+                    return window.Uint8ClampedArray;
                 }
             },
             'log': function () {
@@ -780,7 +782,7 @@ NeuQuant = function () {
     }
     return NeuQuant;
 }();
-worker = function () {
+processFrameWorker = function () {
     var workerCode = function worker() {
         self.onmessage = function (ev) {
             var data = ev.data, response = workerMethods.run(data);
@@ -831,6 +833,71 @@ worker = function () {
     };
     return workerCode;
 }();
+encodeGifWorker = function () {
+    var workerCode = function worker() {
+        self.onmessage = function (ev) {
+            workerMethods.encodeGif(ev.data);
+        };
+        var workerMethods = {
+                'encodeGif': function (obj) {
+                    var frames = obj.frames, framesLength = frames.length, buffer = obj.buffer, width = obj.width, height = obj.width, gifOptions = obj.gifOptions, delay = obj.delay, onRenderProgressCallback = obj.onRenderProgressCallback, gifWriter = new GifWriter(buffer, width, height, gifOptions), x = -1, frame, framePalette, bufferToString, gif;
+                    while (++x < framesLength) {
+                        frame = frames[x];
+                        framePalette = frame.palette;
+                        postMessage({
+                            'complete': false,
+                            'frame': frame
+                        });
+                        gifWriter.addFrame(0, 0, width, height, frame.pixels, {
+                            palette: framePalette,
+                            delay: delay
+                        });
+                    }
+                    gifWriter.end();
+                    bufferToString = workerMethods.bufferToString(buffer);
+                    gif = 'data:image/gif;base64,' + workerMethods.btoa(bufferToString);
+                    postMessage({
+                        'complete': true,
+                        'gif': gif
+                    });
+                },
+                'byteMap': function () {
+                    var byteMap = [];
+                    for (var i = 0; i < 256; i++) {
+                        byteMap[i] = String.fromCharCode(i);
+                    }
+                    return byteMap;
+                }(),
+                'bufferToString': function (buffer) {
+                    var numberValues = buffer.length, str = '', x = -1;
+                    while (++x < numberValues) {
+                        str += this.byteMap[buffer[x]];
+                    }
+                    return str;
+                },
+                // window.btoa polyfill
+                'btoa': function (input) {
+                    var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+                    while (i < l) {
+                        chr1 = input.charCodeAt(i++);
+                        chr2 = input.charCodeAt(i++);
+                        chr3 = input.charCodeAt(i++);
+                        enc1 = chr1 >> 2;
+                        enc2 = (chr1 & 3) << 4 | chr2 >> 4;
+                        enc3 = (chr2 & 15) << 2 | chr3 >> 6;
+                        enc4 = chr3 & 63;
+                        if (isNaN(chr2))
+                            enc3 = enc4 = 64;
+                        else if (isNaN(chr3))
+                            enc4 = 64;
+                        output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
+                    }
+                    return output;
+                }
+            };
+    };
+    return workerCode;
+}();
 gifWriter = function () {
     function GifWriter(buf, width, height, gopts) {
         var p = 0;
@@ -857,24 +924,6 @@ gifWriter = function () {
         // Handling of Global Color Table (palette) and background index.
         var gp_num_colors_pow2 = 0;
         var background = 0;
-        if (global_palette !== null) {
-            var gp_num_colors = check_palette_and_num_colors(global_palette);
-            while (gp_num_colors >>= 1)
-                ++gp_num_colors_pow2;
-            gp_num_colors = 1 << gp_num_colors_pow2;
-            --gp_num_colors_pow2;
-            if (gopts.background !== undefined) {
-                background = gopts.background;
-                if (background >= gp_num_colors)
-                    throw 'Background index out of range.';
-                // The GIF spec states that a background index of 0 should be ignored, so
-                // this is probably a mistake and you really want to set it to another
-                // slot in the palette.  But actually in the end most browsers, etc end
-                // up ignoring this almost completely (including for dispose background).
-                if (background === 0)
-                    throw 'Background index explicitly passed as 0.';
-            }
-        }
         // - Logical Screen Descriptor.
         // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
         buf[p++] = width & 255;
@@ -889,15 +938,6 @@ gifWriter = function () {
         // Background Color Index.
         buf[p++] = 0;
         // Pixel aspect ratio (unused?).
-        // - Global Color Table
-        if (global_palette !== null) {
-            for (var i = 0, il = global_palette.length; i < il; ++i) {
-                var rgb = global_palette[i];
-                buf[p++] = rgb >> 16 & 255;
-                buf[p++] = rgb >> 8 & 255;
-                buf[p++] = rgb & 255;
-            }
-        }
         if (loop_count !== null) {
             // Netscape block for looping.
             if (loop_count < 0 || loop_count > 65535)
@@ -1031,104 +1071,24 @@ gifWriter = function () {
             }
             return p;
         };
-    }
-    // Main compression routine, palette indexes -> LZW code stream.
-    // |index_stream| must have at least one entry.
-    function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
-        buf[p++] = min_code_size;
-        var cur_subblock = p++;
-        // Pointing at the length field.
-        var clear_code = 1 << min_code_size;
-        var code_mask = clear_code - 1;
-        var eoi_code = clear_code + 1;
-        var next_code = eoi_code + 1;
-        var cur_code_size = min_code_size + 1;
-        // Number of bits per code.
-        var cur_shift = 0;
-        // We have at most 12-bit codes, so we should have to hold a max of 19
-        // bits here (and then we would write out).
-        var cur = 0;
-        function emit_bytes_to_buffer(bit_block_size) {
-            while (cur_shift >= bit_block_size) {
-                buf[p++] = cur & 255;
-                cur >>= 8;
-                cur_shift -= 8;
-                if (p === cur_subblock + 256) {
-                    // Finished a subblock.
-                    buf[cur_subblock] = 255;
-                    cur_subblock = p++;
-                }
-            }
-        }
-        function emit_code(c) {
-            cur |= c << cur_shift;
-            cur_shift += cur_code_size;
-            emit_bytes_to_buffer(8);
-        }
-        // I am not an expert on the topic, and I don't want to write a thesis.
-        // However, it is good to outline here the basic algorithm and the few data
-        // structures and optimizations here that make this implementation fast.
-        // The basic idea behind LZW is to build a table of previously seen runs
-        // addressed by a short id (herein called output code).  All data is
-        // referenced by a code, which represents one or more values from the
-        // original input stream.  All input bytes can be referenced as the same
-        // value as an output code.  So if you didn't want any compression, you
-        // could more or less just output the original bytes as codes (there are
-        // some details to this, but it is the idea).  In order to achieve
-        // compression, values greater then the input range (codes can be up to
-        // 12-bit while input only 8-bit) represent a sequence of previously seen
-        // inputs.  The decompressor is able to build the same mapping while
-        // decoding, so there is always a shared common knowledge between the
-        // encoding and decoder, which is also important for "timing" aspects like
-        // how to handle variable bit width code encoding.
-        //
-        // One obvious but very important consequence of the table system is there
-        // is always a unique id (at most 12-bits) to map the runs.  'A' might be
-        // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
-        // can be used for an effecient lookup strategy for the code mapping.  We
-        // need to know if a run has been seen before, and be able to map that run
-        // to the output code.  Since we start with known unique ids (input bytes),
-        // and then from those build more unique ids (table entries), we can
-        // continue this chain (almost like a linked list) to always have small
-        // integer values that represent the current byte chains in the encoder.
-        // This means instead of tracking the input bytes (AAAABCD) to know our
-        // current state, we can track the table entry for AAAABC (it is guaranteed
-        // to exist by the nature of the algorithm) and the next character D.
-        // Therefor the tuple of (table_entry, byte) is guaranteed to also be
-        // unique.  This allows us to create a simple lookup key for mapping input
-        // sequences to codes (table indices) without having to store or search
-        // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
-        // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
-        // key.  This leads to a integer value at most 20-bits, which can always
-        // fit in an SMI value and be used as a fast sparse array / object key.
-        // Output code for the current contents of the index buffer.
-        var ib_code = index_stream[0] & code_mask;
-        // Load first input index.
-        var code_table = {};
-        // Key'd on our 20-bit "tuple".
-        emit_code(clear_code);
-        // Spec says first code should be a clear code.
-        // First index already loaded, process the rest of the stream.
-        for (var i = 1, il = index_stream.length; i < il; ++i) {
-            var k = index_stream[i] & code_mask;
-            var cur_key = ib_code << 8 | k;
-            // (prev, k) unique tuple.
-            var cur_code = code_table[cur_key];
-            // buffer + k.
-            // Check if we have to create a new code table entry.
-            if (cur_code === undefined) {
-                // We don't have buffer + k.
-                // Emit index buffer (without k).
-                // This is an inline version of emit_code, because this is the core
-                // writing routine of the compressor (and V8 cannot inline emit_code
-                // because it is a closure here in a different context).  Additionally
-                // we can call emit_byte_to_buffer less often, because we can have
-                // 30-bits (from our 31-bit signed SMI), and we know our codes will only
-                // be 12-bits, so can safely have 18-bits there without overflow.
-                // emit_code(ib_code);
-                cur |= ib_code << cur_shift;
-                cur_shift += cur_code_size;
-                while (cur_shift >= 8) {
+        // Main compression routine, palette indexes -> LZW code stream.
+        // |index_stream| must have at least one entry.
+        function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
+            buf[p++] = min_code_size;
+            var cur_subblock = p++;
+            // Pointing at the length field.
+            var clear_code = 1 << min_code_size;
+            var code_mask = clear_code - 1;
+            var eoi_code = clear_code + 1;
+            var next_code = eoi_code + 1;
+            var cur_code_size = min_code_size + 1;
+            // Number of bits per code.
+            var cur_shift = 0;
+            // We have at most 12-bit codes, so we should have to hold a max of 19
+            // bits here (and then we would write out).
+            var cur = 0;
+            function emit_bytes_to_buffer(bit_block_size) {
+                while (cur_shift >= bit_block_size) {
                     buf[p++] = cur & 255;
                     cur >>= 8;
                     cur_shift -= 8;
@@ -1138,50 +1098,130 @@ gifWriter = function () {
                         cur_subblock = p++;
                     }
                 }
-                if (next_code === 4096) {
-                    // Table full, need a clear.
-                    emit_code(clear_code);
-                    next_code = eoi_code + 1;
-                    cur_code_size = min_code_size + 1;
-                    code_table = {};
-                } else {
-                    // Table not full, insert a new entry.
-                    // Increase our variable bit code sizes if necessary.  This is a bit
-                    // tricky as it is based on "timing" between the encoding and
-                    // decoder.  From the encoders perspective this should happen after
-                    // we've already emitted the index buffer and are about to create the
-                    // first table entry that would overflow our current code bit size.
-                    if (next_code >= 1 << cur_code_size)
-                        ++cur_code_size;
-                    code_table[cur_key] = next_code++;
-                }
-                ib_code = k;
-            } else {
-                ib_code = cur_code;
             }
+            function emit_code(c) {
+                cur |= c << cur_shift;
+                cur_shift += cur_code_size;
+                emit_bytes_to_buffer(8);
+            }
+            // I am not an expert on the topic, and I don't want to write a thesis.
+            // However, it is good to outline here the basic algorithm and the few data
+            // structures and optimizations here that make this implementation fast.
+            // The basic idea behind LZW is to build a table of previously seen runs
+            // addressed by a short id (herein called output code).  All data is
+            // referenced by a code, which represents one or more values from the
+            // original input stream.  All input bytes can be referenced as the same
+            // value as an output code.  So if you didn't want any compression, you
+            // could more or less just output the original bytes as codes (there are
+            // some details to this, but it is the idea).  In order to achieve
+            // compression, values greater then the input range (codes can be up to
+            // 12-bit while input only 8-bit) represent a sequence of previously seen
+            // inputs.  The decompressor is able to build the same mapping while
+            // decoding, so there is always a shared common knowledge between the
+            // encoding and decoder, which is also important for "timing" aspects like
+            // how to handle variable bit width code encoding.
+            //
+            // One obvious but very important consequence of the table system is there
+            // is always a unique id (at most 12-bits) to map the runs.  'A' might be
+            // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
+            // can be used for an effecient lookup strategy for the code mapping.  We
+            // need to know if a run has been seen before, and be able to map that run
+            // to the output code.  Since we start with known unique ids (input bytes),
+            // and then from those build more unique ids (table entries), we can
+            // continue this chain (almost like a linked list) to always have small
+            // integer values that represent the current byte chains in the encoder.
+            // This means instead of tracking the input bytes (AAAABCD) to know our
+            // current state, we can track the table entry for AAAABC (it is guaranteed
+            // to exist by the nature of the algorithm) and the next character D.
+            // Therefor the tuple of (table_entry, byte) is guaranteed to also be
+            // unique.  This allows us to create a simple lookup key for mapping input
+            // sequences to codes (table indices) without having to store or search
+            // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
+            // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
+            // key.  This leads to a integer value at most 20-bits, which can always
+            // fit in an SMI value and be used as a fast sparse array / object key.
+            // Output code for the current contents of the index buffer.
+            var ib_code = index_stream[0] & code_mask;
+            // Load first input index.
+            var code_table = {};
+            // Key'd on our 20-bit "tuple".
+            emit_code(clear_code);
+            // Spec says first code should be a clear code.
+            // First index already loaded, process the rest of the stream.
+            for (var i = 1, il = index_stream.length; i < il; ++i) {
+                var k = index_stream[i] & code_mask;
+                var cur_key = ib_code << 8 | k;
+                // (prev, k) unique tuple.
+                var cur_code = code_table[cur_key];
+                // buffer + k.
+                // Check if we have to create a new code table entry.
+                if (cur_code === undefined) {
+                    // We don't have buffer + k.
+                    // Emit index buffer (without k).
+                    // This is an inline version of emit_code, because this is the core
+                    // writing routine of the compressor (and V8 cannot inline emit_code
+                    // because it is a closure here in a different context).  Additionally
+                    // we can call emit_byte_to_buffer less often, because we can have
+                    // 30-bits (from our 31-bit signed SMI), and we know our codes will only
+                    // be 12-bits, so can safely have 18-bits there without overflow.
+                    // emit_code(ib_code);
+                    cur |= ib_code << cur_shift;
+                    cur_shift += cur_code_size;
+                    while (cur_shift >= 8) {
+                        buf[p++] = cur & 255;
+                        cur >>= 8;
+                        cur_shift -= 8;
+                        if (p === cur_subblock + 256) {
+                            // Finished a subblock.
+                            buf[cur_subblock] = 255;
+                            cur_subblock = p++;
+                        }
+                    }
+                    if (next_code === 4096) {
+                        // Table full, need a clear.
+                        emit_code(clear_code);
+                        next_code = eoi_code + 1;
+                        cur_code_size = min_code_size + 1;
+                        code_table = {};
+                    } else {
+                        // Table not full, insert a new entry.
+                        // Increase our variable bit code sizes if necessary.  This is a bit
+                        // tricky as it is based on "timing" between the encoding and
+                        // decoder.  From the encoders perspective this should happen after
+                        // we've already emitted the index buffer and are about to create the
+                        // first table entry that would overflow our current code bit size.
+                        if (next_code >= 1 << cur_code_size)
+                            ++cur_code_size;
+                        code_table[cur_key] = next_code++;
+                    }
+                    ib_code = k;
+                } else {
+                    ib_code = cur_code;
+                }
+            }
+            emit_code(ib_code);
+            // There will still be something in the index buffer.
+            emit_code(eoi_code);
+            // End Of Information.
+            // Flush / finalize the sub-blocks stream to the buffer.
+            emit_bytes_to_buffer(1);
+            // Finish the sub-blocks, writing out any unfinished lengths and
+            // terminating with a sub-block of length 0.  If we have already started
+            // but not yet used a sub-block it can just become the terminator.
+            if (cur_subblock + 1 === p) {
+                // Started but unused.
+                buf[cur_subblock] = 0;
+            } else {
+                // Started and used, write length and additional terminator block.
+                buf[cur_subblock] = p - cur_subblock - 1;
+                buf[p++] = 0;
+            }
+            return p;
         }
-        emit_code(ib_code);
-        // There will still be something in the index buffer.
-        emit_code(eoi_code);
-        // End Of Information.
-        // Flush / finalize the sub-blocks stream to the buffer.
-        emit_bytes_to_buffer(1);
-        // Finish the sub-blocks, writing out any unfinished lengths and
-        // terminating with a sub-block of length 0.  If we have already started
-        // but not yet used a sub-block it can just become the terminator.
-        if (cur_subblock + 1 === p) {
-            // Started but unused.
-            buf[cur_subblock] = 0;
-        } else {
-            // Started and used, write length and additional terminator block.
-            buf[cur_subblock] = p - cur_subblock - 1;
-            buf[p++] = 0;
-        }
-        return p;
     }
     return GifWriter;
 }();
-animatedGif = function (workerCode, GifWriter) {
+animatedGif = function (frameWorkerCode, GifWriter) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
         this.canvas = null;
@@ -1195,11 +1235,10 @@ animatedGif = function (workerCode, GifWriter) {
         this.availableWorkers = [];
         this.generatingGIF = false;
         this.options = options = utils.mergeOptions(this.defaultOptions, options);
-        // Initializes the instance options and constructs the web workers appropriately
+        // Constructs and initializes the the web workers appropriately
         this.initializeWebWorkers(options);
     };
     AnimatedGIF.prototype = {
-        'GifWriter': GifWriter,
         'defaultOptions': {
             'width': 160,
             'height': 120,
@@ -1209,10 +1248,10 @@ animatedGif = function (workerCode, GifWriter) {
             'numWorkers': 2
         },
         'initializeWebWorkers': function (options) {
-            var workerCodeString = NeuQuant.toString() + workerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1;
+            var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1;
             numWorkers = options.numWorkers;
             while (++x < numWorkers) {
-                webWorkerObj = utils.createWebWorker(workerCodeString);
+                webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
                 objectUrl = webWorkerObj.objectUrl;
                 webWorker = webWorkerObj.worker;
                 this.workers.push({
@@ -1315,25 +1354,34 @@ animatedGif = function (workerCode, GifWriter) {
         'generateGIF': function (frames, callback) {
             // TODO: Weird: using a simple JS array instead of a typed array,
             // the files are WAY smaller o_o. Patches/explanations welcome!
-            var buffer = [],
-                // new Uint8Array(width * height * frames.length * 5);
-                gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay;
+            var context = this, options = this.options, buffer = [],
+                //new Uint8Array(options.width * options.height * this.frames.length)
+                gifOptions = { 'loop': this.repeat }, height = options.height, width = options.width, onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();', webWorkerObj = utils.createWebWorker(encodeGifWorkerCode), worker = webWorkerObj.worker, objectUrl = webWorkerObj.objectUrl;
             this.generatingGIF = true;
-            utils.each(frames, function (iterator, frame) {
-                var framePalette = frame.palette;
-                onRenderProgressCallback(0.75 + 0.25 * frame.position * 1 / frames.length);
-                gifWriter.addFrame(0, 0, width, height, frame.pixels, {
-                    palette: framePalette,
-                    delay: delay
-                });
+            worker.onmessage = function (ev) {
+                var data = ev.data, gif = data.gif, frame = data.frame, complete = data.complete;
+                if (complete === false) {
+                    onRenderProgressCallback(0.75 + 0.25 * frame.position * 1 / frames.length);
+                    return;
+                } else {
+                    onRenderProgressCallback(1);
+                    context.frames = [];
+                    context.generatingGIF = false;
+                    utils.URL.revokeObjectURL(objectUrl);
+                    worker.terminate();
+                    if (utils.isFunction(callback)) {
+                        callback(gif);
+                    }
+                }
+            };
+            worker.postMessage({
+                'frames': frames,
+                'buffer': buffer,
+                'width': width,
+                'height': height,
+                'gifOptions': gifOptions,
+                'delay': delay
             });
-            gifWriter.end();
-            onRenderProgressCallback(1);
-            this.frames = [];
-            this.generatingGIF = false;
-            if (utils.isFunction(callback)) {
-                callback(buffer);
-            }
         },
         // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
         'setRepeat': function (r) {
@@ -1346,7 +1394,7 @@ animatedGif = function (workerCode, GifWriter) {
             this.addFrameImageData(imageData);
         },
         'addFrameImageData': function (imageData) {
-            var frames = this.frames, imageDataArray = new Uint8Array(imageData.data);
+            var frames = this.frames, imageDataArray = imageData.data;
             this.frames.push({
                 'data': imageDataArray,
                 'width': imageData.width,
@@ -1365,10 +1413,11 @@ animatedGif = function (workerCode, GifWriter) {
             return this.generatingGIF;
         },
         'getBase64GIF': function (completeCallback) {
-            var self = this, onRenderComplete = function (buffer) {
-                    var str = self.bufferToString(buffer), gif = 'data:image/gif;base64,' + window.btoa(str);
+            var self = this, onRenderComplete = function (gif) {
                     self.destroyWorkers();
-                    completeCallback(gif);
+                    setTimeout(function () {
+                        completeCallback(gif);
+                    }, 0);
                 };
             this.startRendering(onRenderComplete);
         },
@@ -1383,7 +1432,7 @@ animatedGif = function (workerCode, GifWriter) {
         }
     };
     return AnimatedGIF;
-}(worker, gifWriter);
+}(processFrameWorker, gifWriter);
 screenShot = function (AnimatedGIF) {
     return {
         getWebcamGif: function (obj, callback) {
@@ -1446,10 +1495,12 @@ screenShot = function (AnimatedGIF) {
 }(animatedGif);
 error = function () {
     var error = {
-            'validate': function () {
+            'validate': function (skipObj) {
+                skipObj = utils.isObject(skipObj) ? skipObj : {};
                 var errorObj = {};
                 utils.each(error.validators, function (indece, currentValidator) {
-                    if (!currentValidator.condition) {
+                    var errorCode = currentValidator.errorCode;
+                    if (!skipObj[errorCode] && !currentValidator.condition) {
                         errorObj = currentValidator;
                         errorObj.error = true;
                         return false;
@@ -1458,8 +1509,8 @@ error = function () {
                 delete errorObj.condition;
                 return errorObj;
             },
-            'isValid': function () {
-                var errorObj = error.validate(), isValid = errorObj.error !== true ? true : false;
+            'isValid': function (skipObj) {
+                var errorObj = error.validate(skipObj), isValid = errorObj.error !== true ? true : false;
                 return isValid;
             },
             'validators': [
@@ -1492,16 +1543,6 @@ error = function () {
                     'condition': utils.isFunction(window.btoa),
                     'errorCode': 'window.btoa',
                     'errorMsg': 'The window.btoa base-64 encoding method is not supported in your browser'
-                },
-                {
-                    'condition': utils.isFunction(Uint8Array),
-                    'errorCode': 'window.Uint8Array',
-                    'errorMsg': 'The window.Uint8Array function constructor is not supported in your browser'
-                },
-                {
-                    'condition': utils.isFunction(Uint32Array),
-                    'errorCode': 'window.Uint32Array',
-                    'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser'
                 }
             ]
         };
@@ -1531,12 +1572,18 @@ index = function (AnimatedGif) {
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
                 if (!utils.isFunction(callback)) {
                     return;
-                } else if (!gifshot.isSupported()) {
-                    return callback(error.validate());
                 }
-                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0;
+                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0, errorObj;
                 // If the user has passed in at least one image path or image DOM elements
                 if (imagesLength) {
+                    errorObj = error.validate({
+                        'getUserMedia': true,
+                        'window.URL': true
+                    });
+                    console.log('errorObj', errorObj);
+                    if (errorObj.error) {
+                        return callback(errorObj);
+                    }
                     // change workerPath to point to where Animated_GIF.worker.js is
                     var ag = new AnimatedGif(options), x = -1, currentImage, tempImage, loadedImages = 0;
                     while (++x < imagesLength) {
@@ -1570,6 +1617,9 @@ index = function (AnimatedGif) {
                         }
                     }
                 } else {
+                    if (!gifshot.isSupported()) {
+                        return callback(error.validate());
+                    }
                     videoStream.startVideoStreaming(function (obj) {
                         gifshot._createAndGetGIF(obj, callback);
                     }, {
@@ -1605,8 +1655,8 @@ index = function (AnimatedGif) {
                     'keepCameraOn': options.keepCameraOn
                 });
             },
-            'isSupported': function () {
-                return error.isValid();
+            'isSupported': function (skipObj) {
+                return error.isValid(skipObj);
             },
             '_createAndGetGIF': function (obj, callback) {
                 var options = gifshot._options, numFrames = options.numFrames, interval = options.interval, wait = interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({

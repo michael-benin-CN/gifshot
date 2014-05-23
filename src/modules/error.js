@@ -2,10 +2,12 @@ define([
 	'utils'
 ], function(utils) {
 	var error = {
-		'validate': function() {
+		'validate': function(skipObj) {
+			skipObj = utils.isObject(skipObj) ? skipObj : {};
 			var errorObj = {};
 			utils.each(error.validators, function(indece, currentValidator) {
-				if(!currentValidator.condition) {
+				var errorCode = currentValidator.errorCode;
+				if(!skipObj[errorCode] && !currentValidator.condition) {
 					errorObj = currentValidator;
 					errorObj.error = true;
 					return false;
@@ -14,8 +16,8 @@ define([
 			delete errorObj.condition;
 			return errorObj;
 		},
-		'isValid': function() {
-			var errorObj = error.validate(),
+		'isValid': function(skipObj) {
+			var errorObj = error.validate(skipObj),
 				isValid = errorObj.error !== true ? true : false;
 
 			return isValid;
@@ -44,14 +46,6 @@ define([
 	        'condition': utils.isFunction(window.btoa),
 	        'errorCode': 'window.btoa',
 	        'errorMsg': 'The window.btoa base-64 encoding method is not supported in your browser'
-	    }, {
-	        'condition': utils.isFunction(Uint8Array),
-	        'errorCode': 'window.Uint8Array',
-	        'errorMsg': 'The window.Uint8Array function constructor is not supported in your browser'
-	    }, {
-	        'condition': utils.isFunction(Uint32Array),
-	        'errorCode': 'window.Uint32Array',
-	        'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser'
 	    }]
 	};
 	return error;
