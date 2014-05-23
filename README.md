@@ -40,6 +40,7 @@ Influenced By:
 *  Start using the JavaScript API to create your animated GIFs
 
 ```javascript
+// By default, a user's webcam is used to create the animated GIF
 gifshot.createGIF(function(obj) {
 	if(!obj.error) {
 		var image = obj.image,
@@ -103,6 +104,56 @@ gifshot.stopVideoStreaming();
 gifshot.isSupported();
 ```
 
+## Examples
+
+**Web Cam**
+
+```javascript
+gifshot.createGIF(function(obj) {
+	if(!obj.error) {
+		var image = obj.image,
+		animatedImage = document.createElement('img');
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
+	} else {
+		console.log('obj', obj);
+	}
+});
+```
+
+**HTML5 Videos**
+
+```javascript
+gifshot.createGIF({
+	'video': ['example.mp4', 'example.ogv']
+},function(obj) {
+	if(!obj.error) {
+		var image = obj.image,
+		animatedImage = document.createElement('img');
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
+	} else {
+		console.log('obj', obj);
+	}
+});
+```
+
+**Images**
+
+```javascript
+gifshot.createGIF({
+	'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif']
+},function(obj) {
+	if(!obj.error) {
+		var image = obj.image,
+		animatedImage = document.createElement('img');
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
+	} else {
+		console.log('obj', obj);
+	}
+});
+```
 
 ## Options
 
