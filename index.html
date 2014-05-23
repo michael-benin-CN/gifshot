@@ -22,8 +22,7 @@
         <button type="button" id="snapShot">Take Snapshot</button>
         <progress max="1" value="0"></progress>
     </form>
-
-
+</video>
 
   <script>
     var form = document.querySelector("form"),
@@ -38,6 +37,7 @@
       e.preventDefault();
 
       gifshot.createGIF({
+        'video': ['example.mp4', 'example.ogv'],
         // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,

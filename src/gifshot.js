@@ -1,5 +1,5 @@
 ;(function(window, navigator, document, undefined) {
-var utils, videoStream, NeuQuant, processFrameWorker, encodeGifWorker, gifWriter, animatedGif, screenShot, error, index;
+var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error, index;
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -56,7 +56,29 @@ utils = function () {
                 },
                 'Uint32Array': function () {
                     return window.Uint32Array;
-                }
+                },
+                'videoCodecs': function () {
+                    var testEl = document.createElement('video'), supportObj = {
+                            'mp4': false,
+                            'h264': false,
+                            'ogv': false,
+                            'ogg': false,
+                            'webm': false
+                        };
+                    if (testEl.canPlayType) {
+                        // Check for MPEG-4 support
+                        supportObj.mp4 = testEl.canPlayType('video/mp4; codecs="mp4v.20.8"') !== '';
+                        // Check for h264 support
+                        supportObj.h264 = (testEl.canPlayType('video/mp4; codecs="avc1.42E01E"') || testEl.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) !== '';
+                        // Check for Ogv support
+                        supportObj.ogv = testEl.canPlayType('video/ogg; codecs="theora"') !== '';
+                        // Check for Ogg support
+                        supportObj.ogg = testEl.canPlayType('video/ogg; codecs="theora"') !== '';
+                        // Check for Webm support
+                        supportObj.webm = testEl.canPlayType('video/webm; codecs="vp8, vorbis"') !== -1;
+                    }
+                    return supportObj;
+                }()
             },
             'log': function () {
                 if (utils.isSupported.console()) {
@@ -193,9 +215,15 @@ videoStream = function () {
             }
         },
         'stream': function (obj) {
-            var self = this, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
-            streamedCallback();
-            if (videoElement.mozSrcObject) {
+            var self = this, existingVideo = obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
+            if (utils.isFunction(streamedCallback)) {
+                streamedCallback();
+            }
+            if (existingVideo) {
+                if (!videoElement.src && utils.isString(existingVideo)) {
+                    videoElement.src = existingVideo;
+                }
+            } else if (videoElement.mozSrcObject) {
                 videoElement.mozSrcObject = cameraStream;
             } else if (utils.URL) {
                 videoElement.src = utils.URL.createObjectURL(cameraStream);
@@ -225,12 +253,21 @@ videoStream = function () {
             }, 100);
         },
         'startStreaming': function (obj) {
-            var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, videoElement = document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
+            var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, videoElement = utils.isElement(existingVideo) ? existingVideo : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
+            videoElement.crossOrigin = 'Anonymous';
             videoElement.autoplay = true;
+            videoElement.loop = true;
+            videoElement.muted = true;
             videoElement.addEventListener('loadeddata', function (event) {
                 self.loadedData = true;
             });
-            if (lastCameraStream) {
+            if (existingVideo) {
+                self.stream({
+                    'videoElement': videoElement,
+                    'existingVideo': existingVideo,
+                    'completedCallback': completedCallback
+                });
+            } else if (lastCameraStream) {
                 self.stream({
                     'videoElement': videoElement,
                     'cameraStream': lastCameraStream,
@@ -783,9 +820,7 @@ processFrameWorker = function () {
         };
         var workerMethods = {
                 'dataToRGB': function (data, width, height) {
-                    var i = 0;
-                    var length = width * height * 4;
-                    var rgb = [];
+                    var i = 0, length = width * height * 4, rgb = [];
                     while (i < length) {
                         rgb.push(data[i++]);
                         rgb.push(data[i++]);
@@ -821,71 +856,6 @@ processFrameWorker = function () {
                 'run': function (frame) {
                     var width = frame.width, height = frame.height, imageData = frame.data, palette = frame.palette, sampleInterval = frame.sampleInterval;
                     return workerMethods.processFrameWithQuantizer(imageData, width, height, sampleInterval);
-                }
-            };
-    };
-    return workerCode;
-}();
-encodeGifWorker = function () {
-    var workerCode = function worker() {
-        self.onmessage = function (ev) {
-            workerMethods.encodeGif(ev.data);
-        };
-        var workerMethods = {
-                'encodeGif': function (obj) {
-                    var frames = obj.frames, framesLength = frames.length, buffer = obj.buffer, width = obj.width, height = obj.width, gifOptions = obj.gifOptions, delay = obj.delay, onRenderProgressCallback = obj.onRenderProgressCallback, gifWriter = new GifWriter(buffer, width, height, gifOptions), x = -1, frame, framePalette, bufferToString, gif;
-                    while (++x < framesLength) {
-                        frame = frames[x];
-                        framePalette = frame.palette;
-                        postMessage({
-                            'complete': false,
-                            'frame': frame
-                        });
-                        gifWriter.addFrame(0, 0, width, height, frame.pixels, {
-                            palette: framePalette,
-                            delay: delay
-                        });
-                    }
-                    gifWriter.end();
-                    bufferToString = workerMethods.bufferToString(buffer);
-                    gif = 'data:image/gif;base64,' + workerMethods.btoa(bufferToString);
-                    postMessage({
-                        'complete': true,
-                        'gif': gif
-                    });
-                },
-                'byteMap': function () {
-                    var byteMap = [];
-                    for (var i = 0; i < 256; i++) {
-                        byteMap[i] = String.fromCharCode(i);
-                    }
-                    return byteMap;
-                }(),
-                'bufferToString': function (buffer) {
-                    var numberValues = buffer.length, str = '', x = -1;
-                    while (++x < numberValues) {
-                        str += this.byteMap[buffer[x]];
-                    }
-                    return str;
-                },
-                // window.btoa polyfill
-                'btoa': function (input) {
-                    var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-                    while (i < l) {
-                        chr1 = input.charCodeAt(i++);
-                        chr2 = input.charCodeAt(i++);
-                        chr3 = input.charCodeAt(i++);
-                        enc1 = chr1 >> 2;
-                        enc2 = (chr1 & 3) << 4 | chr2 >> 4;
-                        enc3 = (chr2 & 15) << 2 | chr3 >> 6;
-                        enc4 = chr3 & 63;
-                        if (isNaN(chr2))
-                            enc3 = enc4 = 64;
-                        else if (isNaN(chr3))
-                            enc4 = 64;
-                        output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
-                    }
-                    return output;
                 }
             };
     };
@@ -1347,34 +1317,71 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         'generateGIF': function (frames, callback) {
             // TODO: Weird: using a simple JS array instead of a typed array,
             // the files are WAY smaller o_o. Patches/explanations welcome!
-            var context = this, options = this.options, buffer = [],
-                //new Uint8Array(options.width * options.height * this.frames.length)
-                gifOptions = { 'loop': this.repeat }, height = options.height, width = options.width, onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();', webWorkerObj = utils.createWebWorker(encodeGifWorkerCode), worker = webWorkerObj.worker, objectUrl = webWorkerObj.objectUrl;
+            //       var context = this,
+            //       	options = this.options,
+            //       	buffer = [], //new Uint8Array(options.width * options.height * this.frames.length)
+            //       	gifOptions = {
+            // 		'loop': this.repeat
+            // 	},
+            // 	height = options.height,
+            // 	width = options.width,
+            // 	onRenderProgressCallback = this.onRenderProgressCallback,
+            // 	delay = options.delay,
+            // 	encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();',
+            // 	webWorkerObj = utils.createWebWorker(encodeGifWorkerCode),
+            // 	worker = webWorkerObj.worker,
+            // 	objectUrl = webWorkerObj.objectUrl;
+            //       this.generatingGIF = true;
+            //       worker.onmessage = function(ev) {
+            //     var data = ev.data,
+            //     	gif = data.gif,
+            //     	frame = data.frame,
+            //     	complete = data.complete;
+            //     if(complete === false) {
+            // 		onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
+            // 		return;
+            //     } else {
+            // 		onRenderProgressCallback(1.0);
+            // 		context.frames = [];
+            // 		context.generatingGIF = false;
+            // 		utils.URL.revokeObjectURL(objectUrl);
+            // 		worker.terminate();
+            // 		if(utils.isFunction(callback)) {
+            // 			callback(gif);
+            // 		}
+            //     }
+            // };
+            // worker.postMessage({
+            // 	'frames': frames,
+            // 	'buffer': buffer,
+            // 	'width': width,
+            // 	'height': height,
+            // 	'gifOptions': gifOptions,
+            // 	'delay': delay
+            // });
+            // TODO: Weird: using a simple JS array instead of a typed array,
+            // the files are WAY smaller o_o. Patches/explanations welcome!
+            var buffer = [],
+                // new Uint8Array(width * height * frames.length * 5);
+                gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
             this.generatingGIF = true;
-            worker.onmessage = function (ev) {
-                var data = ev.data, gif = data.gif, frame = data.frame, complete = data.complete;
-                if (complete === false) {
-                    onRenderProgressCallback(0.75 + 0.25 * frame.position * 1 / frames.length);
-                    return;
-                } else {
-                    onRenderProgressCallback(1);
-                    context.frames = [];
-                    context.generatingGIF = false;
-                    utils.URL.revokeObjectURL(objectUrl);
-                    worker.terminate();
-                    if (utils.isFunction(callback)) {
-                        callback(gif);
-                    }
-                }
-            };
-            worker.postMessage({
-                'frames': frames,
-                'buffer': buffer,
-                'width': width,
-                'height': height,
-                'gifOptions': gifOptions,
-                'delay': delay
+            utils.each(frames, function (iterator, frame) {
+                var framePalette = frame.palette;
+                onRenderProgressCallback(0.75 + 0.25 * frame.position * 1 / frames.length);
+                gifWriter.addFrame(0, 0, width, height, frame.pixels, {
+                    palette: framePalette,
+                    delay: delay
+                });
             });
+            gifWriter.end();
+            onRenderProgressCallback(1);
+            this.frames = [];
+            this.generatingGIF = false;
+            if (utils.isFunction(callback)) {
+                bufferToString = this.bufferToString(buffer);
+                gif = 'data:image/gif;base64,' + window.btoa(bufferToString);
+                callback(gif);
+            }
         },
         // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
         'setRepeat': function (r) {
@@ -1542,7 +1549,13 @@ error = function () {
                     'errorCode': 'window.Uint32Array',
                     'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser'
                 }
-            ]
+            ],
+            'messages': {
+                'videoCodecs': {
+                    'errorCode': 'videocodec',
+                    'errorMsg': 'The video codec you are trying to use is not supported in your browser'
+                }
+            }
         };
     return error;
 }();
@@ -1571,19 +1584,19 @@ index = function (AnimatedGif) {
                 if (!utils.isFunction(callback)) {
                     return;
                 }
-                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0, errorObj;
+                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, existingVideo = options.video, imagesLength = images ? images.length : 0, errorObj, skipObj = {}, ag, x = -1, currentImage, tempImage, loadedImages = 0, videoType, videoSrc;
                 // If the user has passed in at least one image path or image DOM elements
                 if (imagesLength) {
-                    errorObj = error.validate({
+                    skipObj = {
                         'getUserMedia': true,
                         'window.URL': true
-                    });
-                    console.log('errorObj', errorObj);
+                    };
+                    errorObj = error.validate(skipObj);
                     if (errorObj.error) {
                         return callback(errorObj);
                     }
                     // change workerPath to point to where Animated_GIF.worker.js is
-                    var ag = new AnimatedGif(options), x = -1, currentImage, tempImage, loadedImages = 0;
+                    ag = new AnimatedGif(options);
                     while (++x < imagesLength) {
                         currentImage = images[x];
                         if (utils.isElement(currentImage)) {
@@ -1614,6 +1627,36 @@ index = function (AnimatedGif) {
                             document.body.appendChild(tempImage);
                         }
                     }
+                } else if (existingVideo) {
+                    skipObj = {
+                        'getUserMedia': true,
+                        'window.URL': true
+                    };
+                    errorObj = error.validate(skipObj);
+                    if (errorObj.error) {
+                        return callback(errorObj);
+                    }
+                    if (utils.isElement(existingVideo) && existingVideo.src) {
+                        videoSrc = existingVideo.src;
+                        videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+                        if (!utils.isSupported.videoCodecs[videoType]) {
+                            return callback(error.messages.videoCodecs);
+                        }
+                    } else if (utils.isArray(existingVideo)) {
+                        utils.each(existingVideo, function (iterator, videoSrc) {
+                            videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+                            if (utils.isSupported.videoCodecs[videoType]) {
+                                existingVideo = videoSrc;
+                                return false;
+                            }
+                        });
+                    }
+                    videoStream.startStreaming({
+                        'completed': function (obj) {
+                            gifshot._createAndGetGIF(obj, callback);
+                        },
+                        'existingVideo': existingVideo
+                    });
                 } else {
                     if (!gifshot.isSupported()) {
                         return callback(error.validate());
@@ -1657,7 +1700,7 @@ index = function (AnimatedGif) {
                 return error.isValid(skipObj);
             },
             '_createAndGetGIF': function (obj, callback) {
-                var options = gifshot._options, numFrames = options.numFrames, interval = options.interval, wait = interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
+                var options = gifshot._options, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
                         'videoWidth': videoWidth,
                         'videoHeight': videoHeight,
                         'gifHeight': gifHeight,
@@ -1671,7 +1714,6 @@ index = function (AnimatedGif) {
                 if (!utils.isElement(videoElement)) {
                     return;
                 }
-                videoElement.src = utils.URL.createObjectURL(cameraStream);
                 videoElement.width = gifWidth + cropDimensions.width;
                 videoElement.height = gifHeight + cropDimensions.height;
                 utils.setCSSAttr(videoElement, {

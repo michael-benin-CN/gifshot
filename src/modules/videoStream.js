@@ -55,14 +55,22 @@ define([
     },
     'stream': function(obj) {
       var self = this,
+        existingVideo = obj.existingVideo,
         videoElement = obj.videoElement,
         cameraStream = obj.cameraStream,
         streamedCallback = obj.streamedCallback,
         completedCallback = obj.completedCallback;
 
-      streamedCallback();
+      if(utils.isFunction(streamedCallback)) {
+        streamedCallback();
+      }
 
-      if(videoElement.mozSrcObject) {
+      if(existingVideo) {
+        if(!videoElement.src && utils.isString(existingVideo)) {
+          videoElement.src = existingVideo;
+        }
+      }
+      else if(videoElement.mozSrcObject) {
           videoElement.mozSrcObject = cameraStream;
       } else if(utils.URL) {
           videoElement.src = utils.URL.createObjectURL(cameraStream);
@@ -97,17 +105,31 @@ define([
         errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop,
         streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop,
         completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop,
-        videoElement = document.createElement('video'),
+        existingVideo = obj.existingVideo,
+        videoElement = utils.isElement(existingVideo) ? existingVideo : document.createElement('video'),
         lastCameraStream = obj.lastCameraStream,
         cameraStream;
 
+      videoElement.crossOrigin = 'Anonymous';
+
       videoElement.autoplay = true;
+
+      videoElement.loop = true;
+
+      videoElement.muted = true;
 
       videoElement.addEventListener('loadeddata', function(event) {
         self.loadedData = true;
       });
 
-      if(lastCameraStream) {
+      if(existingVideo) {
+        self.stream({
+          'videoElement': videoElement,
+          'existingVideo': existingVideo,
+          'completedCallback': completedCallback
+        });
+      }
+      else if(lastCameraStream) {
         self.stream({
           'videoElement': videoElement,
           'cameraStream': lastCameraStream,

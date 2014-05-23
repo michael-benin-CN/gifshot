@@ -50,7 +50,13 @@ define([
 	        'condition': utils.isSupported.Uint32Array(),
 	        'errorCode': 'window.Uint32Array',
 	        'errorMsg': 'The window.Uint32Array function constructor is not supported in your browser'
-	    }]
+	    }],
+	    'messages': {
+	    	'videoCodecs': {
+				'errorCode': 'videocodec',
+				'errorMsg': 'The video codec you are trying to use is not supported in your browser'
+	    	}
+	    }
 	};
 	return error;
 });
