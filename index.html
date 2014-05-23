@@ -24,6 +24,9 @@
     </form>
 </video>
 
+<script src='http://code.jquery.com/jquery-1.8.3.min.js'></script>
+<script type="text/javascript" src="http://download-data-uri.appspot.com/js/download-data-uri.js"></script>
+
   <script>
     var form = document.querySelector("form"),
         interval = document.querySelector("#interval"),
@@ -37,7 +40,7 @@
       e.preventDefault();
 
       gifshot.createGIF({
-        'video': ['example.mp4', 'example.ogv'],
+        // 'video': ['example.mp4', 'example.ogv'],
         // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,
@@ -52,6 +55,10 @@
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
+          downloadDataURI({
+                  filename: "test.gif", 
+                  data: image
+          });
         } else {
           console.log('obj', obj);
         }
