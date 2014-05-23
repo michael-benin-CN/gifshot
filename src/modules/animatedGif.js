@@ -1,9 +1,10 @@
 define([
 	'utils',
-	'worker',
+	'processFrameWorker',
+	'encodeGifWorker',
 	'NeuQuant',
 	'gifWriter'
-], function(utils, workerCode, NeuQuant, GifWriter) {
+], function(utils, frameWorkerCode, encodeGifWorker, NeuQuant, GifWriter) {
 
 	var AnimatedGIF = function(options) {
 		options = utils.isObject(options) ? options : {};
@@ -20,12 +21,11 @@ define([
 		this.generatingGIF = false;
 		this.options = options = utils.mergeOptions(this.defaultOptions, options);
 
-		// Initializes the instance options and constructs the web workers appropriately
+		// Constructs and initializes the the web workers appropriately
 		this.initializeWebWorkers(options);
 	}
 
 	AnimatedGIF.prototype = {
-		'GifWriter': GifWriter,
 		'defaultOptions': {
 			'width': 160,
 			'height': 120,
@@ -35,7 +35,7 @@ define([
 			'numWorkers': 2
 		},
 		'initializeWebWorkers': function(options) {
-			var workerCodeString = NeuQuant.toString() + workerCode.toString() + 'worker();',
+			var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();',
 				webWorkerObj,
 				objectUrl,
 				webWorker,
@@ -45,7 +45,7 @@ define([
 			numWorkers = options.numWorkers;
 
 			while(++x < numWorkers) {
-				webWorkerObj = utils.createWebWorker(workerCodeString);
+				webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
 				objectUrl = webWorkerObj.objectUrl;
 				webWorker = webWorkerObj.worker;
 				this.workers.push({
@@ -178,41 +178,56 @@ define([
 	    'generateGIF': function(frames, callback) {
 	        // TODO: Weird: using a simple JS array instead of a typed array,
 	        // the files are WAY smaller o_o. Patches/explanations welcome!
-	        var buffer = [], // new Uint8Array(width * height * frames.length * 5);
+	        var context = this,
+	        	options = this.options,
+	        	buffer = [], //new Uint8Array(options.width * options.height * this.frames.length)
 	        	gifOptions = {
 					'loop': this.repeat
 				},
-				options = this.options,
 				height = options.height,
 				width = options.width,
-				gifWriter = new GifWriter(buffer, width, height, gifOptions),
 				onRenderProgressCallback = this.onRenderProgressCallback,
-				delay = options.delay;
+				delay = options.delay,
+				encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();',
+				webWorkerObj = utils.createWebWorker(encodeGifWorkerCode),
+				worker = webWorkerObj.worker,
+				objectUrl = webWorkerObj.objectUrl;
 
 	        this.generatingGIF = true;
 
-	        utils.each(frames, function(iterator, frame) {
-				var framePalette = frame.palette;
+	        worker.onmessage = function(ev) {
+			    var data = ev.data,
+			    	gif = data.gif,
+			    	frame = data.frame,
+			    	complete = data.complete;
 
-				onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
+			    if(complete === false) {
+					onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
+					return;
+			    } else {
+					onRenderProgressCallback(1.0);
+					context.frames = [];
 
-				gifWriter.addFrame(0, 0, width, height, frame.pixels, {
-				    palette: framePalette,
-				    delay: delay
-				});
-	        });
+					context.generatingGIF = false;
 
-	        gifWriter.end();
+					utils.URL.revokeObjectURL(objectUrl);
 
-	        onRenderProgressCallback(1.0);
+					worker.terminate();
 
-	        this.frames = [];
+					if(utils.isFunction(callback)) {
+						callback(gif);
+					}
+			    }
+			};
 
-	        this.generatingGIF = false;
-
-	        if(utils.isFunction(callback)) {
-				callback(buffer);
-	        }
+			worker.postMessage({
+				'frames': frames,
+				'buffer': buffer,
+				'width': width,
+				'height': height,
+				'gifOptions': gifOptions,
+				'delay': delay
+			});
 	    },
 	    // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
 	    'setRepeat': function(r) {
@@ -232,7 +247,7 @@ define([
 	    },
 		'addFrameImageData': function(imageData) {
 		    var frames = this.frames,
-		        imageDataArray = new Uint8Array(imageData.data);
+		        imageDataArray = imageData.data;
 
 		    this.frames.push({
 		        'data': imageDataArray,
@@ -253,12 +268,11 @@ define([
 	    },
 	    'getBase64GIF': function(completeCallback) {
 	    	var self = this,
-	    		onRenderComplete = function(buffer) {
-					var str = self.bufferToString(buffer),
-						gif = 'data:image/gif;base64,' + window.btoa(str);
-
+	    		onRenderComplete = function(gif) {
 					self.destroyWorkers();
-					completeCallback(gif);
+					setTimeout(function() {
+						completeCallback(gif);
+					}, 0);
 				};
 
 	        this.startRendering(onRenderComplete);

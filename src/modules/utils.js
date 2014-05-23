@@ -53,11 +53,13 @@ define(function() {
                 return console && utils.isFunction(console.log);
             },
             'webworkers': function() {
-                var worker = window.Worker;
-                return utils.isFunction(worker);
+                return window.Worker;
             },
             'blob': function() {
                 return utils.Blob;
+            },
+            'Uint8ClampedArray': function() {
+                return window.Uint8ClampedArray;
             }
         },
         'log': function() {
