@@ -121,7 +121,7 @@ gifshot.createGIF(function(obj) {
 });
 ```
 
-**HTML5 Videos**
+**HTML5 Video**
 
 ```javascript
 gifshot.createGIF({
@@ -176,8 +176,6 @@ gifshot.createGIF({
 // create another gif and/or snapshot without asking for the user's permission to
 // access the camera again
 'keepCameraOn': false,
-// Pass an array of image DOM elements or src URL's
-[],
 // The interval (in milleseconds) that images are created
 'interval': 0.1,
 // The number of frames to use
