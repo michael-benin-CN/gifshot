@@ -58,8 +58,11 @@ define(function() {
             'blob': function() {
                 return utils.Blob;
             },
-            'Uint8ClampedArray': function() {
-                return window.Uint8ClampedArray;
+            'Uint8Array': function() {
+                return window.Uint8Array;
+            },
+            'Uint32Array': function() {
+                return window.Uint32Array;
             }
         },
         'log': function() {
