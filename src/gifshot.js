@@ -1,5 +1,5 @@
 ;(function(window, navigator, document, undefined) {
-var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error, index;
+var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error, index, gifshot;
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -1743,9 +1743,7 @@ index = function (AnimatedGif) {
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
     if (typeof define === 'function' && define.amd) {
-        define('gifshot', [], function () {
-            return publicApi(gifshot);
-        });
+        gifshot = publicApi(gifshot);
     } else if (typeof exports !== 'undefined') {
         module.exports = publicApi(gifshot);
     } else {

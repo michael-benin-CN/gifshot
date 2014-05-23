@@ -22,10 +22,6 @@
         <button type="button" id="snapShot">Take Snapshot</button>
         <progress max="1" value="0"></progress>
     </form>
-</video>
-
-<script src='http://code.jquery.com/jquery-1.8.3.min.js'></script>
-<script type="text/javascript" src="http://download-data-uri.appspot.com/js/download-data-uri.js"></script>
 
   <script>
     var form = document.querySelector("form"),
@@ -55,10 +51,6 @@
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
-          downloadDataURI({
-                  filename: "test.gif", 
-                  data: image
-          });
         } else {
           console.log('obj', obj);
         }
