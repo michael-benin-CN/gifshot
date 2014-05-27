@@ -8,6 +8,29 @@ utils = function () {
                 return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
             }(),
             'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
+            'btoa': function () {
+                var btoa = window.btoa || utils.btoaPolyfill;
+                return btoa ? btoa.bind(window) : false;
+            }(),
+            // window.btoa polyfill
+            'btoaPolyfill': function (input) {
+                var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+                while (i < l) {
+                    chr1 = input.charCodeAt(i++);
+                    chr2 = input.charCodeAt(i++);
+                    chr3 = input.charCodeAt(i++);
+                    enc1 = chr1 >> 2;
+                    enc2 = (chr1 & 3) << 4 | chr2 >> 4;
+                    enc3 = (chr2 & 15) << 2 | chr3 >> 6;
+                    enc4 = chr3 & 63;
+                    if (isNaN(chr2))
+                        enc3 = enc4 = 64;
+                    else if (isNaN(chr3))
+                        enc4 = 64;
+                    output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
+                }
+                return output;
+            },
             'isObject': function (obj) {
                 if (!obj) {
                     return false;
@@ -862,6 +885,31 @@ processFrameWorker = function () {
     return workerCode;
 }();
 gifWriter = function () {
+    // (c) Dean McNamee <dean@gmail.com>, 2013.
+    //
+    // https://github.com/deanm/omggif
+    //
+    // Permission is hereby granted, free of charge, to any person obtaining a copy
+    // of this software and associated documentation files (the "Software"), to
+    // deal in the Software without restriction, including without limitation the
+    // rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+    // sell copies of the Software, and to permit persons to whom the Software is
+    // furnished to do so, subject to the following conditions:
+    //
+    // The above copyright notice and this permission notice shall be included in
+    // all copies or substantial portions of the Software.
+    //
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+    // IN THE SOFTWARE.
+    //
+    // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
+    // including animation and compression.  It does not rely on any specific
+    // underlying system, so should run in the browser, Node, or Plask.
     function GifWriter(buf, width, height, gopts) {
         var p = 0;
         gopts = gopts === undefined ? {} : gopts;
@@ -1317,50 +1365,6 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         'generateGIF': function (frames, callback) {
             // TODO: Weird: using a simple JS array instead of a typed array,
             // the files are WAY smaller o_o. Patches/explanations welcome!
-            //       var context = this,
-            //       	options = this.options,
-            //       	buffer = [], //new Uint8Array(options.width * options.height * this.frames.length)
-            //       	gifOptions = {
-            // 		'loop': this.repeat
-            // 	},
-            // 	height = options.height,
-            // 	width = options.width,
-            // 	onRenderProgressCallback = this.onRenderProgressCallback,
-            // 	delay = options.delay,
-            // 	encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();',
-            // 	webWorkerObj = utils.createWebWorker(encodeGifWorkerCode),
-            // 	worker = webWorkerObj.worker,
-            // 	objectUrl = webWorkerObj.objectUrl;
-            //       this.generatingGIF = true;
-            //       worker.onmessage = function(ev) {
-            //     var data = ev.data,
-            //     	gif = data.gif,
-            //     	frame = data.frame,
-            //     	complete = data.complete;
-            //     if(complete === false) {
-            // 		onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
-            // 		return;
-            //     } else {
-            // 		onRenderProgressCallback(1.0);
-            // 		context.frames = [];
-            // 		context.generatingGIF = false;
-            // 		utils.URL.revokeObjectURL(objectUrl);
-            // 		worker.terminate();
-            // 		if(utils.isFunction(callback)) {
-            // 			callback(gif);
-            // 		}
-            //     }
-            // };
-            // worker.postMessage({
-            // 	'frames': frames,
-            // 	'buffer': buffer,
-            // 	'width': width,
-            // 	'height': height,
-            // 	'gifOptions': gifOptions,
-            // 	'delay': delay
-            // });
-            // TODO: Weird: using a simple JS array instead of a typed array,
-            // the files are WAY smaller o_o. Patches/explanations welcome!
             var buffer = [],
                 // new Uint8Array(width * height * frames.length * 5);
                 gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
@@ -1379,7 +1383,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             this.generatingGIF = false;
             if (utils.isFunction(callback)) {
                 bufferToString = this.bufferToString(buffer);
-                gif = 'data:image/gif;base64,' + window.btoa(bufferToString);
+                gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
                 callback(gif);
             }
         },
