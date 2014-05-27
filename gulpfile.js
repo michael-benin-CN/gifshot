@@ -16,6 +16,11 @@ gulp.task('minify', function() {
     .pipe(gulp.dest('build/'));
 });
 
+gulp.task('add-unminified-file-to-buld', function() {
+  gulp.src(['src/gifshot.js'])
+    .pipe(gulp.dest('build/'));
+});
+
 gulp.task('lint', function() {
   gulp.src('src/gifshot.js')
     .pipe(jshint({
@@ -59,7 +64,7 @@ gulp.task('test', function() {
 });
 
 // The default task (called when you run `gulp`)
-gulp.task('default', ['clean','lint', 'minify']);
+gulp.task('default', ['clean','lint', 'minify', 'add-unminified-file-to-buld']);
 
 // The watch task
 gulp.task('watch', function() {

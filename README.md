@@ -31,7 +31,7 @@ Influenced By:
 - [Meatspace Chat](https://chat.meatspac.es/)
 
 ## Quick Start
-*  Include `gifshot.js` on your HTML page
+*  Include `gifshot.js` on your HTML page (`gifshot.js` can be found in the `build` directory)
 
 ```html
 <script src='gifshot.js'></script>
