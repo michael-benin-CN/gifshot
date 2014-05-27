@@ -19,7 +19,7 @@ gifshot.js uses:
 
 - `window.btoa()` to create a base 64 URI
 
-- Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML) image quantization algorithm which was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
+- Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML) image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size).   This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
 
 - Dean McNamee's [omggif](https://github.com/deanm/omggif) library - for actually encoding into GIF89
 
@@ -64,44 +64,14 @@ gifshot.createGIF(function(obj) {
 ## API Methods
 
 ```javascript
-// Creates an animated gif
-gifshot.createGIF({
-	'gifHeight': 200,
-	'gifWidth': 200,
-}, function(obj) {
-	var error = obj.error,
-		errorCode = obj.errorCode,
-		errorMsg = obj.errorMsg,
-		image = obj.image,
-		cameraStream = obj.cameraStream,
-		animatedImage = document.createElement('img');
+// Creates an animated gif from either a webcam stream, an existing video (e.g. mp4), or existing images
+gifshot.createGIF(options, callback);
 
-	if(!error) {
-		animatedImage.src = image;
-		document.body.appendChild(animatedImage);
-	}
-});
+// Takes a snap shot (not animated) image from a webcam stream or existing video
+gifshot.takeSnapShot(options, callback);
 
-// Takes a snap shot (not animated)
-gifshot.takeSnapShot(function(obj) {
-	var error = obj.error,
-		errorCode = obj.errorCode,
-		errorMsg = obj.errorMsg,
-		image = obj.image,
-		cameraStream = obj.cameraStream,
-		animatedImage = document.createElement('img');
-
-	if(!error) {
-		animatedImage.src = image;
-		document.body.appendChild(animatedImage);
-	}
-});
-
-// Turns off the user's webcam
+// Turns off the user's webcam (by default, the user's webcam is turned off)
 gifshot.stopVideoStreaming();
-
-// Helper method to determine if the user's browser supports the technology to create animated gifs in JavaScript
-gifshot.isSupported();
 ```
 
 ## Examples
@@ -115,8 +85,6 @@ gifshot.createGIF(function(obj) {
 		animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		document.body.appendChild(animatedImage);
-	} else {
-		console.log('obj', obj);
 	}
 });
 ```
@@ -132,8 +100,6 @@ gifshot.createGIF({
 		animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		document.body.appendChild(animatedImage);
-	} else {
-		console.log('obj', obj);
 	}
 });
 ```
@@ -149,8 +115,19 @@ gifshot.createGIF({
 		animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		document.body.appendChild(animatedImage);
-	} else {
-		console.log('obj', obj);
+	}
+});
+```
+
+**Snap Shot**
+
+```javascript
+gifshot.takeSnapShot(function(obj) {
+	if(!obj.error) {
+		var image = obj.image,
+		animatedImage = document.createElement('img');
+		animatedImage.src = image;
+		document.body.appendChild(animatedImage);
 	}
 });
 ```
@@ -165,10 +142,12 @@ gifshot.createGIF({
 // If this option is used, then a gif will be created using these images
 // e.g. ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
 // Note: Make sure these image resources are CORS enabled to prevent any cross-origin JavaScript errors
+// Note: You may also pass a NodeList of existing image elements on the page
 'images': [],
 // If this option is used, then a gif will be created using the appropriate video
 // HTML5 video that you would like to create your animated GIF from
-// Browser support for certain video codecs is checked, and the appropriate video is selected
+// Note: Browser support for certain video codecs is checked, and the appropriate video is selected
+// Note: You may also pass a NodeList of existing video elements on the page
 // e.g. 'video': ['example.mp4', 'example.ogv'],
 'video': null,
 // Whether or not you would like the user's camera to stay on after the gif is created
@@ -176,17 +155,22 @@ gifshot.createGIF({
 // create another gif and/or snapshot without asking for the user's permission to
 // access the camera again
 'keepCameraOn': false,
-// The interval (in milleseconds) that images are created
+// The amount of time (in seconds) to wait between each frame capture of a video
 'interval': 0.1,
-// The number of frames to use
+// The number of frames to use to create the animated GIF
+// Note: Each frame is captured every 100 milleseconds of a video
 'numFrames': 10,
 // Callback function that provides the current progress of the current image
 'progressCallback': function(captureProgress) {},
 // Callback function that is called when the current image is completed
 'completeCallback': function() {},
 // how many pixels to skip when creating the palette. Default is 10. Less is better, but slower.
+// Note: By adjusting the sample interval, you can either produce extremely high-quality images slowly, or produce good images in
+//       reasonable times. With a sampleInterval of 1, the entire image is used in the learning phase, while with an interval of 10,
+//       a pseudo-random subset of 1/10 of the pixels are used in the learning phase. A sampling factor of 10 gives a substantial
+//       speed-up, with a small quality penalty.
 'sampleInterval': 10,
-// how many web workers to use. Default is 2.
+// how many web workers to use to process the animated GIF frames. Default is 2.
 'numWorkers': 2
 ```
 
