@@ -4,7 +4,6 @@ define([
 	'NeuQuant',
 	'gifWriter'
 ], function(utils, frameWorkerCode, NeuQuant, GifWriter) {
-
 	var AnimatedGIF = function(options) {
 		options = utils.isObject(options) ? options : {};
 
@@ -177,58 +176,6 @@ define([
 	    'generateGIF': function(frames, callback) {
 	        // TODO: Weird: using a simple JS array instead of a typed array,
 	        // the files are WAY smaller o_o. Patches/explanations welcome!
-	  //       var context = this,
-	  //       	options = this.options,
-	  //       	buffer = [], //new Uint8Array(options.width * options.height * this.frames.length)
-	  //       	gifOptions = {
-			// 		'loop': this.repeat
-			// 	},
-			// 	height = options.height,
-			// 	width = options.width,
-			// 	onRenderProgressCallback = this.onRenderProgressCallback,
-			// 	delay = options.delay,
-			// 	encodeGifWorkerCode = GifWriter.toString() + encodeGifWorker.toString() + 'worker();',
-			// 	webWorkerObj = utils.createWebWorker(encodeGifWorkerCode),
-			// 	worker = webWorkerObj.worker,
-			// 	objectUrl = webWorkerObj.objectUrl;
-
-	  //       this.generatingGIF = true;
-
-	  //       worker.onmessage = function(ev) {
-			//     var data = ev.data,
-			//     	gif = data.gif,
-			//     	frame = data.frame,
-			//     	complete = data.complete;
-
-			//     if(complete === false) {
-			// 		onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
-			// 		return;
-			//     } else {
-			// 		onRenderProgressCallback(1.0);
-			// 		context.frames = [];
-
-			// 		context.generatingGIF = false;
-
-			// 		utils.URL.revokeObjectURL(objectUrl);
-
-			// 		worker.terminate();
-
-			// 		if(utils.isFunction(callback)) {
-			// 			callback(gif);
-			// 		}
-			//     }
-			// };
-
-			// worker.postMessage({
-			// 	'frames': frames,
-			// 	'buffer': buffer,
-			// 	'width': width,
-			// 	'height': height,
-			// 	'gifOptions': gifOptions,
-			// 	'delay': delay
-			// });
-	        // TODO: Weird: using a simple JS array instead of a typed array,
-	        // the files are WAY smaller o_o. Patches/explanations welcome!
 	        var buffer = [], // new Uint8Array(width * height * frames.length * 5);
 	        	gifOptions = {
 					'loop': this.repeat
@@ -265,7 +212,7 @@ define([
 
 	        if(utils.isFunction(callback)) {
                 bufferToString = this.bufferToString(buffer);
-                gif = 'data:image/gif;base64,' + window.btoa(bufferToString);
+                gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
 				callback(gif);
 	        }
 	    },

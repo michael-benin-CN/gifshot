@@ -125,8 +125,6 @@ define([
 					},
 					'existingVideo': existingVideo
 				});
-
-
 			} else {
  				if(!gifshot.isSupported()) {
 					return callback(error.validate());
