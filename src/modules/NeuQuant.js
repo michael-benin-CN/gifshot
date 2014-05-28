@@ -1,3 +1,5 @@
+// NeuQuant.js
+// ===========
 define(function() {
 	/*
 	* NeuQuant Neural-Net Quantization Algorithm

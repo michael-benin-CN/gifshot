@@ -1,9 +1,12 @@
+// animatedGif.js
+// ==============
 define([
 	'utils',
 	'processFrameWorker',
 	'NeuQuant',
-	'gifWriter'
-], function(utils, frameWorkerCode, NeuQuant, GifWriter) {
+	'gifWriter',
+	'base64ArrayBuffer'
+], function(utils, frameWorkerCode, NeuQuant, GifWriter, base64ArrayBuffer) {
 	var AnimatedGIF = function(options) {
 		options = utils.isObject(options) ? options : {};
 
@@ -69,24 +72,6 @@ define([
 		// Restores a worker to the pool
 		'freeWorker': function(worker) {
 		    this.availableWorkers.push(worker);
-		},
-		'byteMap': (function() {
-			var byteMap = [];
-			for(var i = 0; i < 256; i++) {
-			    byteMap[i] = String.fromCharCode(i);
-			}
-			return byteMap;
-		}()),
-	    'bufferToString': function(buffer) {
-			var numberValues = buffer.length,
-				str = '',
-				x = -1;
-
-			while(++x < numberValues) {
-				str += this.byteMap[buffer[x]];
-			}
-
-			return str;
 		},
 	    'onFrameFinished': function() {
 	        // The GIF is not written until we're done with all the frames
@@ -186,7 +171,6 @@ define([
 				gifWriter = new GifWriter(buffer, width, height, gifOptions),
 				onRenderProgressCallback = this.onRenderProgressCallback,
 				delay = options.delay,
-				bufferToString,
 				gif;
 
 	        this.generatingGIF = true;
@@ -211,8 +195,7 @@ define([
 	        this.generatingGIF = false;
 
 	        if(utils.isFunction(callback)) {
-                bufferToString = this.bufferToString(buffer);
-                gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
+                gif = 'data:image/gif;base64,' + base64ArrayBuffer(buffer);
 				callback(gif);
 	        }
 	    },
