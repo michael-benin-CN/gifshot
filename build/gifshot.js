@@ -1,5 +1,7 @@
 ;(function(window, navigator, document, undefined) {
-var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error, index, gifshot;
+// utils.js
+// ========
+var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, base64ArrayBuffer, animatedGif, screenShot, error, index, gifshot;
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -8,29 +10,6 @@ utils = function () {
                 return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
             }(),
             'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
-            'btoa': function () {
-                var btoa = window.btoa || utils.btoaPolyfill;
-                return btoa ? btoa.bind(window) : false;
-            }(),
-            // window.btoa polyfill
-            'btoaPolyfill': function (input) {
-                var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-                while (i < l) {
-                    chr1 = input.charCodeAt(i++);
-                    chr2 = input.charCodeAt(i++);
-                    chr3 = input.charCodeAt(i++);
-                    enc1 = chr1 >> 2;
-                    enc2 = (chr1 & 3) << 4 | chr2 >> 4;
-                    enc3 = (chr2 & 15) << 2 | chr3 >> 6;
-                    enc4 = chr3 & 63;
-                    if (isNaN(chr2))
-                        enc3 = enc4 = 64;
-                    else if (isNaN(chr3))
-                        enc4 = 64;
-                    output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
-                }
-                return output;
-            },
             'isObject': function (obj) {
                 if (!obj) {
                     return false;
@@ -1232,6 +1211,53 @@ gifWriter = function () {
     }
     return GifWriter;
 }();
+base64ArrayBuffer = function (arrayBuffer) {
+    var base64 = '';
+    var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    var bytes = new Uint8Array(arrayBuffer);
+    var byteLength = bytes.byteLength;
+    var byteRemainder = byteLength % 3;
+    var mainLength = byteLength - byteRemainder;
+    var a, b, c, d;
+    var chunk;
+    // Main loop deals with bytes in chunks of 3
+    for (var i = 0; i < mainLength; i = i + 3) {
+        // Combine the three bytes into a single integer
+        chunk = bytes[i] << 16 | bytes[i + 1] << 8 | bytes[i + 2];
+        // Use bitmasks to extract 6-bit segments from the triplet
+        a = (chunk & 16515072) >> 18;
+        // 16515072 = (2^6 - 1) << 18
+        b = (chunk & 258048) >> 12;
+        // 258048   = (2^6 - 1) << 12
+        c = (chunk & 4032) >> 6;
+        // 4032     = (2^6 - 1) << 6
+        d = chunk & 63;
+        // 63       = 2^6 - 1
+        // Convert the raw binary segments to the appropriate ASCII encoding
+        base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d];
+    }
+    // Deal with the remaining bytes and padding
+    if (byteRemainder == 1) {
+        chunk = bytes[mainLength];
+        a = (chunk & 252) >> 2;
+        // 252 = (2^6 - 1) << 2
+        // Set the 4 least significant bits to zero
+        b = (chunk & 3) << 4;
+        // 3   = 2^2 - 1
+        base64 += encodings[a] + encodings[b] + '==';
+    } else if (byteRemainder == 2) {
+        chunk = bytes[mainLength] << 8 | bytes[mainLength + 1];
+        a = (chunk & 64512) >> 10;
+        // 64512 = (2^6 - 1) << 10
+        b = (chunk & 1008) >> 4;
+        // 1008  = (2^6 - 1) << 4
+        // Set the 2 least significant bits to zero
+        c = (chunk & 15) << 2;
+        // 15    = 2^4 - 1
+        base64 += encodings[a] + encodings[b] + encodings[c] + '=';
+    }
+    return base64;
+};
 animatedGif = function (frameWorkerCode, GifWriter) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
@@ -1285,20 +1311,6 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         // Restores a worker to the pool
         'freeWorker': function (worker) {
             this.availableWorkers.push(worker);
-        },
-        'byteMap': function () {
-            var byteMap = [];
-            for (var i = 0; i < 256; i++) {
-                byteMap[i] = String.fromCharCode(i);
-            }
-            return byteMap;
-        }(),
-        'bufferToString': function (buffer) {
-            var numberValues = buffer.length, str = '', x = -1;
-            while (++x < numberValues) {
-                str += this.byteMap[buffer[x]];
-            }
-            return str;
         },
         'onFrameFinished': function () {
             // The GIF is not written until we're done with all the frames
@@ -1367,7 +1379,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             // the files are WAY smaller o_o. Patches/explanations welcome!
             var buffer = [],
                 // new Uint8Array(width * height * frames.length * 5);
-                gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
+                gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, gif;
             this.generatingGIF = true;
             utils.each(frames, function (iterator, frame) {
                 var framePalette = frame.palette;
@@ -1382,8 +1394,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             this.frames = [];
             this.generatingGIF = false;
             if (utils.isFunction(callback)) {
-                bufferToString = this.bufferToString(buffer);
-                gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
+                gif = 'data:image/gif;base64,' + base64ArrayBuffer(buffer);
                 callback(gif);
             }
         },

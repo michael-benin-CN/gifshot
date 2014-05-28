@@ -1,3 +1,5 @@
+// gifWriter.js
+// ============
 define([
   'utils'
 ], function(utils){

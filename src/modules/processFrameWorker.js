@@ -1,3 +1,5 @@
+// processFrameWorker.js
+// =====================
 define([
     'NeuQuant'
 ],function(NeuQuant) {
