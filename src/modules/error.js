@@ -1,3 +1,5 @@
+// error.js
+// ========
 define([
 	'utils'
 ], function(utils) {

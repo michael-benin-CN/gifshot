@@ -1,4 +1,5 @@
-// gifshot.js
+// index.js
+// ========
 define([
 	'utils',
 	'videoStream',

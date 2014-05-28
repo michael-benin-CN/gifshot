@@ -1,3 +1,5 @@
+// screenShot.js
+// =============
 define([
 	'utils',
 	'animatedGif'
