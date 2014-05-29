@@ -101,8 +101,6 @@ function downloadURI(uri, name) {
     form.onsubmit = function(e){
       e.preventDefault();
 
-      console.log('fontFamily.value', fontFamily.value);
-
       gifshot.createGIF({
         'video': video.checked ? ['example.mp4', 'example.ogv'] : null,
         'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
