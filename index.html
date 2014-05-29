@@ -41,6 +41,17 @@
         <label for="textBaseline">Text Baseline</label>
         <input name="textBaseline" id="textBaseline" value="bottom" size="5"></input>
 
+        <label for="textBaseline">Text Baseline</label>
+        <input name="textBaseline" id="textBaseline" value="bottom" size="5"></input>
+
+        <br><br>
+
+        <label for="video">Show Video Example</label>
+        <input type="checkbox" name="video" id="video"></input>
+
+        <label for="images">Show Images Example</label>
+        <input type="checkbox" name="images" id="images"></input>
+
         <br><br>
 
         <button type="submit">Create GIF</button>
@@ -71,14 +82,16 @@ function downloadURI(uri, name) {
         fontFamily = document.querySelector('#fontFamily'),
         fontColor = document.querySelector('#fontColor'),
         textAlign = document.querySelector('#textAlign'),
-        textBaseline = document.querySelector('#textBaseline');
+        textBaseline = document.querySelector('#textBaseline'),
+        video = document.querySelector('#video'),
+        images = document.querySelector('#images');
 
     form.onsubmit = function(e){
       e.preventDefault();
 
       gifshot.createGIF({
-        // 'video': ['example.mp4', 'example.ogv'],
-        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
+        'video': video.checked ? ['example.mp4', 'example.ogv'] : null,
+        'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
         'text': text.value || '',
         'fontWeight': fontWeight.value || 'normal',
         'fontColor': '#FFF',
@@ -100,7 +113,6 @@ function downloadURI(uri, name) {
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
-          console.log('download data uri man');
           setTimeout(function() {
             // downloadURI(image, 'examplegif.gif');
           }, 300);
