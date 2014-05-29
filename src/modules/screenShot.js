@@ -30,6 +30,16 @@ define([
 					'height': gifHeight,
 					'delay': interval
 				}),
+				text = obj.text,
+				fontWeight = obj.fontWeight,
+				fontSize = obj.fontSize,
+				fontFamily = obj.fontFamily,
+				fontColor = obj.fontColor,
+				textAlign = obj.textAlign,
+				textBaseline = obj.textBaseline,
+				textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth/2,
+				textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight/2 : gifHeight,
+				font = fontWeight + ' ' + fontSize + ' ' + fontFamily,
 				sourceX = Math.floor(crop.scaledWidth / 2),
 				sourceWidth = videoWidth - crop.scaledWidth,
 				sourceY = Math.floor(crop.scaledHeight / 2),
@@ -40,6 +50,15 @@ define([
 					context.drawImage(videoElement,
 					  sourceX, sourceY, sourceWidth, sourceHeight,
 					  0, 0, gifWidth, gifHeight);
+
+					// If there is text to display, make sure to display it on the canvas after the image is drawn
+					if(text) {
+						context.font = font;
+						context.fillStyle = fontColor;
+						context.textAlign = textAlign;
+						context.textBaseline = textBaseline;
+						context.fillText(text, (textXCoordinate ? textXCoordinate : gifWidth/2), (textYCoordinate ? textYCoordinate : gifHeight));
+					}
 
 					ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
 
