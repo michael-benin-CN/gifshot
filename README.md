@@ -160,6 +160,24 @@ gifshot.takeSnapShot(function(obj) {
 // The number of frames to use to create the animated GIF
 // Note: Each frame is captured every 100 milleseconds of a video
 'numFrames': 10,
+// The text that covers the animated gif
+'text': '',
+// The font weight of the text that covers the animated gif
+'fontWeight': 'normal',
+// The font size of the text that covers the animated gif
+'fontSize': '16px',
+// The font family of the text that covers the animated gif
+'fontFamily': 'sans-serif',
+// The font color of the text that covers the animated gif
+'fontColor': '#FFF',
+// The horizontal text alignment of the text that covers the animated gif
+'textAlign': 'center',
+// The vertical text alignment of the text that covers the animated gif
+'textBaseline': 'bottom',
+// The X (horizontal) Coordinate of the text that covers the animated gif (only use this if the default textAlign and textBaseline options don't work for you)
+'textXCoordinate': null,
+// The Y (vertical) Coordinate of the text that covers the animated gif (only use this if the default textAlign and textBaseline options don't work for you)
+'textYCoordinate': null,
 // Callback function that provides the current progress of the current image
 'progressCallback': function(captureProgress) {},
 // Callback function that is called when the current image is completed
