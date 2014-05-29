@@ -7,21 +7,55 @@
 
     <form action="">
         <label for="interval">Interval</label>
-        <input name="interval" id="interval" value=".2" size="5"></input>
+        <input name="interval" id="interval" value=".1" size="5"></input>
 
         <label for="numFrames">Number of Frames</label>
-        <input name="numFrames" id="numFrames" value="15" size="5"></input>
+        <input name="numFrames" id="numFrames" value="10" size="5"></input>
 
         <label for="gifHeight">GIF Height</label>
-        <input name="gifHeight" id="gifHeight" value="400" size="5"></input>
+        <input name="gifHeight" id="gifHeight" value="200" size="5"></input>
 
         <label for="gifWidth">GIF Width</label>
-        <input name="gifWidth" id="gifWidth" value="400" size="5"></input>
+        <input name="gifWidth" id="gifWidth" value="200" size="5"></input>
+
+        <br><br>
+
+        <label for="gifText">GIF Text</label>
+        <input name="gifText" id="gifText" value="" size="30"></input>
+
+        <label for="fontWeight">Font Weight</label>
+        <input name="fontWeight" id="fontWeight" value="normal" size="10"></input>
+
+        <label for="fontSize">Font Size</label>
+        <input name="fontSize" id="fontSize" value="16px" size="5"></input>
+
+        <label for="fontFamily">Font Family</label>
+        <input name="fontFamily" id="fontFamily" value="sans-serif" size="15"></input>
+
+        <label for="fontColor">Font Color</label>
+        <input name="fontColor" id="fontColor" value="#FFF" size="5"></input>
+
+        <label for="textAlign">Text Align</label>
+        <input name="textAlign" id="textAlign" value="center" size="5"></input>
+
+        <label for="textBaseline">Text Baseline</label>
+        <input name="textBaseline" id="textBaseline" value="bottom" size="5"></input>
+
+        <br><br>
 
         <button type="submit">Create GIF</button>
         <button type="button" id="snapShot">Take Snapshot</button>
         <progress max="1" value="0"></progress>
     </form>
+
+  <script>
+function downloadURI(uri, name) {
+  var link = document.createElement("a");
+  link.download = name;
+  link.href = uri;
+  link.click();
+}
+  </script>
 
   <script>
     var form = document.querySelector("form"),
@@ -30,7 +64,14 @@
         gifHeight = document.querySelector("#gifHeight"),
         gifWidth = document.querySelector("#gifWidth"),
         progressBar = document.querySelector("progress"),
-        snapShot = document.querySelector("#snapShot");
+        snapShot = document.querySelector("#snapShot"),
+        text = document.querySelector('#gifText'),
+        fontWeight = document.querySelector('#fontWeight'),
+        fontSize = document.querySelector('#fontSize'),
+        fontFamily = document.querySelector('#fontFamily'),
+        fontColor = document.querySelector('#fontColor'),
+        textAlign = document.querySelector('#textAlign'),
+        textBaseline = document.querySelector('#textBaseline');
 
     form.onsubmit = function(e){
       e.preventDefault();
@@ -38,6 +79,14 @@
       gifshot.createGIF({
         // 'video': ['example.mp4', 'example.ogv'],
         // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
+        'text': text.value || '',
+        'fontWeight': fontWeight.value || 'normal',
+        'fontColor': '#FFF',
+        'fontSize': fontSize.value || '16px',
+        'fontFamily': fontFamily.value || 'sans-serif',
+        'fontColor': fontColor.value || '#FFF',
+        'textBaseline': textBaseline.value || 'bottom',
+        'textAlign': textAlign.value || 'center',
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,
         'gifHeight': +gifHeight.value || 400,
@@ -51,6 +100,10 @@
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
+          console.log('download data uri man');
+          setTimeout(function() {
+            // downloadURI(image, 'examplegif.gif');
+          }, 300);
         } else {
           console.log('obj', obj);
         }
