@@ -136,6 +136,16 @@ function downloadURI(uri, name) {
 
     snapShot.onclick = function(e){
       gifshot.takeSnapShot({
+        'video': video.checked ? ['example.mp4', 'example.ogv'] : null,
+        'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
+        'text': text.value || '',
+        'fontWeight': fontWeight.value || 'normal',
+        'fontColor': '#FFF',
+        'fontSize': fontSize.value || '16px',
+        'fontFamily': fontFamily.value || 'sans-serif',
+        'fontColor': fontColor.value || '#FFF',
+        'textBaseline': textBaseline.value || 'bottom',
+        'textAlign': textAlign.value || 'center',
         'interval': +interval.value || 0.2,
         'numFrames': +numFrames.value || 15,
         'gifHeight': +gifHeight.value || 400,
