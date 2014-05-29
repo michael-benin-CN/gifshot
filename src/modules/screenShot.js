@@ -57,7 +57,7 @@ define([
 						context.fillStyle = fontColor;
 						context.textAlign = textAlign;
 						context.textBaseline = textBaseline;
-						context.fillText(text, (textXCoordinate ? textXCoordinate : gifWidth/2), (textYCoordinate ? textYCoordinate : gifHeight));
+						context.fillText(text, textXCoordinate, textYCoordinate);
 					}
 
 					ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
