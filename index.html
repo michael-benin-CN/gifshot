@@ -6,6 +6,13 @@
   <body>
 
     <form action="">
+        <label for="gifText">GIF Text</label>
+        <input name="gifText" id="gifText" value="" size="30"></input>
+
+        <!-- <label for="fontColor">Font Color</label> -->
+        <input type="color" name="fontColor" id="fontColor" value="#FFF" size="5"></input>
+        <br><br>
+      <div style='display:none;'>
         <label for="interval">Interval</label>
         <input name="interval" id="interval" value=".1" size="5"></input>
 
@@ -18,10 +25,7 @@
         <label for="gifWidth">GIF Width</label>
         <input name="gifWidth" id="gifWidth" value="200" size="5"></input>
 
-        <br><br>
-
-        <label for="gifText">GIF Text</label>
-        <input name="gifText" id="gifText" value="" size="30"></input>
+        <!-- <br><br> -->
 
         <label for="fontWeight">Font Weight</label>
         <select name="fontWeight" id="fontWeight">
@@ -39,9 +43,6 @@
           <option value="Calibri">Calibri</option>
           <option value="Times New Roman">Times New Roman</option>
         </select>
-
-        <label for="fontColor">Font Color</label>
-        <input name="fontColor" id="fontColor" value="#FFF" size="5"></input>
 
         <label for="textAlign">Text Align</label>
         <select name="textAlign" id="textAlign">
@@ -65,6 +66,7 @@
         <input type="checkbox" name="images" id="images"></input>
 
         <br><br>
+      </div>
 
         <button type="submit">Create GIF</button>
         <button type="button" id="snapShot">Take Snapshot</button>
@@ -107,7 +109,7 @@ function downloadURI(uri, name) {
         'text': text.value || '',
         'fontWeight': fontWeight.value || 'normal',
         'fontColor': '#FFF',
-        'fontSize': fontSize.value || '16px',
+        'fontSize': fontSize.value || '22px',
         'fontFamily': fontFamily.value || 'sans-serif',
         'fontColor': fontColor.value || '#FFF',
         'textBaseline': textBaseline.value || 'bottom',
@@ -126,10 +128,8 @@ function downloadURI(uri, name) {
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
           setTimeout(function() {
-            // downloadURI(image, 'examplegif.gif');
+            downloadURI(image, 'examplegif.gif');
           }, 300);
-        } else {
-          console.log('obj', obj);
         }
       });
     }
@@ -156,6 +156,9 @@ function downloadURI(uri, name) {
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
+          setTimeout(function() {
+            downloadURI(image, 'examplegif.gif');
+          }, 300);
         }
       });
     }
