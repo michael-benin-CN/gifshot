@@ -278,7 +278,7 @@ videoStream = function () {
             }, 100);
         },
         'startStreaming': function (obj) {
-            var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, videoElement = utils.isElement(existingVideo) ? existingVideo : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
+            var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, webcamVideoElement = obj.webcamVideoElement, videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
             videoElement.crossOrigin = 'Anonymous';
             videoElement.autoplay = true;
             videoElement.loop = true;
@@ -312,7 +312,7 @@ videoStream = function () {
         },
         startVideoStreaming: function (callback, options) {
             options = options || {};
-            var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback;
+            var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
             // Some browsers apparently have support for video streaming because of the
             // presence of the getUserMedia function, but then do not answer our
             // calls for streaming.
@@ -346,17 +346,18 @@ videoStream = function () {
                         'videoHeight': videoHeight
                     });
                 },
-                'lastCameraStream': options.lastCameraStream
+                'lastCameraStream': options.lastCameraStream,
+                'webcamVideoElement': webcamVideoElement
             });
         },
         'stopVideoStreaming': function (obj) {
             obj = utils.isObject(obj) ? obj : {};
-            var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn;
+            var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
             if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
                 // Stops the camera stream
                 cameraStream.stop();
             }
-            if (utils.isElement(videoElement)) {
+            if (utils.isElement(videoElement) && !webcamVideoElement) {
                 // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
                 videoElement.pause();
                 // Destroys the object url
@@ -1444,7 +1445,7 @@ screenShot = function (AnimatedGIF) {
         getWebcamGif: function (obj, callback) {
             callback = utils.isFunction(callback) ? callback : function () {
             };
-            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
                     'sampleInterval': sampleInterval,
                     'numWorkers': numWorkers,
                     'width': gifWidth,
@@ -1476,7 +1477,8 @@ screenShot = function (AnimatedGIF) {
                                 'errorMsg': '',
                                 'image': image,
                                 'cameraStream': cameraStream,
-                                'videoElement': videoElement
+                                'videoElement': videoElement,
+                                'webcamVideoElement': webcamVideoElement
                             });
                         });
                     }
@@ -1585,6 +1587,7 @@ index = function (AnimatedGif) {
                 'keepCameraOn': false,
                 'images': [],
                 'video': null,
+                'webcamVideoElement': null,
                 'text': '',
                 'fontWeight': 'normal',
                 'fontSize': '16px',
@@ -1607,7 +1610,7 @@ index = function (AnimatedGif) {
                 if (!utils.isFunction(callback)) {
                     return;
                 }
-                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, existingVideo = options.video, imagesLength = images ? images.length : 0, errorObj, skipObj = {}, ag, x = -1, currentImage, tempImage, loadedImages = 0, videoType, videoSrc;
+                var defaultOptions = gifshot._defaultOptions, options = gifshot._options = utils.mergeOptions(defaultOptions, userOptions), lastCameraStream = userOptions.cameraStream, images = options.images, existingVideo = options.video, webcamVideoElement = options.webcamVideoElement, imagesLength = images ? images.length : 0, errorObj, skipObj = {}, ag, x = -1, currentImage, tempImage, loadedImages = 0, videoType, videoSrc;
                 // If the user has passed in at least one image path or image DOM elements
                 if (imagesLength) {
                     skipObj = {
@@ -1688,7 +1691,8 @@ index = function (AnimatedGif) {
                         gifshot._createAndGetGIF(obj, callback);
                     }, {
                         'lastCameraStream': lastCameraStream,
-                        'callback': callback
+                        'callback': callback,
+                        'webcamVideoElement': webcamVideoElement
                     });
                 }
             },
@@ -1712,11 +1716,12 @@ index = function (AnimatedGif) {
             },
             'stopVideoStreaming': function (obj) {
                 obj = utils.isObject(obj) ? obj : {};
-                var options = utils.isObject(gifshot._options) ? gifshot._options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement;
+                var options = utils.isObject(gifshot._options) ? gifshot._options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
                 videoStream.stopVideoStreaming({
                     'cameraStream': cameraStream,
                     'videoElement': videoElement,
-                    'keepCameraOn': options.keepCameraOn
+                    'keepCameraOn': options.keepCameraOn,
+                    'webcamVideoElement': webcamVideoElement
                 });
             },
             'isSupported': function (skipObj) {
@@ -1739,10 +1744,12 @@ index = function (AnimatedGif) {
                 }
                 videoElement.width = gifWidth + cropDimensions.width;
                 videoElement.height = gifHeight + cropDimensions.height;
-                utils.setCSSAttr(videoElement, {
-                    'position': 'fixed',
-                    'opacity': '0'
-                });
+                if (!options.webcamVideoElement) {
+                    utils.setCSSAttr(videoElement, {
+                        'position': 'fixed',
+                        'opacity': '0'
+                    });
+                }
                 document.body.appendChild(videoElement);
                 // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
                 // is loaded, so we must manually trigger play after adding it, or the video will be frozen

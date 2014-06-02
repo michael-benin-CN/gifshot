@@ -5,6 +5,8 @@
 
   <body>
 
+    <video src="" style="width:200px;height:200px;"></video>
+
     <form action="">
         <label for="gifText">GIF Text</label>
         <input name="gifText" id="gifText" value="" size="30"></input>
@@ -104,6 +106,8 @@ function downloadURI(uri, name) {
       e.preventDefault();
 
       gifshot.createGIF({
+        // 'keepCameraOn': true,
+        // 'webcamVideoElement': document.querySelector('video'),
         'video': video.checked ? ['example.mp4', 'example.ogv'] : null,
         'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
         'text': text.value || '',
