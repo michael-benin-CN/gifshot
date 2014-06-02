@@ -18,6 +18,7 @@ define([
 			'keepCameraOn': false,
 			'images': [],
 			'video': null,
+			'webcamVideoElement': null,
 			'text': '',
 			'fontWeight': 'normal',
 			'fontSize': '16px',
@@ -45,6 +46,7 @@ define([
 				lastCameraStream = userOptions.cameraStream,
 				images = options.images,
 				existingVideo = options.video,
+				webcamVideoElement = options.webcamVideoElement,
 				imagesLength = images ? images.length : 0,
 				errorObj,
 				skipObj = {},
@@ -143,7 +145,8 @@ define([
 					gifshot._createAndGetGIF(obj, callback);
 				}, {
 					'lastCameraStream': lastCameraStream,
-					'callback': callback
+					'callback': callback,
+					'webcamVideoElement': webcamVideoElement
 				});
 			}
 		},
@@ -170,12 +173,14 @@ define([
 			obj = utils.isObject(obj) ? obj : {};
 			var options = utils.isObject(gifshot._options) ? gifshot._options : {},
 				cameraStream = obj.cameraStream,
-				videoElement = obj.videoElement;
+				videoElement = obj.videoElement,
+				webcamVideoElement = obj.webcamVideoElement
 
 			videoStream.stopVideoStreaming({
 				'cameraStream': cameraStream,
 				'videoElement': videoElement,
-				'keepCameraOn': options.keepCameraOn
+				'keepCameraOn': options.keepCameraOn,
+				'webcamVideoElement': webcamVideoElement
 			});
 		},
 		'isSupported': function(skipObj) {
@@ -213,10 +218,12 @@ define([
 			videoElement.width = gifWidth + cropDimensions.width;
 			videoElement.height = gifHeight + cropDimensions.height;
 
-	        utils.setCSSAttr(videoElement, {
-	        	'position': 'fixed',
-				'opacity': '0'
-	        });
+			if(!options.webcamVideoElement) {
+				utils.setCSSAttr(videoElement, {
+					'position': 'fixed',
+					'opacity': '0'
+				});
+			}
 
 	        document.body.appendChild(videoElement);
 

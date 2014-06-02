@@ -108,7 +108,8 @@ define([
         streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop,
         completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop,
         existingVideo = obj.existingVideo,
-        videoElement = utils.isElement(existingVideo) ? existingVideo : document.createElement('video'),
+        webcamVideoElement = obj.webcamVideoElement,
+        videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'),
         lastCameraStream = obj.lastCameraStream,
         cameraStream;
 
@@ -155,7 +156,8 @@ define([
       var self = this,
         noGetUserMediaSupportTimeout,
         timeoutLength = options.timeout !== undefined ? options.timeout : 0,
-        originalCallback = options.callback;
+        originalCallback = options.callback,
+        webcamVideoElement = options.webcamVideoElement;
 
       // Some browsers apparently have support for video streaming because of the
       // presence of the getUserMedia function, but then do not answer our
@@ -195,21 +197,23 @@ define([
             'videoHeight': videoHeight,
           });
         },
-        'lastCameraStream': options.lastCameraStream
+        'lastCameraStream': options.lastCameraStream,
+        'webcamVideoElement': webcamVideoElement
       });
     },
     'stopVideoStreaming': function(obj) {
       obj = utils.isObject(obj) ? obj : {};
       var cameraStream = obj.cameraStream,
         videoElement = obj.videoElement,
-        keepCameraOn = obj.keepCameraOn;
+        keepCameraOn = obj.keepCameraOn,
+        webcamVideoElement = obj.webcamVideoElement;
 
       if(!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
         // Stops the camera stream
         cameraStream.stop();
       }
 
-      if(utils.isElement(videoElement)) {
+      if(utils.isElement(videoElement) && !webcamVideoElement) {
         // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
         videoElement.pause();
 

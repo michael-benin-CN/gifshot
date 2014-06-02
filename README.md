@@ -150,6 +150,12 @@ gifshot.takeSnapShot(function(obj) {
 // Note: You may also pass a NodeList of existing video elements on the page
 // e.g. 'video': ['example.mp4', 'example.ogv'],
 'video': null,
+// You can pass an existing video element to use for the webcam GIF creation process,
+// and this video element will not be hidden (useful when used with the keepCameraOn option)
+// Pro tip: Set the height and width of the video element to the same values as your future GIF
+// Another Pro Tip: If you use this option, the video will not be paused, the object url not revoked, and
+// the video will not be removed from the DOM.  You will need to handle this yourself.
+'webcamVideoElement': null,
 // Whether or not you would like the user's camera to stay on after the gif is created
 // If you keep the camera on, then you can reuse the returned cameraStream object to
 // create another gif and/or snapshot without asking for the user's permission to
