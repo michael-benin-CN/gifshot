@@ -11,6 +11,7 @@ define([
 			var canvas = document.createElement('canvas'),
 				context,
 				videoElement = obj.videoElement,
+				webcamVideoElement = obj.webcamVideoElement,
 				cameraStream = obj.cameraStream,
 				gifWidth = obj.gifWidth,
 				gifHeight = obj.gifHeight,
@@ -79,7 +80,8 @@ define([
 								'errorMsg': '',
 								'image': image,
 								'cameraStream': cameraStream,
-								'videoElement': videoElement
+								'videoElement': videoElement,
+								'webcamVideoElement': webcamVideoElement
 							});
 						});
 					}
