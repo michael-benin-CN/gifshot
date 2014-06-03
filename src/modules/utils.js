@@ -6,7 +6,7 @@ define(function() {
             window.webkitURL ||
             window.mozURL ||
             window.msURL),
-        'getUserMedia': function getUserMedia() {
+        'getUserMedia': function() {
             var getUserMedia = (navigator.getUserMedia ||
                 navigator.webkitGetUserMedia ||
                 navigator.mozGetUserMedia ||
@@ -50,7 +50,7 @@ define(function() {
                 var el = document.createElement('canvas');
                 return !!(el.getContext && el.getContext('2d'));
             },
-            'console': function console() {
+            'console': function() {
                 var console = window.console;
                 return console && utils.isFunction(console.log);
             },
