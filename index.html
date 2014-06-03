@@ -5,7 +5,7 @@
 
   <body>
 
-    <video src="" style="width:200px;height:200px;"></video>
+    <!-- <video src="" style="width:200px;height:200px;"></video> -->
 
     <form action="">
         <label for="gifText">GIF Text</label>
@@ -108,8 +108,8 @@ function downloadURI(uri, name) {
       gifshot.createGIF({
         // 'keepCameraOn': true,
         // 'webcamVideoElement': document.querySelector('video'),
-        'video': video.checked ? ['example.mp4', 'example.ogv'] : null,
-        'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
+        'video': ['example.mp4', 'example.ogv'],
+        // 'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
         'text': text.value || '',
         'fontWeight': fontWeight.value || 'normal',
         'fontColor': '#FFF',
@@ -132,8 +132,13 @@ function downloadURI(uri, name) {
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
           setTimeout(function() {
-            downloadURI(image, 'examplegif.gif');
+            // downloadURI(image, 'examplegif.gif');
           }, 300);
+        } else {
+          console.log('obj', obj);
+          console.log('obj.error', obj.error);
+          console.log('obj.errorCode', obj.errorCode);
+          console.log('obj.errorMsg', obj.errorMsg);
         }
       });
     }
@@ -161,7 +166,7 @@ function downloadURI(uri, name) {
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
           setTimeout(function() {
-            downloadURI(image, 'examplegif.gif');
+            // downloadURI(image, 'examplegif.gif');
           }, 300);
         }
       });

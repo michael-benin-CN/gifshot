@@ -33,7 +33,6 @@ define([
 			'completeCallback': function() {}
 		},
 		'_options': {},
-		'AnimatedGif': AnimatedGif,
 		'createGIF': function (userOptions, callback) {
 			callback = utils.isFunction(userOptions) ? userOptions : callback;
 			userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -139,7 +138,7 @@ define([
 					'existingVideo': existingVideo
 				});
 			} else {
- 				if(!gifshot.isSupported()) {
+ 				if(!gifshot.isWebCamGIFSupported()) {
 					return callback(error.validate());
 				}
 				videoStream.startVideoStreaming(function(obj) {
@@ -184,8 +183,36 @@ define([
 				'webcamVideoElement': webcamVideoElement
 			});
 		},
-		'isSupported': function(skipObj) {
-			return error.isValid(skipObj);
+		'isWebCamGIFSupported': function() {
+			return error.isValid();
+		},
+		'isExistingVideoGIFSupported': function(codecs) {
+			var isSupported = false,
+				hasValidCodec = false;
+
+			if(utils.isArray(codecs) && codecs.length) {
+				utils.each(codecs, function(indece, currentCodec) {
+					if(utils.isSupported.videoCodecs[currentCodec]) {
+						hasValidCodec = true;
+					}
+				});
+				if(!hasValidCodec) {
+					return false;
+				}
+			} else if(utils.isString(codecs) && codecs.length) {
+				if(!utils.isSupported.videoCodecs[codecs]) {
+					return false;
+				}
+			}
+
+			return error.isValid({
+				'getUserMedia': true
+			});
+		},
+		'isExistingImagesGIFSupported': function() {
+			return error.isValid({
+				'getUserMedia': true
+			});
 		},
 		'_createAndGetGIF': function(obj, callback) {
 			var options = gifshot._options,
