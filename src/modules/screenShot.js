@@ -46,6 +46,18 @@ define([
 				sourceY = Math.floor(crop.scaledHeight / 2),
 				sourceHeight = videoHeight - crop.scaledHeight,
 				captureFrame = function() {
+					if(ag.workerError && ag.workerError.length) {
+						callback({
+							'error': true,
+							'errorCode': 'webworkers',
+							'errorMsg': ag.workerError,
+							'image': null,
+							'cameraStream': cameraStream,
+							'videoElement': videoElement,
+							'webcamVideoElement': webcamVideoElement
+						});
+						return;
+					}
 					var framesLeft = pendingFrames - 1;
 
 					context.drawImage(videoElement,
