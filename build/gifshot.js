@@ -5,7 +5,7 @@ var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, sc
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
-            'getUserMedia': function getUserMedia() {
+            'getUserMedia': function () {
                 var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                 return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
             }(),
@@ -43,7 +43,7 @@ utils = function () {
                     var el = document.createElement('canvas');
                     return !!(el.getContext && el.getContext('2d'));
                 },
-                'console': function console() {
+                'console': function () {
                     var console = window.console;
                     return console && utils.isFunction(console.log);
                 },
