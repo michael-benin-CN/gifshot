@@ -9,7 +9,7 @@ utils = function () {
                 var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                 return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
             }(),
-            'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
+            'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder,
             'btoa': function () {
                 var btoa = window.btoa || utils.btoaPolyfill;
                 return btoa ? btoa.bind(window) : false;
@@ -179,13 +179,13 @@ utils = function () {
                     return {};
                 }
                 try {
-                    var blob = new utils.Blob([content], { 'type': 'text/javascript' }), objectUrl = window.URL.createObjectURL(blob), worker = new Worker(objectUrl);
+                    var blob = new utils.Blob([content], { 'type': 'text/javascript' }), objectUrl = utils.URL.createObjectURL(blob), worker = new Worker(objectUrl);
                     return {
                         'objectUrl': objectUrl,
                         'worker': worker
                     };
                 } catch (e) {
-                    return {};
+                    return '' + e;
                 }
             }
         };
@@ -353,7 +353,6 @@ videoStream = function () {
         'stopVideoStreaming': function (obj) {
             obj = utils.isObject(obj) ? obj : {};
             var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
-            console.log(webcamVideoElement);
             if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
                 // Stops the camera stream
                 cameraStream.stop();
@@ -1263,18 +1262,23 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             'numWorkers': 2
         },
         'initializeWebWorkers': function (options) {
-            var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1;
+            var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
             numWorkers = options.numWorkers;
             while (++x < numWorkers) {
                 webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
-                objectUrl = webWorkerObj.objectUrl;
-                webWorker = webWorkerObj.worker;
-                this.workers.push({
-                    'worker': webWorker,
-                    'objectUrl': objectUrl
-                });
-                this.availableWorkers.push(webWorker);
+                if (utils.isObject(webWorkerObj)) {
+                    objectUrl = webWorkerObj.objectUrl;
+                    webWorker = webWorkerObj.worker;
+                    this.workers.push({
+                        'worker': webWorker,
+                        'objectUrl': objectUrl
+                    });
+                    this.availableWorkers.push(webWorker);
+                } else {
+                    workerError = webWorkerObj;
+                }
             }
+            this.workerError = workerError;
             this.canvas = document.createElement('canvas');
             this.canvas.width = options.width;
             this.canvas.height = options.height;
@@ -1332,18 +1336,20 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             frame.sampleInterval = sampleInterval;
             frame.beingProcessed = true;
             worker = this.getWorker();
-            worker.onmessage = function (ev) {
-                var data = ev.data;
-                // Delete original data, and free memory
-                delete frame.data;
-                frame.pixels = Array.prototype.slice.call(data.pixels);
-                frame.palette = Array.prototype.slice.call(data.palette);
-                frame.done = true;
-                frame.beingProcessed = false;
-                AnimatedGifContext.freeWorker(worker);
-                AnimatedGifContext.onFrameFinished();
-            };
-            worker.postMessage(frame);
+            if (worker) {
+                worker.onmessage = function (ev) {
+                    var data = ev.data;
+                    // Delete original data, and free memory
+                    delete frame.data;
+                    frame.pixels = Array.prototype.slice.call(data.pixels);
+                    frame.palette = Array.prototype.slice.call(data.palette);
+                    frame.done = true;
+                    frame.beingProcessed = false;
+                    AnimatedGifContext.freeWorker(worker);
+                    AnimatedGifContext.onFrameFinished();
+                };
+                worker.postMessage(frame);
+            }
         },
         'startRendering': function (completeCallback) {
             this.onRenderCompleteCallback = completeCallback;
@@ -1453,6 +1459,18 @@ screenShot = function (AnimatedGIF) {
                     'height': gifHeight,
                     'delay': interval
                 }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
+                    if (ag.workerError && ag.workerError.length) {
+                        callback({
+                            'error': true,
+                            'errorCode': 'webworkers',
+                            'errorMsg': ag.workerError,
+                            'image': null,
+                            'cameraStream': cameraStream,
+                            'videoElement': videoElement,
+                            'webcamVideoElement': webcamVideoElement
+                        });
+                        return;
+                    }
                     var framesLeft = pendingFrames - 1;
                     context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
                     // If there is text to display, make sure to display it on the canvas after the image is drawn
@@ -1605,7 +1623,6 @@ index = function (AnimatedGif) {
                 }
             },
             '_options': {},
-            'AnimatedGif': AnimatedGif,
             'createGIF': function (userOptions, callback) {
                 callback = utils.isFunction(userOptions) ? userOptions : callback;
                 userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -1686,7 +1703,7 @@ index = function (AnimatedGif) {
                         'existingVideo': existingVideo
                     });
                 } else {
-                    if (!gifshot.isSupported()) {
+                    if (!gifshot.isWebCamGIFSupported()) {
                         return callback(error.validate());
                     }
                     videoStream.startVideoStreaming(function (obj) {
@@ -1726,8 +1743,29 @@ index = function (AnimatedGif) {
                     'webcamVideoElement': webcamVideoElement
                 });
             },
-            'isSupported': function (skipObj) {
-                return error.isValid(skipObj);
+            'isWebCamGIFSupported': function () {
+                return error.isValid();
+            },
+            'isExistingVideoGIFSupported': function (codecs) {
+                var isSupported = false, hasValidCodec = false;
+                if (utils.isArray(codecs) && codecs.length) {
+                    utils.each(codecs, function (indece, currentCodec) {
+                        if (utils.isSupported.videoCodecs[currentCodec]) {
+                            hasValidCodec = true;
+                        }
+                    });
+                    if (!hasValidCodec) {
+                        return false;
+                    }
+                } else if (utils.isString(codecs) && codecs.length) {
+                    if (!utils.isSupported.videoCodecs[codecs]) {
+                        return false;
+                    }
+                }
+                return error.isValid({ 'getUserMedia': true });
+            },
+            'isExistingImagesGIFSupported': function () {
+                return error.isValid({ 'getUserMedia': true });
             },
             '_createAndGetGIF': function (obj, callback) {
                 var options = gifshot._options, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
@@ -1751,8 +1789,8 @@ index = function (AnimatedGif) {
                         'position': 'fixed',
                         'opacity': '0'
                     });
+                    document.body.appendChild(videoElement);
                 }
-                document.body.appendChild(videoElement);
                 // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
                 // is loaded, so we must manually trigger play after adding it, or the video will be frozen
                 videoElement.play();

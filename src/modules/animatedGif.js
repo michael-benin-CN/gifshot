@@ -40,20 +40,27 @@ define([
 				objectUrl,
 				webWorker,
 				numWorkers,
-				x = -1;
+				x = -1,
+				workerError = '';
 
 			numWorkers = options.numWorkers;
 
 			while(++x < numWorkers) {
 				webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
-				objectUrl = webWorkerObj.objectUrl;
-				webWorker = webWorkerObj.worker;
-				this.workers.push({
-					'worker': webWorker,
-					'objectUrl': objectUrl
-				});
-				this.availableWorkers.push(webWorker);
+				if(utils.isObject(webWorkerObj)) {
+					objectUrl = webWorkerObj.objectUrl;
+					webWorker = webWorkerObj.worker;
+					this.workers.push({
+						'worker': webWorker,
+						'objectUrl': objectUrl
+					});
+					this.availableWorkers.push(webWorker);
+				} else {
+					workerError = webWorkerObj;
+				}
 			}
+
+			this.workerError = workerError;
 
 	        this.canvas = document.createElement('canvas');
 	        this.canvas.width = options.width;
@@ -133,23 +140,25 @@ define([
 
 	        worker = this.getWorker();
 
-			worker.onmessage = function(ev) {
-			    var data = ev.data;
+	        if(worker) {
+				worker.onmessage = function(ev) {
+				    var data = ev.data;
 
-			    // Delete original data, and free memory
-			    delete(frame.data);
+				    // Delete original data, and free memory
+				    delete(frame.data);
 
-			    frame.pixels = Array.prototype.slice.call(data.pixels);
-			    frame.palette = Array.prototype.slice.call(data.palette);
-			    frame.done = true;
-			    frame.beingProcessed = false;
+				    frame.pixels = Array.prototype.slice.call(data.pixels);
+				    frame.palette = Array.prototype.slice.call(data.palette);
+				    frame.done = true;
+				    frame.beingProcessed = false;
 
-			    AnimatedGifContext.freeWorker(worker);
+				    AnimatedGifContext.freeWorker(worker);
 
-			    AnimatedGifContext.onFrameFinished();
-			};
+				    AnimatedGifContext.onFrameFinished();
+				};
 
-	        worker.postMessage(frame);
+				worker.postMessage(frame);
+	        }
 	    },
 	    'startRendering': function(completeCallback) {
 	        this.onRenderCompleteCallback = completeCallback;

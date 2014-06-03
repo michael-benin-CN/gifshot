@@ -16,7 +16,8 @@ define(function() {
         'Blob': (window.Blob ||
                 window.BlobBuilder ||
                 window.WebKitBlobBuilder ||
-                window.MozBlobBuilder),
+                window.MozBlobBuilder ||
+                window.MSBlobBuilder),
         'btoa': function() {
             var btoa = (window.btoa ||
                 utils.btoaPolyfill);
@@ -199,7 +200,7 @@ define(function() {
                 var blob = new utils.Blob([content], {
                     'type': 'text/javascript'
                 }),
-                    objectUrl = window.URL.createObjectURL(blob),
+                    objectUrl = utils.URL.createObjectURL(blob),
                     worker = new Worker(objectUrl);
 
                 return {
@@ -207,7 +208,7 @@ define(function() {
                     'worker': worker
                 }
             } catch(e) {
-                return {};
+                return '' + e;
             }
         }
     };

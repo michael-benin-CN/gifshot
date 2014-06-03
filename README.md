@@ -1,7 +1,7 @@
 gifshot
 =======
 
-JavaScript library that can create animated gifs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
+JavaScript library that can create Animated GIFs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
 
 ## Demo
 
@@ -27,6 +27,21 @@ Influenced By:
 - [animated_GIF.js](https://github.com/sole/Animated_GIF) - Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
 
 - [Meatspace Chat](https://chat.meatspac.es/)
+
+## Browser Support
+
+ - **Animated GIF from Webcam** :
+
+ * Firefox 17+, Chrome 21+, Opera 18+, Blackberry Browser 10+, Opera Mobile 12+, Chrome For Android 35+, Firefox for Android 29+
+
+ - **Animated GIF from Existing Video** :
+
+ * All modern browsers (IE10+)
+
+ - **Animated GIF from Existing Images** :
+
+ * All modern browsers (IE10+)
+
 
 ## Quick Start
 *  Include `gifshot.js` on your HTML page (`gifshot.js` can be found in the `build` directory)
@@ -70,6 +85,16 @@ gifshot.takeSnapShot(options, callback);
 
 // Turns off the user's webcam (by default, the user's webcam is turned off)
 gifshot.stopVideoStreaming();
+
+// If the current browser supports creating animated GIFs from a webcam video stream
+gifshot.isWebCamGIFSupported();
+
+// If the current browser supports creating animated GIFs from an existing HTML video (e.g. mp4, ogg, ogv, webm)
+// e.g. gifshot.isExistingVideoGIFSupported(['mp4', 'ogg']);
+gifshot.isExistingVideoGIFSupported(codecs);
+
+// If the current browser supports creating animated GIFs from existing images (e.g. jpeg, png, gif)
+gifshot.isExistingImagesGIFSupported();
 ```
 
 ## Examples
