@@ -224,9 +224,9 @@ define([
 					'position': 'fixed',
 					'opacity': '0'
 				});
+				document.body.appendChild(videoElement);
 			}
 
-	        document.body.appendChild(videoElement);
 
 	        // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
 	        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
