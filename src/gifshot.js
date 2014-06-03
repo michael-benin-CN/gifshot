@@ -353,6 +353,7 @@ videoStream = function () {
         'stopVideoStreaming': function (obj) {
             obj = utils.isObject(obj) ? obj : {};
             var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
+            console.log(webcamVideoElement);
             if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
                 // Stops the camera stream
                 cameraStream.stop();
