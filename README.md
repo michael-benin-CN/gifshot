@@ -1,4 +1,4 @@
-gifshot
+![](http://i.imgur.com/I17GUX9.gif) 
 =======
 
 JavaScript library that can create Animated GIFs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
@@ -225,3 +225,6 @@ gifshot.takeSnapShot(function(obj) {
 
 - Chase West
 - Greg Franko
+
+
+
