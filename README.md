@@ -1,7 +1,7 @@
 gifshot
 =======
 
-JavaScript library that can create animated gifs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images 
+JavaScript library that can create animated gifs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
 
 ## Demo
 
@@ -9,15 +9,13 @@ gifshot is currently set up here: http://pokedsoaked.corp.ne1.yahoo.com:8001/
 
 ## How
 
-gifshot.js uses: 
+gifshot.js uses:
 
 - The webRTC `getUserMedia()` API to get permission to use a user's webcam
 
 - The `canvas` API to create a dynamic image from a video stream, video, or images
 
 - Web workers to process the gif frames
-
-- `window.btoa()` to create a base 64 URI
 
 - Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML) image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size).   This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
 
