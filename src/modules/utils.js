@@ -6,7 +6,7 @@ define(function() {
             window.webkitURL ||
             window.mozURL ||
             window.msURL),
-        'getUserMedia': function() {
+        'getUserMedia': function getUserMedia() {
             var getUserMedia = (navigator.getUserMedia ||
                 navigator.webkitGetUserMedia ||
                 navigator.mozGetUserMedia ||
@@ -17,37 +17,13 @@ define(function() {
                 window.BlobBuilder ||
                 window.WebKitBlobBuilder ||
                 window.MozBlobBuilder),
-        'btoa': function() {
-            var btoa = (window.btoa ||
-                utils.btoaPolyfill);
-            return btoa ? btoa.bind(window) : false;
-        }(),
-        // window.btoa polyfill
-        'btoaPolyfill': function (input) {
-            var output = '', i = 0, l = input.length,
-            key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
-            chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-            while (i < l) {
-                chr1 = input.charCodeAt(i++);
-                chr2 = input.charCodeAt(i++);
-                chr3 = input.charCodeAt(i++);
-                enc1 = chr1 >> 2;
-                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-                enc4 = chr3 & 63;
-                if (isNaN(chr2)) enc3 = enc4 = 64;
-                else if (isNaN(chr3)) enc4 = 64;
-                output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
-            }
-            return output;
-        },
-        'isObject': function(obj) {
+        'isObject': function isObject(obj) {
             if(!obj) {
                 return false;
             }
             return Object.prototype.toString.call(obj) === '[object Object]';
         },
-        'isArray': function(arr) {
+        'isArray': function isArray(arr) {
             if(!arr) {
                 return false;
             }
@@ -57,37 +33,37 @@ define(function() {
                 return Object.prototype.toString.call(arr) === '[object Array]';
             }
         },
-        'isFunction': function(func) {
+        'isFunction': function isFunction(func) {
             if(!func) {
                 return false;
             }
             return Object.prototype.toString.call(func) === '[object Function]';
         },
-        'isElement': function(elem) {
+        'isElement': function isElement(elem) {
             return elem && elem.nodeType === 1;
         },
-        'isString': function(value) {
+        'isString': function isString(value) {
             return typeof value === 'string' || Object.prototype.toString.call(value) === '[object String]';
         },
         'isSupported': {
-            'canvas': function() {
+            'canvas': function canvas() {
                 var el = document.createElement('canvas');
                 return !!(el.getContext && el.getContext('2d'));
             },
-            'console': function() {
+            'console': function console() {
                 var console = window.console;
                 return console && utils.isFunction(console.log);
             },
-            'webworkers': function() {
+            'webworkers': function webworkers() {
                 return window.Worker;
             },
-            'blob': function() {
+            'blob': function blob() {
                 return utils.Blob;
             },
-            'Uint8Array': function() {
+            'Uint8Array': function Uint8Array() {
                 return window.Uint8Array;
             },
-            'Uint32Array': function() {
+            'Uint32Array': function Uint32Array() {
                 return window.Uint32Array;
             },
             'videoCodecs': (function() {
@@ -120,13 +96,13 @@ define(function() {
                 return supportObj;
             }())
         },
-        'log': function() {
+        'log': function log() {
             if(utils.isSupported.console()) {
                 console.log.apply(window.console, arguments);
             }
         },
-        'noop': function() {},
-        'each': function(collection, callback) {
+        'noop': function noop() {},
+        'each': function each(collection, callback) {
             var x, len;
             if(utils.isArray(collection)) {
                 x = -1;
@@ -171,7 +147,7 @@ define(function() {
 
             return newObj;
         },
-        'setCSSAttr': function(elem, attr, val) {
+        'setCSSAttr': function setCSSAttr(elem, attr, val) {
             if(!utils.isElement(elem)) {
                 return;
             }
@@ -183,7 +159,7 @@ define(function() {
                 });
             }
         },
-        'removeElement': function(node) {
+        'removeElement': function removeElement(node) {
             if(!utils.isElement(node)) {
                 return;
             }
@@ -191,7 +167,7 @@ define(function() {
               node.parentNode.removeChild(node);
             }
         },
-        'createWebWorker': function(content) {
+        'createWebWorker': function createWebWorker(content) {
             if(!utils.isString(content)) {
                 return {};
             }

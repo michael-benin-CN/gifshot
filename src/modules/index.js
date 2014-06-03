@@ -8,6 +8,7 @@ define([
 	'error'
 ], function(utils, videoStream, screenShot, AnimatedGif, error) {
 	var gifshot = {
+		'utils': utils,
 		'_defaultOptions': {
 			'sampleInterval': 10,
 			'numWorkers': 2,
@@ -237,7 +238,7 @@ define([
 					completeCallback(obj);
 				});
 	        }, wait);
-		} 
+		}
 	},
 		publicApi = function (api) {
 			var method,
