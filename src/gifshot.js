@@ -5,18 +5,41 @@ var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, sc
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
-            'getUserMedia': function getUserMedia() {
+            'getUserMedia': function () {
                 var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                 return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
             }(),
             'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
-            'isObject': function isObject(obj) {
+            'btoa': function () {
+                var btoa = window.btoa || utils.btoaPolyfill;
+                return btoa ? btoa.bind(window) : false;
+            }(),
+            // window.btoa polyfill
+            'btoaPolyfill': function (input) {
+                var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+                while (i < l) {
+                    chr1 = input.charCodeAt(i++);
+                    chr2 = input.charCodeAt(i++);
+                    chr3 = input.charCodeAt(i++);
+                    enc1 = chr1 >> 2;
+                    enc2 = (chr1 & 3) << 4 | chr2 >> 4;
+                    enc3 = (chr2 & 15) << 2 | chr3 >> 6;
+                    enc4 = chr3 & 63;
+                    if (isNaN(chr2))
+                        enc3 = enc4 = 64;
+                    else if (isNaN(chr3))
+                        enc4 = 64;
+                    output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
+                }
+                return output;
+            },
+            'isObject': function (obj) {
                 if (!obj) {
                     return false;
                 }
                 return Object.prototype.toString.call(obj) === '[object Object]';
             },
-            'isArray': function isArray(arr) {
+            'isArray': function (arr) {
                 if (!arr) {
                     return false;
                 }
@@ -26,37 +49,37 @@ utils = function () {
                     return Object.prototype.toString.call(arr) === '[object Array]';
                 }
             },
-            'isFunction': function isFunction(func) {
+            'isFunction': function (func) {
                 if (!func) {
                     return false;
                 }
                 return Object.prototype.toString.call(func) === '[object Function]';
             },
-            'isElement': function isElement(elem) {
+            'isElement': function (elem) {
                 return elem && elem.nodeType === 1;
             },
-            'isString': function isString(value) {
+            'isString': function (value) {
                 return typeof value === 'string' || Object.prototype.toString.call(value) === '[object String]';
             },
             'isSupported': {
-                'canvas': function canvas() {
+                'canvas': function () {
                     var el = document.createElement('canvas');
                     return !!(el.getContext && el.getContext('2d'));
                 },
-                'console': function console() {
+                'console': function () {
                     var console = window.console;
                     return console && utils.isFunction(console.log);
                 },
-                'webworkers': function webworkers() {
+                'webworkers': function () {
                     return window.Worker;
                 },
-                'blob': function blob() {
+                'blob': function () {
                     return utils.Blob;
                 },
-                'Uint8Array': function Uint8Array() {
+                'Uint8Array': function () {
                     return window.Uint8Array;
                 },
-                'Uint32Array': function Uint32Array() {
+                'Uint32Array': function () {
                     return window.Uint32Array;
                 },
                 'videoCodecs': function () {
@@ -82,14 +105,14 @@ utils = function () {
                     return supportObj;
                 }()
             },
-            'log': function log() {
+            'log': function () {
                 if (utils.isSupported.console()) {
                     console.log.apply(window.console, arguments);
                 }
             },
-            'noop': function noop() {
+            'noop': function () {
             },
-            'each': function each(collection, callback) {
+            'each': function (collection, callback) {
                 var x, len;
                 if (utils.isArray(collection)) {
                     x = -1;
@@ -131,7 +154,7 @@ utils = function () {
                 });
                 return newObj;
             },
-            'setCSSAttr': function setCSSAttr(elem, attr, val) {
+            'setCSSAttr': function (elem, attr, val) {
                 if (!utils.isElement(elem)) {
                     return;
                 }
@@ -143,7 +166,7 @@ utils = function () {
                     });
                 }
             },
-            'removeElement': function removeElement(node) {
+            'removeElement': function (node) {
                 if (!utils.isElement(node)) {
                     return;
                 }
@@ -151,7 +174,7 @@ utils = function () {
                     node.parentNode.removeChild(node);
                 }
             },
-            'createWebWorker': function createWebWorker(content) {
+            'createWebWorker': function (content) {
                 if (!utils.isString(content)) {
                     return {};
                 }
