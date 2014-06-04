@@ -85,21 +85,30 @@ define([
 					} else if(utils.isString(currentImage)) {
 						tempImage = document.createElement('img');
 						tempImage.crossOrigin = 'Anonymous';
+						tempImage.onerror = function(e) {
+							// If there is an error, ignore the image
+							if(imagesLength > 0) {
+								imagesLength -= 1;
+							}
+						}
+
 						tempImage.src = currentImage;
+
 						utils.setCSSAttr(tempImage, {
 							'position': 'fixed',
 							'opacity': '0'
 						});
-						(function(tempImage, ag) {
+
+						(function(tempImage, ag, currentImage) {
 							tempImage.onload = function() {
-								ag.addFrame(tempImage);
+								ag.addFrame(tempImage, currentImage);
 								utils.removeElement(tempImage);
 								loadedImages += 1;
 								if(loadedImages === imagesLength) {
 									gifshot._getBase64GIF(ag, callback);
 								}
 							};
-						}(tempImage, ag));
+						}(tempImage, ag, currentImage));
 						document.body.appendChild(tempImage);
 					}
 				}

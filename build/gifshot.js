@@ -1415,11 +1415,18 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         'setRepeat': function (r) {
             this.repeat = r;
         },
-        'addFrame': function (element) {
-            var ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData;
-            ctx.drawImage(element, 0, 0, width, height);
-            imageData = ctx.getImageData(0, 0, width, height);
-            this.addFrameImageData(imageData);
+        'addFrame': function (element, src) {
+            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData;
+            try {
+                if (src) {
+                    element.src = src;
+                }
+                ctx.drawImage(element, 0, 0, width, height);
+                imageData = ctx.getImageData(0, 0, width, height);
+                self.addFrameImageData(imageData);
+            } catch (e) {
+                return '' + e;
+            }
         },
         'addFrameImageData': function (imageData) {
             var frames = this.frames, imageDataArray = imageData.data;
@@ -1671,21 +1678,27 @@ index = function (AnimatedGif) {
                         } else if (utils.isString(currentImage)) {
                             tempImage = document.createElement('img');
                             tempImage.crossOrigin = 'Anonymous';
+                            tempImage.onerror = function (e) {
+                                // If there is an error, ignore the image
+                                if (imagesLength > 0) {
+                                    imagesLength -= 1;
+                                }
+                            };
                             tempImage.src = currentImage;
                             utils.setCSSAttr(tempImage, {
                                 'position': 'fixed',
                                 'opacity': '0'
                             });
-                            (function (tempImage, ag) {
+                            (function (tempImage, ag, currentImage) {
                                 tempImage.onload = function () {
-                                    ag.addFrame(tempImage);
+                                    ag.addFrame(tempImage, currentImage);
                                     utils.removeElement(tempImage);
                                     loadedImages += 1;
                                     if (loadedImages === imagesLength) {
                                         gifshot._getBase64GIF(ag, callback);
                                     }
                                 };
-                            }(tempImage, ag));
+                            }(tempImage, ag, currentImage));
                             document.body.appendChild(tempImage);
                         }
                     }

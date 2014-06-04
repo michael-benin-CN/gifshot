@@ -239,17 +239,25 @@ define([
 	    'setRepeat': function(r) {
 	        this.repeat = r;
 	    },
-	    'addFrame': function(element) {
-	    	var ctx = this.ctx,
+	    'addFrame': function(element, src) {
+	    	var self = this,
+	    		ctx = this.ctx,
 	    		options = this.options,
 	    		width = options.width,
 	    		height = options.height,
 	    		imageData;
 
-	        ctx.drawImage(element, 0, 0, width, height);
-	        imageData = ctx.getImageData(0, 0, width, height);
+	    	try {
+	    		if(src) {
+	    			element.src = src;
+	    		}
+				ctx.drawImage(element, 0, 0, width, height);
+				imageData = ctx.getImageData(0, 0, width, height);
 
-	        this.addFrameImageData(imageData);
+				self.addFrameImageData(imageData);
+	    	} catch(e) {
+	    		return '' + e;
+	    	}
 	    },
 		'addFrameImageData': function(imageData) {
 		    var frames = this.frames,
