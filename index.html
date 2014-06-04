@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <script src="src/gifshot.js"></script>
@@ -5,7 +6,11 @@
 
   <body>
 
-    <!-- <video src="" style="width:200px;height:200px;"></video> -->
+    <!-- <video id='video' src="example.mp4" style="width:200px;height:200px;"></video> -->
+
+<!--     <video width="456" height="360">
+        <source src="example.mp4" type="video/mp4" />
+    </video> -->
 
     <form action="">
         <label for="gifText">GIF Text</label>
@@ -108,8 +113,9 @@ function downloadURI(uri, name) {
       gifshot.createGIF({
         // 'keepCameraOn': true,
         // 'webcamVideoElement': document.querySelector('video'),
-        'video': ['example.mp4', 'example.ogv'],
-        // 'images': images.checked ? ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
+        'video': ['example.mp4'],
+        // 'video': document.querySelector('video'),
+        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
         'text': text.value || '',
         'fontWeight': fontWeight.value || 'normal',
         'fontColor': '#FFF',
