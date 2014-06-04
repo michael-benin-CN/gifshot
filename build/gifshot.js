@@ -11,7 +11,7 @@ utils = function () {
             }(),
             'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder,
             'btoa': function () {
-                var btoa = window.btoa || utils.btoaPolyfill;
+                var btoa = window.btoa || this.btoaPolyfill;
                 return btoa ? btoa.bind(window) : false;
             }(),
             // window.btoa polyfill
@@ -187,7 +187,11 @@ utils = function () {
                 } catch (e) {
                     return '' + e;
                 }
-            }
+            },
+            'getExtension': function (src) {
+                return src.substr(src.lastIndexOf('.') + 1, src.length);
+            },
+            'webWorkerError': false
         };
     return utils;
 }();
@@ -240,13 +244,14 @@ videoStream = function () {
             }
         },
         'stream': function (obj) {
-            var self = this, existingVideo = obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
+            var self = this, existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
             if (utils.isFunction(streamedCallback)) {
                 streamedCallback();
             }
             if (existingVideo) {
-                if (!videoElement.src && utils.isString(existingVideo)) {
+                if (utils.isString(existingVideo)) {
                     videoElement.src = existingVideo;
+                    videoElement.innerHTML = '<source src="' + existingVideo + '" type="video/' + utils.getExtension(existingVideo) + '" />';
                 }
             } else if (videoElement.mozSrcObject) {
                 videoElement.mozSrcObject = cameraStream;
@@ -361,8 +366,10 @@ videoStream = function () {
                 // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
                 videoElement.pause();
                 // Destroys the object url
-                if (utils.isFunction(utils.URL.revokeObjectURL)) {
-                    utils.URL.revokeObjectURL(videoElement.src);
+                if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
+                    if (videoElement.src) {
+                        utils.URL.revokeObjectURL(videoElement.src);
+                    }
                 }
                 // Removes the video element from the DOM
                 utils.removeElement(videoElement);
@@ -867,7 +874,7 @@ processFrameWorker = function () {
                 },
                 // This is the "traditional" Animated_GIF style of going from RGBA to indexed color frames
                 'processFrameWithQuantizer': function (imageData, width, height, sampleInterval) {
-                    var rgbComponents = workerMethods.dataToRGB(imageData, width, height), nq = new NeuQuant(rgbComponents, rgbComponents.length, sampleInterval), paletteRGB = nq.process(), paletteArray = new Uint32Array(workerMethods.componentizedPaletteToArray(paletteRGB)), numberPixels = width * height, indexedPixels = new Uint8Array(numberPixels), k = 0, i;
+                    var rgbComponents = this.dataToRGB(imageData, width, height), nq = new NeuQuant(rgbComponents, rgbComponents.length, sampleInterval), paletteRGB = nq.process(), paletteArray = new Uint32Array(this.componentizedPaletteToArray(paletteRGB)), numberPixels = width * height, indexedPixels = new Uint8Array(numberPixels), k = 0, i;
                     for (i = 0; i < numberPixels; i++) {
                         r = rgbComponents[k++];
                         g = rgbComponents[k++];
@@ -881,9 +888,10 @@ processFrameWorker = function () {
                 },
                 'run': function (frame) {
                     var width = frame.width, height = frame.height, imageData = frame.data, palette = frame.palette, sampleInterval = frame.sampleInterval;
-                    return workerMethods.processFrameWithQuantizer(imageData, width, height, sampleInterval);
+                    return this.processFrameWithQuantizer(imageData, width, height, sampleInterval);
                 }
             };
+        return workerMethods;
     };
     return workerCode;
 }();
@@ -1261,6 +1269,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             'sampleInterval': 10,
             'numWorkers': 2
         },
+        'workerMethods': frameWorkerCode(),
         'initializeWebWorkers': function (options) {
             var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
             numWorkers = options.numWorkers;
@@ -1276,6 +1285,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
                     this.availableWorkers.push(webWorker);
                 } else {
                     workerError = webWorkerObj;
+                    utils.webWorkerError = !!webWorkerObj;
                 }
             }
             this.workerError = workerError;
@@ -1327,17 +1337,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             }
         },
         'processFrame': function (position) {
-            var AnimatedGifContext = this, options = this.options, sampleInterval = options.sampleInterval, frames = this.frames, frame, worker;
-            frame = frames[position];
-            if (frame.beingProcessed || frame.done) {
-                this.onFrameFinished();
-                return;
-            }
-            frame.sampleInterval = sampleInterval;
-            frame.beingProcessed = true;
-            worker = this.getWorker();
-            if (worker) {
-                worker.onmessage = function (ev) {
+            var AnimatedGifContext = this, options = this.options, sampleInterval = options.sampleInterval, frames = this.frames, frame, worker, done = function (ev) {
                     var data = ev.data;
                     // Delete original data, and free memory
                     delete frame.data;
@@ -1348,7 +1348,21 @@ animatedGif = function (frameWorkerCode, GifWriter) {
                     AnimatedGifContext.freeWorker(worker);
                     AnimatedGifContext.onFrameFinished();
                 };
+            frame = frames[position];
+            if (frame.beingProcessed || frame.done) {
+                this.onFrameFinished();
+                return;
+            }
+            frame.sampleInterval = sampleInterval;
+            frame.beingProcessed = true;
+            worker = this.getWorker();
+            if (worker) {
+                // Process the frame in a web worker
+                worker.onmessage = done;
                 worker.postMessage(frame);
+            } else {
+                // Process the frame in the current thread
+                done({ 'data': AnimatedGifContext.workerMethods.run(frame) });
             }
         },
         'startRendering': function (completeCallback) {
@@ -1436,6 +1450,9 @@ animatedGif = function (frameWorkerCode, GifWriter) {
             this.startRendering(onRenderComplete);
         },
         'destroyWorkers': function () {
+            if (this.workerError) {
+                return;
+            }
             var workers = this.workers;
             // Explicitly ask web workers to die so they are explicitly GC'ed
             utils.each(workers, function (iterator, workerObj) {
@@ -1459,18 +1476,18 @@ screenShot = function (AnimatedGIF) {
                     'height': gifHeight,
                     'delay': interval
                 }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
-                    if (ag.workerError && ag.workerError.length) {
-                        callback({
-                            'error': true,
-                            'errorCode': 'webworkers',
-                            'errorMsg': ag.workerError,
-                            'image': null,
-                            'cameraStream': cameraStream,
-                            'videoElement': videoElement,
-                            'webcamVideoElement': webcamVideoElement
-                        });
-                        return;
-                    }
+                    // if(ag.workerError && ag.workerError.length) {
+                    // 	callback({
+                    // 		'error': true,
+                    // 		'errorCode': 'webworkers',
+                    // 		'errorMsg': ag.workerError,
+                    // 		'image': null,
+                    // 		'cameraStream': cameraStream,
+                    // 		'videoElement': videoElement,
+                    // 		'webcamVideoElement': webcamVideoElement
+                    // 	});
+                    // 	return;
+                    // }
                     var framesLeft = pendingFrames - 1;
                     context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
                     // If there is text to display, make sure to display it on the canvas after the image is drawn
@@ -1683,7 +1700,7 @@ index = function (AnimatedGif) {
                     }
                     if (utils.isElement(existingVideo) && existingVideo.src) {
                         videoSrc = existingVideo.src;
-                        videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+                        videoType = utils.getExtension(videoSrc);
                         if (!utils.isSupported.videoCodecs[videoType]) {
                             return callback(error.messages.videoCodecs);
                         }

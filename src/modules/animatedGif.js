@@ -34,6 +34,7 @@ define([
 			'sampleInterval': 10,
 			'numWorkers': 2
 		},
+		'workerMethods': frameWorkerCode(),
 		'initializeWebWorkers': function(options) {
 			var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();',
 				webWorkerObj,
@@ -57,6 +58,7 @@ define([
 					this.availableWorkers.push(webWorker);
 				} else {
 					workerError = webWorkerObj;
+					utils.webWorkerError = !!(webWorkerObj);
 				}
 			}
 
@@ -126,7 +128,22 @@ define([
 	        	sampleInterval = options.sampleInterval,
 	        	frames = this.frames,
 	        	frame,
-	        	worker;
+	        	worker,
+	        	done = function(ev) {
+				    var data = ev.data;
+
+				    // Delete original data, and free memory
+				    delete(frame.data);
+
+				    frame.pixels = Array.prototype.slice.call(data.pixels);
+				    frame.palette = Array.prototype.slice.call(data.palette);
+				    frame.done = true;
+				    frame.beingProcessed = false;
+
+				    AnimatedGifContext.freeWorker(worker);
+
+				    AnimatedGifContext.onFrameFinished();
+	        	};
 
 	        frame = frames[position];
 
@@ -141,23 +158,14 @@ define([
 	        worker = this.getWorker();
 
 	        if(worker) {
-				worker.onmessage = function(ev) {
-				    var data = ev.data;
-
-				    // Delete original data, and free memory
-				    delete(frame.data);
-
-				    frame.pixels = Array.prototype.slice.call(data.pixels);
-				    frame.palette = Array.prototype.slice.call(data.palette);
-				    frame.done = true;
-				    frame.beingProcessed = false;
-
-				    AnimatedGifContext.freeWorker(worker);
-
-				    AnimatedGifContext.onFrameFinished();
-				};
-
+	        	// Process the frame in a web worker
+				worker.onmessage = done;
 				worker.postMessage(frame);
+	        } else {
+	        	// Process the frame in the current thread
+	        	done({
+	        		'data': AnimatedGifContext.workerMethods.run(frame)
+	        	});
 	        }
 	    },
 	    'startRendering': function(completeCallback) {
@@ -276,6 +284,9 @@ define([
 	        this.startRendering(onRenderComplete);
 	    },
 	    'destroyWorkers': function() {
+	    	if(this.workerError) {
+	    		return;
+	    	}
 	    	var workers = this.workers;
 
 	        // Explicitly ask web workers to die so they are explicitly GC'ed

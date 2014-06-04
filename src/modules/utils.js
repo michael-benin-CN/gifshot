@@ -20,7 +20,7 @@ define(function() {
                 window.MSBlobBuilder),
         'btoa': function() {
             var btoa = (window.btoa ||
-                utils.btoaPolyfill);
+                this.btoaPolyfill);
             return btoa ? btoa.bind(window) : false;
         }(),
         // window.btoa polyfill
@@ -210,7 +210,11 @@ define(function() {
             } catch(e) {
                 return '' + e;
             }
-        }
+        },
+        'getExtension': function(src) {
+            return src.substr(src.lastIndexOf('.') + 1, src.length);
+        },
+        'webWorkerError': false
     };
     return utils;
 });

@@ -116,7 +116,7 @@ define([
 
 				if(utils.isElement(existingVideo) && existingVideo.src) {
 					videoSrc = existingVideo.src;
-					videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+					videoType = utils.getExtension(videoSrc);
 
 					if(!utils.isSupported.videoCodecs[videoType]) {
 						return callback(error.messages.videoCodecs);
