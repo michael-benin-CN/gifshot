@@ -57,7 +57,7 @@ define([
     },
     'stream': function(obj) {
       var self = this,
-        existingVideo = obj.existingVideo,
+        existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo,
         videoElement = obj.videoElement,
         cameraStream = obj.cameraStream,
         streamedCallback = obj.streamedCallback,
@@ -68,8 +68,9 @@ define([
       }
 
       if(existingVideo) {
-        if(!videoElement.src && utils.isString(existingVideo)) {
+        if(utils.isString(existingVideo)) {
           videoElement.src = existingVideo;
+          videoElement.innerHTML = '<source src="' + existingVideo +'" type="video/' + utils.getExtension(existingVideo) + '" />';
         }
       }
       else if(videoElement.mozSrcObject) {
@@ -79,6 +80,7 @@ define([
       }
 
       videoElement.play();
+
       setTimeout(function checkLoadedData() {
         checkLoadedData.count = checkLoadedData.count || 0;
         if(self.loadedData === true) {
@@ -218,8 +220,10 @@ define([
         videoElement.pause();
 
         // Destroys the object url
-        if(utils.isFunction(utils.URL.revokeObjectURL)) {
-          utils.URL.revokeObjectURL(videoElement.src);
+        if(utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
+          if(videoElement.src) {
+            utils.URL.revokeObjectURL(videoElement.src);
+          }
         }
 
         // Removes the video element from the DOM

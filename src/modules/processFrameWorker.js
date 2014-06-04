@@ -44,10 +44,10 @@ define([
             },
             // This is the "traditional" Animated_GIF style of going from RGBA to indexed color frames
             'processFrameWithQuantizer': function(imageData, width, height, sampleInterval) {
-                var rgbComponents = workerMethods.dataToRGB(imageData, width, height),
+                var rgbComponents = this.dataToRGB(imageData, width, height),
                     nq = new NeuQuant(rgbComponents, rgbComponents.length, sampleInterval),
                     paletteRGB = nq.process(),
-                    paletteArray = new Uint32Array(workerMethods.componentizedPaletteToArray(paletteRGB)),
+                    paletteArray = new Uint32Array(this.componentizedPaletteToArray(paletteRGB)),
                     numberPixels = width * height,
                     indexedPixels = new Uint8Array(numberPixels),
                     k = 0,
@@ -72,9 +72,11 @@ define([
                     palette = frame.palette,
                     sampleInterval = frame.sampleInterval;
 
-                return workerMethods.processFrameWithQuantizer(imageData, width, height, sampleInterval);
+                return this.processFrameWithQuantizer(imageData, width, height, sampleInterval);
             }
         };
+
+        return workerMethods;
 
     };
     return workerCode;
