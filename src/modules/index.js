@@ -290,7 +290,7 @@ define([
 		};
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
 	if(typeof define === 'function' && define.amd) {
-		define('gifshot', [], function() {
+		define([], function() {
 			return publicApi(gifshot);
 		});
 	} else if (typeof exports !== 'undefined') {
