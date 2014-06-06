@@ -1,7 +1,7 @@
 ;(function(window, navigator, document, undefined) {
 // utils.js
 // ========
-var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error, index, gifshot;
+var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error;
 utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -195,188 +195,190 @@ utils = function () {
         };
     return utils;
 }();
-videoStream = function () {
-    return {
-        'loadedData': false,
-        'defaultVideoDimensions': {
-            'width': 640,
-            'height': 480
-        },
-        'findVideoSize': function findVideoSizeMethod(obj) {
-            findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
-            var self = this, videoElement = obj.videoElement, cameraStream = obj.cameraStream, completedCallback = obj.completedCallback;
-            if (!videoElement) {
-                return;
-            }
-            if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-                videoElement.removeEventListener('loadeddata', self.findVideoSize);
+// videoStream.js
+// ==============
+videoStream = {
+    'loadedData': false,
+    'defaultVideoDimensions': {
+        'width': 640,
+        'height': 480
+    },
+    'findVideoSize': function findVideoSizeMethod(obj) {
+        findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
+        var self = this, videoElement = obj.videoElement, cameraStream = obj.cameraStream, completedCallback = obj.completedCallback;
+        if (!videoElement) {
+            return;
+        }
+        if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+            videoElement.removeEventListener('loadeddata', self.findVideoSize);
+            completedCallback({
+                'videoElement': videoElement,
+                'cameraStream': cameraStream,
+                'videoWidth': videoElement.videoWidth,
+                'videoHeight': videoElement.videoHeight
+            });
+        } else {
+            if (findVideoSizeMethod.attempts < 10) {
+                findVideoSizeMethod.attempts += 1;
+                setTimeout(function () {
+                    self.findVideoSize(obj);
+                }, 200);
+            } else {
                 completedCallback({
                     'videoElement': videoElement,
                     'cameraStream': cameraStream,
-                    'videoWidth': videoElement.videoWidth,
-                    'videoHeight': videoElement.videoHeight
+                    'videoWidth': self.defaultVideoDimensions.width,
+                    'videoHeight': self.defaultVideoDimensions.height
                 });
+            }
+        }
+    },
+    'onStreamingTimeout': function (callback) {
+        if (utils.isFunction(callback)) {
+            callback({
+                'error': true,
+                'errorCode': 'getUserMedia',
+                'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
+                'image': null,
+                'cameraStream': {}
+            });
+        }
+    },
+    'stream': function (obj) {
+        var self = this, existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
+        if (utils.isFunction(streamedCallback)) {
+            streamedCallback();
+        }
+        if (existingVideo) {
+            if (utils.isString(existingVideo)) {
+                videoElement.src = existingVideo;
+                videoElement.innerHTML = '<source src="' + existingVideo + '" type="video/' + utils.getExtension(existingVideo) + '" />';
+            }
+        } else if (videoElement.mozSrcObject) {
+            videoElement.mozSrcObject = cameraStream;
+        } else if (utils.URL) {
+            videoElement.src = utils.URL.createObjectURL(cameraStream);
+        }
+        videoElement.play();
+        setTimeout(function checkLoadedData() {
+            checkLoadedData.count = checkLoadedData.count || 0;
+            if (self.loadedData === true) {
+                self.findVideoSize({
+                    'videoElement': videoElement,
+                    'cameraStream': cameraStream,
+                    'completedCallback': completedCallback
+                });
+                self.loadedData = false;
             } else {
-                if (findVideoSizeMethod.attempts < 10) {
-                    findVideoSizeMethod.attempts += 1;
-                    setTimeout(function () {
-                        self.findVideoSize(obj);
-                    }, 200);
-                } else {
-                    completedCallback({
-                        'videoElement': videoElement,
-                        'cameraStream': cameraStream,
-                        'videoWidth': self.defaultVideoDimensions.width,
-                        'videoHeight': self.defaultVideoDimensions.height
-                    });
-                }
-            }
-        },
-        'onStreamingTimeout': function (callback) {
-            if (utils.isFunction(callback)) {
-                callback({
-                    'error': true,
-                    'errorCode': 'getUserMedia',
-                    'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
-                    'image': null,
-                    'cameraStream': {}
-                });
-            }
-        },
-        'stream': function (obj) {
-            var self = this, existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
-            if (utils.isFunction(streamedCallback)) {
-                streamedCallback();
-            }
-            if (existingVideo) {
-                if (utils.isString(existingVideo)) {
-                    videoElement.src = existingVideo;
-                    videoElement.innerHTML = '<source src="' + existingVideo + '" type="video/' + utils.getExtension(existingVideo) + '" />';
-                }
-            } else if (videoElement.mozSrcObject) {
-                videoElement.mozSrcObject = cameraStream;
-            } else if (utils.URL) {
-                videoElement.src = utils.URL.createObjectURL(cameraStream);
-            }
-            videoElement.play();
-            setTimeout(function checkLoadedData() {
-                checkLoadedData.count = checkLoadedData.count || 0;
-                if (self.loadedData === true) {
+                checkLoadedData.count += 1;
+                if (checkLoadedData.count > 10) {
                     self.findVideoSize({
                         'videoElement': videoElement,
                         'cameraStream': cameraStream,
                         'completedCallback': completedCallback
                     });
-                    self.loadedData = false;
                 } else {
-                    checkLoadedData.count += 1;
-                    if (checkLoadedData.count > 10) {
-                        self.findVideoSize({
-                            'videoElement': videoElement,
-                            'cameraStream': cameraStream,
-                            'completedCallback': completedCallback
-                        });
-                    } else {
-                        checkLoadedData();
-                    }
+                    checkLoadedData();
                 }
-            }, 100);
-        },
-        'startStreaming': function (obj) {
-            var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, webcamVideoElement = obj.webcamVideoElement, videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
-            videoElement.crossOrigin = 'Anonymous';
-            videoElement.autoplay = true;
-            videoElement.loop = true;
-            videoElement.muted = true;
-            videoElement.addEventListener('loadeddata', function (event) {
-                self.loadedData = true;
+            }
+        }, 100);
+    },
+    'startStreaming': function (obj) {
+        var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, webcamVideoElement = obj.webcamVideoElement, videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
+        videoElement.crossOrigin = 'Anonymous';
+        videoElement.autoplay = true;
+        videoElement.loop = true;
+        videoElement.muted = true;
+        videoElement.addEventListener('loadeddata', function (event) {
+            self.loadedData = true;
+        });
+        if (existingVideo) {
+            self.stream({
+                'videoElement': videoElement,
+                'existingVideo': existingVideo,
+                'completedCallback': completedCallback
             });
-            if (existingVideo) {
+        } else if (lastCameraStream) {
+            self.stream({
+                'videoElement': videoElement,
+                'cameraStream': lastCameraStream,
+                'streamedCallback': streamedCallback,
+                'completedCallback': completedCallback
+            });
+        } else {
+            utils.getUserMedia({ 'video': true }, function (stream) {
                 self.stream({
                     'videoElement': videoElement,
-                    'existingVideo': existingVideo,
-                    'completedCallback': completedCallback
-                });
-            } else if (lastCameraStream) {
-                self.stream({
-                    'videoElement': videoElement,
-                    'cameraStream': lastCameraStream,
+                    'cameraStream': stream,
                     'streamedCallback': streamedCallback,
                     'completedCallback': completedCallback
                 });
-            } else {
-                utils.getUserMedia({ 'video': true }, function (stream) {
-                    self.stream({
-                        'videoElement': videoElement,
-                        'cameraStream': stream,
-                        'streamedCallback': streamedCallback,
-                        'completedCallback': completedCallback
-                    });
-                }, errorCallback);
-            }
-        },
-        startVideoStreaming: function (callback, options) {
-            options = options || {};
-            var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
-            // Some browsers apparently have support for video streaming because of the
-            // presence of the getUserMedia function, but then do not answer our
-            // calls for streaming.
-            // So we'll set up this timeout and if nothing happens after a while, we'll
-            // conclude that there's no actual getUserMedia support.
-            if (timeoutLength > 0) {
-                noGetUserMediaSupportTimeout = setTimeout(function () {
-                    self.onStreamingTimeout(originalCallback);
-                }, 10000);
-            }
-            this.startStreaming({
-                'error': function () {
-                    originalCallback({
-                        'error': true,
-                        'errorCode': 'getUserMedia',
-                        'errorMsg': 'There was an issue with the getUserMedia API - the user probably denied permission',
-                        'image': null,
-                        'cameraStream': {}
-                    });
-                },
-                'streamed': function () {
-                    // The streaming started somehow, so we can assume there is getUserMedia support
-                    clearTimeout(noGetUserMediaSupportTimeout);
-                },
-                'completed': function (obj) {
-                    var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight;
-                    callback({
-                        'cameraStream': cameraStream,
-                        'videoElement': videoElement,
-                        'videoWidth': videoWidth,
-                        'videoHeight': videoHeight
-                    });
-                },
-                'lastCameraStream': options.lastCameraStream,
-                'webcamVideoElement': webcamVideoElement
-            });
-        },
-        'stopVideoStreaming': function (obj) {
-            obj = utils.isObject(obj) ? obj : {};
-            var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
-            if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
-                // Stops the camera stream
-                cameraStream.stop();
-            }
-            if (utils.isElement(videoElement) && !webcamVideoElement) {
-                // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
-                videoElement.pause();
-                // Destroys the object url
-                if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
-                    if (videoElement.src) {
-                        utils.URL.revokeObjectURL(videoElement.src);
-                    }
-                }
-                // Removes the video element from the DOM
-                utils.removeElement(videoElement);
-            }
+            }, errorCallback);
         }
-    };
-}();
+    },
+    startVideoStreaming: function (callback, options) {
+        options = options || {};
+        var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
+        // Some browsers apparently have support for video streaming because of the
+        // presence of the getUserMedia function, but then do not answer our
+        // calls for streaming.
+        // So we'll set up this timeout and if nothing happens after a while, we'll
+        // conclude that there's no actual getUserMedia support.
+        if (timeoutLength > 0) {
+            noGetUserMediaSupportTimeout = setTimeout(function () {
+                self.onStreamingTimeout(originalCallback);
+            }, 10000);
+        }
+        this.startStreaming({
+            'error': function () {
+                originalCallback({
+                    'error': true,
+                    'errorCode': 'getUserMedia',
+                    'errorMsg': 'There was an issue with the getUserMedia API - the user probably denied permission',
+                    'image': null,
+                    'cameraStream': {}
+                });
+            },
+            'streamed': function () {
+                // The streaming started somehow, so we can assume there is getUserMedia support
+                clearTimeout(noGetUserMediaSupportTimeout);
+            },
+            'completed': function (obj) {
+                var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight;
+                callback({
+                    'cameraStream': cameraStream,
+                    'videoElement': videoElement,
+                    'videoWidth': videoWidth,
+                    'videoHeight': videoHeight
+                });
+            },
+            'lastCameraStream': options.lastCameraStream,
+            'webcamVideoElement': webcamVideoElement
+        });
+    },
+    'stopVideoStreaming': function (obj) {
+        obj = utils.isObject(obj) ? obj : {};
+        var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
+        if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
+            // Stops the camera stream
+            cameraStream.stop();
+        }
+        if (utils.isElement(videoElement) && !webcamVideoElement) {
+            // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
+            videoElement.pause();
+            // Destroys the object url
+            if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
+                if (videoElement.src) {
+                    utils.URL.revokeObjectURL(videoElement.src);
+                }
+            }
+            // Removes the video element from the DOM
+            utils.removeElement(videoElement);
+        }
+    }
+};
+// NeuQuant.js
+// ===========
 NeuQuant = function () {
     /*
     	* NeuQuant Neural-Net Quantization Algorithm
@@ -845,6 +847,8 @@ NeuQuant = function () {
     }
     return NeuQuant;
 }();
+// processFrameWorker.js
+// =====================
 processFrameWorker = function () {
     var workerCode = function worker() {
         self.onmessage = function (ev) {
@@ -895,6 +899,8 @@ processFrameWorker = function () {
     };
     return workerCode;
 }();
+// gifWriter.js
+// ============
 gifWriter = function () {
     // (c) Dean McNamee <dean@gmail.com>, 2013.
     //
@@ -1243,6 +1249,8 @@ gifWriter = function () {
     }
     return GifWriter;
 }();
+// animatedGif.js
+// ==============
 animatedGif = function (frameWorkerCode, GifWriter) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
@@ -1471,87 +1479,89 @@ animatedGif = function (frameWorkerCode, GifWriter) {
     };
     return AnimatedGIF;
 }(processFrameWorker, gifWriter);
-screenShot = function (AnimatedGIF) {
-    return {
-        getWebcamGif: function (obj, callback) {
-            callback = utils.isFunction(callback) ? callback : function () {
-            };
-            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
-                    'sampleInterval': sampleInterval,
-                    'numWorkers': numWorkers,
-                    'width': gifWidth,
-                    'height': gifHeight,
-                    'delay': interval
-                }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
-                    // if(ag.workerError && ag.workerError.length) {
-                    // 	callback({
-                    // 		'error': true,
-                    // 		'errorCode': 'webworkers',
-                    // 		'errorMsg': ag.workerError,
-                    // 		'image': null,
-                    // 		'cameraStream': cameraStream,
-                    // 		'videoElement': videoElement,
-                    // 		'webcamVideoElement': webcamVideoElement
-                    // 	});
-                    // 	return;
-                    // }
-                    var framesLeft = pendingFrames - 1;
-                    context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
-                    // If there is text to display, make sure to display it on the canvas after the image is drawn
-                    if (text) {
-                        context.font = font;
-                        context.fillStyle = fontColor;
-                        context.textAlign = textAlign;
-                        context.textBaseline = textBaseline;
-                        context.fillText(text, textXCoordinate, textYCoordinate);
-                    }
-                    ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
-                    pendingFrames = framesLeft;
-                    // Call back with an r value indicating how far along we are in capture
-                    progressCallback((numFrames - pendingFrames) / numFrames);
-                    if (framesLeft > 0) {
-                        setTimeout(captureFrame, interval * 1000);
-                    }
-                    if (!pendingFrames) {
-                        ag.getBase64GIF(function (image) {
-                            callback({
-                                'error': false,
-                                'errorCode': '',
-                                'errorMsg': '',
-                                'image': image,
-                                'cameraStream': cameraStream,
-                                'videoElement': videoElement,
-                                'webcamVideoElement': webcamVideoElement
-                            });
+// screenShot.js
+// =============
+screenShot = {
+    getWebcamGif: function (obj, callback) {
+        callback = utils.isFunction(callback) ? callback : function () {
+        };
+        var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+                'sampleInterval': sampleInterval,
+                'numWorkers': numWorkers,
+                'width': gifWidth,
+                'height': gifHeight,
+                'delay': interval
+            }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
+                // if(ag.workerError && ag.workerError.length) {
+                // 	callback({
+                // 		'error': true,
+                // 		'errorCode': 'webworkers',
+                // 		'errorMsg': ag.workerError,
+                // 		'image': null,
+                // 		'cameraStream': cameraStream,
+                // 		'videoElement': videoElement,
+                // 		'webcamVideoElement': webcamVideoElement
+                // 	});
+                // 	return;
+                // }
+                var framesLeft = pendingFrames - 1;
+                context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
+                // If there is text to display, make sure to display it on the canvas after the image is drawn
+                if (text) {
+                    context.font = font;
+                    context.fillStyle = fontColor;
+                    context.textAlign = textAlign;
+                    context.textBaseline = textBaseline;
+                    context.fillText(text, textXCoordinate, textYCoordinate);
+                }
+                ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+                pendingFrames = framesLeft;
+                // Call back with an r value indicating how far along we are in capture
+                progressCallback((numFrames - pendingFrames) / numFrames);
+                if (framesLeft > 0) {
+                    setTimeout(captureFrame, interval * 1000);
+                }
+                if (!pendingFrames) {
+                    ag.getBase64GIF(function (image) {
+                        callback({
+                            'error': false,
+                            'errorCode': '',
+                            'errorMsg': '',
+                            'image': image,
+                            'cameraStream': cameraStream,
+                            'videoElement': videoElement,
+                            'webcamVideoElement': webcamVideoElement
                         });
-                    }
-                };
-            numFrames = numFrames !== undefined ? numFrames : 10;
-            interval = interval !== undefined ? interval : 0.1;
-            // In seconds
-            canvas.width = gifWidth;
-            canvas.height = gifHeight;
-            context = canvas.getContext('2d');
-            captureFrame();
-        },
-        'getCropDimensions': function (obj) {
-            var width = obj.videoWidth, height = obj.videoHeight, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, result = {
-                    width: 0,
-                    height: 0,
-                    scaledWidth: 0,
-                    scaledHeight: 0
-                };
-            if (width > height) {
-                result.width = Math.round(width * (gifHeight / height)) - gifWidth;
-                result.scaledWidth = Math.round(result.width * (height / gifHeight));
-            } else {
-                result.height = Math.round(height * (gifWidth / width)) - gifHeight;
-                result.scaledHeight = Math.round(result.height * (width / gifWidth));
-            }
-            return result;
+                    });
+                }
+            };
+        numFrames = numFrames !== undefined ? numFrames : 10;
+        interval = interval !== undefined ? interval : 0.1;
+        // In seconds
+        canvas.width = gifWidth;
+        canvas.height = gifHeight;
+        context = canvas.getContext('2d');
+        captureFrame();
+    },
+    'getCropDimensions': function (obj) {
+        var width = obj.videoWidth, height = obj.videoHeight, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, result = {
+                width: 0,
+                height: 0,
+                scaledWidth: 0,
+                scaledHeight: 0
+            };
+        if (width > height) {
+            result.width = Math.round(width * (gifHeight / height)) - gifWidth;
+            result.scaledWidth = Math.round(result.width * (height / gifHeight));
+        } else {
+            result.height = Math.round(height * (gifWidth / width)) - gifHeight;
+            result.scaledHeight = Math.round(result.height * (width / gifWidth));
         }
-    };
-}(animatedGif);
+        return result;
+    }
+};
+// error.js
+// ========
 error = function () {
     var error = {
             'validate': function (skipObj) {
@@ -1618,7 +1628,15 @@ error = function () {
         };
     return error;
 }();
-index = function (AnimatedGif) {
+// index.js
+// ========
+define([
+    'utils',
+    'videoStream',
+    'screenShot',
+    'animatedGif',
+    'error'
+], function (utils, videoStream, screenShot, AnimatedGif, error) {
     var gifshot = {
             'utils': utils,
             '_defaultOptions': {
@@ -1843,11 +1861,13 @@ index = function (AnimatedGif) {
         };
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
     if (typeof define === 'function' && define.amd) {
-        gifshot = publicApi(gifshot);
+        define([], function () {
+            return publicApi(gifshot);
+        });
     } else if (typeof exports !== 'undefined') {
         module.exports = publicApi(gifshot);
     } else {
         window.gifshot = publicApi(gifshot);
     }
-}(animatedGif);
+});
 }(window, window.navigator, document));
