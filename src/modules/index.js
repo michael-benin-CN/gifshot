@@ -1,5 +1,10 @@
 // index.js
 // ========
+
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
+
 define([
 	'utils',
 	'videoStream',
@@ -159,7 +164,7 @@ define([
 				});
 			}
 		},
-		_getBase64GIF: function(animatedGifInstance, callback) {
+		'_getBase64GIF': function(animatedGifInstance, callback) {
 			// This is asynchronous, rendered with WebWorkers
 			animatedGifInstance.getBase64GIF(function(image) {
 				callback({
@@ -288,6 +293,7 @@ define([
 			}
 			return publicApi;
 		};
+
 	// Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
 	if(typeof define === 'function' && define.amd) {
 		define([], function() {

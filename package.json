@@ -1,7 +1,7 @@
 {
   "name": "gifshot",
   "version": "0.0.1",
-  "description": "JavaScript library that creates animated gifs from a video stream",
+  "description": "JavaScript library that can create animated gifs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images",
   "main": "./src/gifshot",
   "repository": {
     "type": "git",
@@ -27,9 +27,10 @@
     "watch": "gulp watch"
   },
   "devDependencies": {
-    "amdclean": "^2.0.0",
+    "amdclean": "latest",
     "express": "^4.2.0",
     "gulp": "^3.6.2",
+    "gulp-insert": "^0.3.0",
     "gulp-jshint": "^1.6.0",
     "gulp-rename": "^1.2.0",
     "gulp-uglify": "^0.3.0",

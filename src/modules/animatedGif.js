@@ -1,5 +1,12 @@
 // animatedGif.js
 // ==============
+
+// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
+
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
+
 define([
 	'utils',
 	'processFrameWorker',
@@ -23,7 +30,7 @@ define([
 
 		// Constructs and initializes the the web workers appropriately
 		this.initializeWebWorkers(options);
-	}
+	};
 
 	AnimatedGIF.prototype = {
 		'defaultOptions': {
@@ -63,14 +70,11 @@ define([
 			}
 
 			this.workerError = workerError;
-
-	        this.canvas = document.createElement('canvas');
-	        this.canvas.width = options.width;
-	        this.canvas.height = options.height;
-	        this.ctx = this.canvas.getContext('2d');
-
+			this.canvas = document.createElement('canvas');
+			this.canvas.width = options.width;
+			this.canvas.height = options.height;
+			this.ctx = this.canvas.getContext('2d');
 			this.options.delay = this.options.delay * 0.1;
-
 			this.frames = [];
 		},
 		// Return a worker for processing a frame
@@ -88,7 +92,7 @@ define([
 			}
 			return byteMap;
 		}()),
-	    'bufferToString': function(buffer) {
+		'bufferToString': function(buffer) {
 			var numberValues = buffer.length,
 				str = '',
 				x = -1;
@@ -99,166 +103,166 @@ define([
 
 			return str;
 		},
-	    'onFrameFinished': function() {
-	        // The GIF is not written until we're done with all the frames
-	        // because they might not be processed in the same order
-	        var self = this,
-	        	frames = this.frames,
-	        	allDone = frames.every(function(frame) {
-	            	return !frame.beingProcessed && frame.done;
-	        	});
+		'onFrameFinished': function() {
+		    // The GIF is not written until we're done with all the frames
+		    // because they might not be processed in the same order
+		    var self = this,
+		    	frames = this.frames,
+		    	allDone = frames.every(function(frame) {
+		        	return !frame.beingProcessed && frame.done;
+		    	});
 
-	        this.numRenderedFrames++;
-	        this.onRenderProgressCallback(this.numRenderedFrames * 0.75 / frames.length);
+		    this.numRenderedFrames++;
+		    this.onRenderProgressCallback(this.numRenderedFrames * 0.75 / frames.length);
 
-	        if(allDone) {
-	            if(!this.generatingGIF) {
-	                this.generateGIF(frames, this.onRenderCompleteCallback);
-	            }
-	        } else {
-	            setTimeout(function() {
-	            	self.processNextFrame();
-	            }, 1);
-	        }
+		    if(allDone) {
+		        if(!this.generatingGIF) {
+		            this.generateGIF(frames, this.onRenderCompleteCallback);
+		        }
+		    } else {
+		        setTimeout(function() {
+		        	self.processNextFrame();
+		        }, 1);
+		    }
 
-	    },
-	    'processFrame': function(position) {
-	        var AnimatedGifContext = this,
-	        	options = this.options,
-	        	sampleInterval = options.sampleInterval,
-	        	frames = this.frames,
-	        	frame,
-	        	worker,
-	        	done = function(ev) {
-				    var data = ev.data;
+		},
+    'processFrame': function(position) {
+        var AnimatedGifContext = this,
+        	options = this.options,
+        	sampleInterval = options.sampleInterval,
+        	frames = this.frames,
+        	frame,
+        	worker,
+        	done = function(ev) {
+			    var data = ev.data;
 
-				    // Delete original data, and free memory
-				    delete(frame.data);
+			    // Delete original data, and free memory
+			    delete(frame.data);
 
-				    frame.pixels = Array.prototype.slice.call(data.pixels);
-				    frame.palette = Array.prototype.slice.call(data.palette);
-				    frame.done = true;
-				    frame.beingProcessed = false;
+			    frame.pixels = Array.prototype.slice.call(data.pixels);
+			    frame.palette = Array.prototype.slice.call(data.palette);
+			    frame.done = true;
+			    frame.beingProcessed = false;
 
-				    AnimatedGifContext.freeWorker(worker);
+			    AnimatedGifContext.freeWorker(worker);
 
-				    AnimatedGifContext.onFrameFinished();
-	        	};
+			    AnimatedGifContext.onFrameFinished();
+        	};
 
-	        frame = frames[position];
+        frame = frames[position];
 
-	        if(frame.beingProcessed || frame.done) {
-	            this.onFrameFinished();
-	            return;
-	        }
+        if(frame.beingProcessed || frame.done) {
+            this.onFrameFinished();
+            return;
+        }
 
-	        frame.sampleInterval = sampleInterval;
-	        frame.beingProcessed = true;
+        frame.sampleInterval = sampleInterval;
+        frame.beingProcessed = true;
 
-	        worker = this.getWorker();
+        worker = this.getWorker();
 
-	        if(worker) {
-	        	// Process the frame in a web worker
-				worker.onmessage = done;
-				worker.postMessage(frame);
-	        } else {
-	        	// Process the frame in the current thread
-	        	done({
-	        		'data': AnimatedGifContext.workerMethods.run(frame)
-	        	});
-	        }
-	    },
-	    'startRendering': function(completeCallback) {
-	        this.onRenderCompleteCallback = completeCallback;
+        if(worker) {
+        	// Process the frame in a web worker
+			worker.onmessage = done;
+			worker.postMessage(frame);
+        } else {
+        	// Process the frame in the current thread
+        	done({
+        		'data': AnimatedGifContext.workerMethods.run(frame)
+        	});
+        }
+    },
+    'startRendering': function(completeCallback) {
+        this.onRenderCompleteCallback = completeCallback;
 
-	        for(var i = 0; i < this.options.numWorkers && i < this.frames.length; i++) {
-	            this.processFrame(i);
-	        }
-	    },
-	    'processNextFrame': function() {
-	        var position = -1;
+        for(var i = 0; i < this.options.numWorkers && i < this.frames.length; i++) {
+            this.processFrame(i);
+        }
+    },
+    'processNextFrame': function() {
+        var position = -1;
 
-	        for(var i = 0; i < this.frames.length; i++) {
-	            var frame = this.frames[i];
-	            if(!frame.done && !frame.beingProcessed) {
-	                position = i;
-	                break;
-	            }
-	        }
+        for(var i = 0; i < this.frames.length; i++) {
+            var frame = this.frames[i];
+            if(!frame.done && !frame.beingProcessed) {
+                position = i;
+                break;
+            }
+        }
 
-	        if(position >= 0) {
-	            this.processFrame(position);
-	        }
-	    },
-	    // Takes the already processed data in frames and feeds it to a new
-	    // GifWriter instance in order to get the binary GIF file
-	    'generateGIF': function(frames, callback) {
-	        // TODO: Weird: using a simple JS array instead of a typed array,
-	        // the files are WAY smaller o_o. Patches/explanations welcome!
-	        var buffer = [], // new Uint8Array(width * height * frames.length * 5);
-	        	gifOptions = {
-					'loop': this.repeat
-				},
-				options = this.options,
-				height = options.height,
-				width = options.width,
-				gifWriter = new GifWriter(buffer, width, height, gifOptions),
-				onRenderProgressCallback = this.onRenderProgressCallback,
-				delay = options.delay,
-				bufferToString,
-				gif;
+        if(position >= 0) {
+            this.processFrame(position);
+        }
+    },
+    // Takes the already processed data in frames and feeds it to a new
+    // GifWriter instance in order to get the binary GIF file
+    'generateGIF': function(frames, callback) {
+        // TODO: Weird: using a simple JS array instead of a typed array,
+        // the files are WAY smaller o_o. Patches/explanations welcome!
+        var buffer = [], // new Uint8Array(width * height * frames.length * 5);
+					gifOptions = {
+						'loop': this.repeat
+					},
+					options = this.options,
+					height = options.height,
+					width = options.width,
+					gifWriter = new GifWriter(buffer, width, height, gifOptions),
+					onRenderProgressCallback = this.onRenderProgressCallback,
+					delay = options.delay,
+					bufferToString,
+					gif;
 
-	        this.generatingGIF = true;
+				this.generatingGIF = true;
 
-	        utils.each(frames, function(iterator, frame) {
-				var framePalette = frame.palette;
+				utils.each(frames, function(iterator, frame) {
+					var framePalette = frame.palette;
 
-				onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
+					onRenderProgressCallback(0.75 + 0.25 * frame.position * 1.0 / frames.length);
 
-				gifWriter.addFrame(0, 0, width, height, frame.pixels, {
-				    palette: framePalette,
-				    delay: delay
+					gifWriter.addFrame(0, 0, width, height, frame.pixels, {
+					    palette: framePalette,
+					    delay: delay
+					});
 				});
-	        });
 
-	        gifWriter.end();
+				gifWriter.end();
 
-	        onRenderProgressCallback(1.0);
+				onRenderProgressCallback(1.0);
 
-	        this.frames = [];
+				this.frames = [];
 
-	        this.generatingGIF = false;
+				this.generatingGIF = false;
 
-	        if(utils.isFunction(callback)) {
-                bufferToString = this.bufferToString(buffer);
-                gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
-				callback(gif);
-	        }
-	    },
-	    // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
-	    'setRepeat': function(r) {
-	        this.repeat = r;
-	    },
-	    'addFrame': function(element, src) {
-	    	var self = this,
-	    		ctx = this.ctx,
-	    		options = this.options,
-	    		width = options.width,
-	    		height = options.height,
-	    		imageData;
+				if(utils.isFunction(callback)) {
+				    bufferToString = this.bufferToString(buffer);
+				    gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
+						callback(gif);
+				}
+    },
+    // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
+    'setRepeat': function(r) {
+        this.repeat = r;
+    },
+		'addFrame': function(element, src) {
+			var self = this,
+				ctx = this.ctx,
+				options = this.options,
+				width = options.width,
+				height = options.height,
+				imageData;
 
-	    	try {
-	    		if(src) {
-	    			element.src = src;
-	    		}
+			try {
+				if(src) {
+					element.src = src;
+				}
 				ctx.drawImage(element, 0, 0, width, height);
 				imageData = ctx.getImageData(0, 0, width, height);
 
 				self.addFrameImageData(imageData);
-	    	} catch(e) {
-	    		return '' + e;
-	    	}
-	    },
+			} catch(e) {
+				return '' + e;
+			}
+		},
 		'addFrameImageData': function(imageData) {
 		    var frames = this.frames,
 		        imageDataArray = imageData.data;
@@ -274,40 +278,39 @@ define([
 		        'position': frames.length
 		    });
 		},
-	    'onRenderProgress': function(callback) {
-	        this.onRenderProgressCallback = callback;
-	    },
+    'onRenderProgress': function(callback) {
+        this.onRenderProgressCallback = callback;
+    },
 		'isRendering': function() {
 			return this.generatingGIF;
-	    },
-	    'getBase64GIF': function(completeCallback) {
-	    	var self = this,
-	    		onRenderComplete = function(gif) {
-					self.destroyWorkers();
-					setTimeout(function() {
-						completeCallback(gif);
-					}, 0);
-				};
+		},
+    'getBase64GIF': function(completeCallback) {
+			var self = this,
+				onRenderComplete = function(gif) {
+				self.destroyWorkers();
+				setTimeout(function() {
+					completeCallback(gif);
+				}, 0);
+			};
 
-	        this.startRendering(onRenderComplete);
-	    },
-	    'destroyWorkers': function() {
-	    	if(this.workerError) {
-	    		return;
-	    	}
-	    	var workers = this.workers;
+			this.startRendering(onRenderComplete);
+    },
+    'destroyWorkers': function() {
+    	if(this.workerError) {
+    		return;
+    	}
 
-	        // Explicitly ask web workers to die so they are explicitly GC'ed
-	        utils.each(workers, function(iterator, workerObj) {
-	        	var worker = workerObj.worker,
-	        		objectUrl = workerObj.objectUrl;
+    	var workers = this.workers;
+
+			// Explicitly ask web workers to die so they are explicitly GC'ed
+			utils.each(workers, function(iterator, workerObj) {
+				var worker = workerObj.worker,
+					objectUrl = workerObj.objectUrl;
 
 				worker.terminate();
-
 				utils.URL.revokeObjectURL(objectUrl);
-	        });
-
-	    }
+			});
+    }
 	};
 	return AnimatedGIF;
 });

@@ -1,5 +1,12 @@
 // videoStream.js
 // ==============
+
+// Inspired from https://github.com/sole/gumhelper/blob/master/gumhelper.js
+
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
+
 define([
   'utils'
 ], function(utils) {
@@ -11,6 +18,7 @@ define([
     },
     'findVideoSize': function findVideoSizeMethod(obj) {
       findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
+
       var self = this,
         videoElement = obj.videoElement,
         cameraStream = obj.cameraStream,
