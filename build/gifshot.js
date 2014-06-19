@@ -1,6 +1,16 @@
+/*Copyrights for code authored by Yahoo! Inc. is licensed under the following terms:
+MIT License
+Copyright  2014 Yahoo! Inc.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ;(function(window, navigator, document, undefined) {
 // utils.js
 // ========
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 var utils, videoStream, NeuQuant, processFrameWorker, gifWriter, animatedGif, screenShot, error;
 utils = function () {
     var utils = {
@@ -197,6 +207,10 @@ utils = function () {
 }();
 // videoStream.js
 // ==============
+// Inspired from https://github.com/sole/gumhelper/blob/master/gumhelper.js
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 videoStream = {
     'loadedData': false,
     'defaultVideoDimensions': {
@@ -379,36 +393,36 @@ videoStream = {
 };
 // NeuQuant.js
 // ===========
+/*
+* NeuQuant Neural-Net Quantization Algorithm
+* ------------------------------------------
+* 
+* Copyright (c) 1994 Anthony Dekker
+* 
+* NEUQUANT Neural-Net quantization algorithm by Anthony Dekker, 1994. See
+* "Kohonen neural networks for optimal colour quantization" in "Network:
+* Computation in Neural Systems" Vol. 5 (1994) pp 351-367. for a discussion of
+* the algorithm.
+* 
+* Any party obtaining a copy of these files from the author, directly or
+* indirectly, is granted, free of charge, a full and unrestricted irrevocable,
+* world-wide, paid up, royalty-free, nonexclusive right and license to deal in
+* this software and documentation files (the "Software"), including without
+* limitation the rights to use, copy, modify, merge, publish, distribute,
+* sublicense, and/or sell copies of the Software, and to permit persons who
+* receive copies from any such party to do so, with the only requirement being
+* that this copyright notice remain intact.
+*/
+/*
+* This class handles Neural-Net quantization algorithm
+* @author Kevin Weiner (original Java version - kweiner@fmsware.com)
+* @author Thibault Imbert (AS3 version - bytearray.org)
+* @version 0.1 AS3 implementation
+* @version 0.2 JS->AS3 "translation" by antimatter15
+* @version 0.3 JS clean up + using modern JS idioms by sole - http://soledadpenades.com
+* Also implement fix in color conversion described at http://stackoverflow.com/questions/16371712/neuquant-js-javascript-color-quantization-hidden-bug-in-js-conversion
+*/
 NeuQuant = function () {
-    /*
-    	* NeuQuant Neural-Net Quantization Algorithm
-    	* ------------------------------------------
-    	* 
-    	* Copyright (c) 1994 Anthony Dekker
-    	* 
-    	* NEUQUANT Neural-Net quantization algorithm by Anthony Dekker, 1994. See
-    	* "Kohonen neural networks for optimal colour quantization" in "Network:
-    	* Computation in Neural Systems" Vol. 5 (1994) pp 351-367. for a discussion of
-    	* the algorithm.
-    	* 
-    	* Any party obtaining a copy of these files from the author, directly or
-    	* indirectly, is granted, free of charge, a full and unrestricted irrevocable,
-    	* world-wide, paid up, royalty-free, nonexclusive right and license to deal in
-    	* this software and documentation files (the "Software"), including without
-    	* limitation the rights to use, copy, modify, merge, publish, distribute,
-    	* sublicense, and/or sell copies of the Software, and to permit persons who
-    	* receive copies from any such party to do so, with the only requirement being
-    	* that this copyright notice remain intact.
-    	*/
-    /*
-    	* This class handles Neural-Net quantization algorithm
-    	* @author Kevin Weiner (original Java version - kweiner@fmsware.com)
-    	* @author Thibault Imbert (AS3 version - bytearray.org)
-    	* @version 0.1 AS3 implementation
-    	* @version 0.2 JS->AS3 "translation" by antimatter15
-    	* @version 0.3 JS clean up + using modern JS idioms by sole - http://soledadpenades.com
-    	* Also implement fix in color conversion described at http://stackoverflow.com/questions/16371712/neuquant-js-javascript-color-quantization-hidden-bug-in-js-conversion
-    	*/
     function NeuQuant() {
         var netsize = 256;
         // number of colours used
@@ -849,6 +863,10 @@ NeuQuant = function () {
 }();
 // processFrameWorker.js
 // =====================
+// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.worker.js
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 processFrameWorker = function () {
     var workerCode = function worker() {
         self.onmessage = function (ev) {
@@ -901,32 +919,32 @@ processFrameWorker = function () {
 }();
 // gifWriter.js
 // ============
+// (c) Dean McNamee <dean@gmail.com>, 2013.
+//
+// https://github.com/deanm/omggif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+//
+// omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
+// including animation and compression.  It does not rely on any specific
+// underlying system, so should run in the browser, Node, or Plask.
 gifWriter = function () {
-    // (c) Dean McNamee <dean@gmail.com>, 2013.
-    //
-    // https://github.com/deanm/omggif
-    //
-    // Permission is hereby granted, free of charge, to any person obtaining a copy
-    // of this software and associated documentation files (the "Software"), to
-    // deal in the Software without restriction, including without limitation the
-    // rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-    // sell copies of the Software, and to permit persons to whom the Software is
-    // furnished to do so, subject to the following conditions:
-    //
-    // The above copyright notice and this permission notice shall be included in
-    // all copies or substantial portions of the Software.
-    //
-    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-    // IN THE SOFTWARE.
-    //
-    // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
-    // including animation and compression.  It does not rely on any specific
-    // underlying system, so should run in the browser, Node, or Plask.
     function GifWriter(buf, width, height, gopts) {
         var p = 0;
         gopts = gopts === undefined ? {} : gopts;
@@ -1251,6 +1269,10 @@ gifWriter = function () {
 }();
 // animatedGif.js
 // ==============
+// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 animatedGif = function (frameWorkerCode, GifWriter) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
@@ -1481,6 +1503,10 @@ animatedGif = function (frameWorkerCode, GifWriter) {
 }(processFrameWorker, gifWriter);
 // screenShot.js
 // =============
+// Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 screenShot = {
     getWebcamGif: function (obj, callback) {
         callback = utils.isFunction(callback) ? callback : function () {
@@ -1492,18 +1518,6 @@ screenShot = {
                 'height': gifHeight,
                 'delay': interval
             }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
-                // if(ag.workerError && ag.workerError.length) {
-                // 	callback({
-                // 		'error': true,
-                // 		'errorCode': 'webworkers',
-                // 		'errorMsg': ag.workerError,
-                // 		'image': null,
-                // 		'cameraStream': cameraStream,
-                // 		'videoElement': videoElement,
-                // 		'webcamVideoElement': webcamVideoElement
-                // 	});
-                // 	return;
-                // }
                 var framesLeft = pendingFrames - 1;
                 context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
                 // If there is text to display, make sure to display it on the canvas after the image is drawn
@@ -1562,6 +1576,9 @@ screenShot = {
 };
 // error.js
 // ========
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 error = function () {
     var error = {
             'validate': function (skipObj) {
@@ -1630,6 +1647,9 @@ error = function () {
 }();
 // index.js
 // ========
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
 define([
     'utils',
     'videoStream',
@@ -1763,7 +1783,7 @@ define([
                     });
                 }
             },
-            _getBase64GIF: function (animatedGifInstance, callback) {
+            '_getBase64GIF': function (animatedGifInstance, callback) {
                 // This is asynchronous, rendered with WebWorkers
                 animatedGifInstance.getBase64GIF(function (image) {
                     callback({

@@ -1,5 +1,10 @@
 // utils.js
 // ========
+
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
+
 define(function() {
     var utils = {
         'URL': (window.URL ||
@@ -216,5 +221,6 @@ define(function() {
         },
         'webWorkerError': false
     };
+
     return utils;
 });
