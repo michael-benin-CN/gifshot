@@ -217,6 +217,22 @@ gifshot.takeSnapShot(function(obj) {
 'numWorkers': 2
 ```
 
+## Contributing
+
+Please send all PR's to the `dev` branch.
+
+If your PR is a code change:
+
+1.  Install all node.js dev dependencies: `npm install`
+2.  Update the appropriate module inside of the `src/modules` directory.
+3.  Install gulp.js globally: `sudo npm install gulp -g`
+4.  Lint and Minify with Gulp: `gulp`
+5.  Verify that the minified output file has been updated in `build/gifshot.js` and `build/gifshot.min.js`
+6.  Send the PR!
+
+**Note:** There is a gulp `watch` task set up that will automatically build, lint, and minify gifshot whenever a module inside of the `src/modules` directory is changed.  We recommend using it.
+
+
 ## Credits
 
 gifshot.js would not have been possible without the help/inspiration of the following libraries/awesome people:

@@ -74,8 +74,7 @@ gulp.task('default', ['clean','lint', 'minify', 'add-unminified-file-to-build'])
 
 // The watch task
 gulp.task('watch', function() {
-  var watcher = gulp.watch('src/modules/**', ['default']);
-  watcher.on('change', function(event) {
-    console.log('File '+event.path+' was '+event.type+', running tasks...');
+  gulp.watch('src/modules/*.js', function(event) {
+    gulp.start('default');
   });
 });
