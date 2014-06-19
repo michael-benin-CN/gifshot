@@ -40,7 +40,7 @@ gulp.task('clean', function() {
     'baseUrl': 'src/modules/',
     'preserveLicenseComments': false,
     'optimize': 'none',
-    // 'mainConfigFile': 'src/js/app/config/config.js',
+    'skipModuleInsertion': true,
     'include': ['index'],
     'out': 'src/gifshot.js',
     'onModuleBundleComplete': function (data) {
