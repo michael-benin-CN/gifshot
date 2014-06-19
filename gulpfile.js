@@ -7,17 +7,22 @@ var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
   requirejs = require('requirejs'),
   amdclean = require('amdclean'),
-  fs = require('fs');
+  fs = require('fs'),
+  packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8')),
+  licenseText = '/*' + fs.readFileSync('./LICENSE.txt', 'utf8') + '\n*/\n',
+  insert = require('gulp-insert');
 
 gulp.task('minify', function() {
   gulp.src(['src/gifshot.js'])
     .pipe(uglify())
     .pipe(rename('gifshot.min.js'))
+    .pipe(insert.prepend(licenseText))
     .pipe(gulp.dest('build/'));
 });
 
-gulp.task('add-unminified-file-to-buld', function() {
+gulp.task('add-unminified-file-to-build', function() {
   gulp.src(['src/gifshot.js'])
+    .pipe(insert.prepend(licenseText))
     .pipe(gulp.dest('build/'));
 });
 
@@ -54,7 +59,7 @@ gulp.task('clean', function() {
       }));
     }
   }, function() {
-    // console.log('built');
+    // Successfully built
   }, function (err) {
       console.log(err);
   });
@@ -65,7 +70,7 @@ gulp.task('test', function() {
 });
 
 // The default task (called when you run `gulp`)
-gulp.task('default', ['clean','lint', 'minify', 'add-unminified-file-to-buld']);
+gulp.task('default', ['clean','lint', 'minify', 'add-unminified-file-to-build']);
 
 // The watch task
 gulp.task('watch', function() {

@@ -3,30 +3,25 @@
 
 JavaScript library that can create Animated GIFs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
 
-## Demo
-
-gifshot is currently set up here: http://pokedsoaked.corp.ne1.yahoo.com:8001/
 
 ## How
 
-gifshot.js uses:
+gifshot.js uses the following technologies:
 
-- The webRTC `getUserMedia()` API to get permission to use a user's webcam
+- The webRTC `getUserMedia()` API to get permission to use a user's webcam and manipulate the `CameraStream` Media object
 
-- The `canvas` API to create a dynamic image from a video stream, video, or images
+- The HTML5 `Filesystem` APIs to handle the temporary blob URL creation
 
-- Web workers to process the gif frames
+- The HTML5 `video` element to stream the blob URL
 
-- Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML) image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size).   This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
+- The `canvas` API to create a dynamic image from an HTML5 video, or images
 
-- Dean McNamee's [omggif](https://github.com/deanm/omggif) library - for actually encoding into GIF89
+- `Web workers` to process the gif frames
 
+- `Typed Arrays` to handle binary image data
 
-Influenced By:
+- `Base 64 encoding` (both `window.btoa` and a polyfilled method)
 
-- [animated_GIF.js](https://github.com/sole/Animated_GIF) - Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
-
-- [Meatspace Chat](https://chat.meatspac.es/)
 
 ## Browser Support
 
@@ -73,6 +68,7 @@ gifshot.createGIF(function(obj) {
 5.  Run the gulp build: `gulp`
 6.  Start up the included node.js preview server: `node server/server.js`
 7.  Go to `localhost:8001` to try out gifshot.js.
+
 
 ## API Methods
 
@@ -221,10 +217,26 @@ gifshot.takeSnapShot(function(obj) {
 'numWorkers': 2
 ```
 
+## Credits
+
+gifshot.js would not have been possible without the help/inspiration of the following libraries/awesome people:
+
+- Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML)
+ * An image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size). This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
+
+- Dean McNamee's [omggif](https://github.com/deanm/omggif)
+ * Encodes a gif into the GIF89 spec
+
+- Soledad Penadés's [animated_GIF.js](https://github.com/sole/Animated_GIF)
+ * Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
+
+- Jen Fong-Adwent's (aka Edna Piranha) [Meatspace Chat](https://chat.meatspac.es/)
+
+- Greg Franko's [AMDclean](https://github.com/gfranko/amdclean)
+ * A build tool that converts AMD and/or CommonJS code to standard JavaScript
+
+
 ## Contributors
 
 - Chase West
 - Greg Franko
-
-
-

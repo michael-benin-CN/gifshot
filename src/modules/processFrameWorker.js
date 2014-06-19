@@ -1,13 +1,20 @@
 // processFrameWorker.js
 // =====================
+
+// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.worker.js
+
+/* Copyright  2014 Yahoo! Inc. 
+* Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+*/
+
 define([
     'NeuQuant'
-],function(NeuQuant) {
+], function(NeuQuant) {
     var workerCode = function worker() {
-
         self.onmessage = function(ev) {
             var data = ev.data,
                 response = workerMethods.run(data);
+
             postMessage(response);
         };
 
@@ -77,7 +84,7 @@ define([
         };
 
         return workerMethods;
-
     };
+
     return workerCode;
 });
