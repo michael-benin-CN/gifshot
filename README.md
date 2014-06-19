@@ -243,6 +243,9 @@ gifshot.js would not have been possible without the help/inspiration of the foll
 - Dean McNamee's [omggif](https://github.com/deanm/omggif)
  * Encodes a gif into the GIF89 spec
 
+- Soledad Penadés's [gumhelper.js](https://github.com/sole/gumhelper)
+ * A module wrapping WebRTC's getUserMedia
+
 - Soledad Penadés's [animated_GIF.js](https://github.com/sole/Animated_GIF)
  * Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
 
