@@ -5,7 +5,7 @@
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 
-define([
+require([
 	'utils',
 	'videoStream',
 	'screenShot',
