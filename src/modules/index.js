@@ -82,7 +82,7 @@ require([
 					currentImage = images[x];
 					if(utils.isElement(currentImage)) {
 						currentImage.crossOrigin = 'Anonymous';
-						ag.addFrame(currentImage);
+						ag.addFrame(currentImage, currentImage.src, options);
 						loadedImages += 1;
 						if(loadedImages === imagesLength) {
 							gifshot._getBase64GIF(ag, callback);
@@ -106,7 +106,7 @@ require([
 
 						(function(tempImage, ag, currentImage) {
 							tempImage.onload = function() {
-								ag.addFrame(tempImage, currentImage);
+								ag.addFrame(tempImage, currentImage, options);
 								utils.removeElement(tempImage);
 								loadedImages += 1;
 								if(loadedImages === imagesLength) {
@@ -268,29 +268,30 @@ require([
 				document.body.appendChild(videoElement);
 			}
 
+			// Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
+			// is loaded, so we must manually trigger play after adding it, or the video will be frozen
+			videoElement.play();
 
-	        // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
-	        // is loaded, so we must manually trigger play after adding it, or the video will be frozen
-	        videoElement.play();
-
-	        setTimeout(function() {
+			setTimeout(function() {
 				screenShot.getWebcamGif(options, function(obj) {
 					gifshot.stopVideoStreaming(obj);
 					completeCallback(obj);
 				});
-	        }, wait);
+			}, wait);
 		}
 	},
 		publicApi = function (api) {
 			var method,
 			  currentMethod,
 			  publicApi = {};
+
 			for(method in api) {
 			  currentMethod = api[method];
 			  if(method.charAt(0) !== '_') {
 			    publicApi[method] = api[method];
 			  }
 			}
+
 			return publicApi;
 		};
 

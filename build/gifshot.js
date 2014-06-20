@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 /* Copyright  2014 Yahoo! Inc. 
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
-var videoStream, NeuQuant, processFrameWorker, animatedGif, screenShot, _utils_, _gifWriter_, _error_, utils;
+var videoStream, NeuQuant, processFrameWorker, GifWriter, animatedGif, screenShot, _utils_, _error_, utils;
 _utils_ = utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -47,6 +47,17 @@ _utils_ = utils = function () {
                     return false;
                 }
                 return Object.prototype.toString.call(obj) === '[object Object]';
+            },
+            'isEmptyObject': function (obj) {
+                var isEmpty = true;
+                if (utils.isFunction(Object.keys)) {
+                    isEmpty = !Object.keys(obj).length;
+                } else {
+                    utils.each(obj, function () {
+                        isEmpty = false;
+                    });
+                }
+                return isEmpty;
             },
             'isArray': function (arr) {
                 if (!arr) {
@@ -940,7 +951,7 @@ processFrameWorker = function () {
 // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
 // including animation and compression.  It does not rely on any specific
 // underlying system, so should run in the browser, Node, or Plask.
-_gifWriter_ = function () {
+GifWriter = function () {
     function GifWriter(buf, width, height, gopts) {
         var p = 0;
         gopts = gopts === undefined ? {} : gopts;
@@ -1269,7 +1280,7 @@ _gifWriter_ = function () {
 /* Copyright  2014 Yahoo! Inc. 
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
-animatedGif = function (frameWorkerCode, GifWriter) {
+animatedGif = function (frameWorkerCode) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
         this.canvas = null;
@@ -1441,13 +1452,21 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         'setRepeat': function (r) {
             this.repeat = r;
         },
-        'addFrame': function (element, src) {
-            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData;
+        'addFrame': function (element, src, gifshotOptions) {
+            gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
+            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = gifshotOptions.fontSize, fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
             try {
                 if (src) {
                     element.src = src;
                 }
                 ctx.drawImage(element, 0, 0, width, height);
+                if (text) {
+                    ctx.font = font;
+                    ctx.fillStyle = fontColor;
+                    ctx.textAlign = textAlign;
+                    ctx.textBaseline = textBaseline;
+                    ctx.fillText(text, textXCoordinate, textYCoordinate);
+                }
                 imageData = ctx.getImageData(0, 0, width, height);
                 self.addFrameImageData(imageData);
             } catch (e) {
@@ -1496,7 +1515,7 @@ animatedGif = function (frameWorkerCode, GifWriter) {
         }
     };
     return AnimatedGIF;
-}(processFrameWorker, _gifWriter_);
+}(processFrameWorker);
 // screenShot.js
 // =============
 // Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
@@ -1700,7 +1719,7 @@ _error_ = function () {
                         currentImage = images[x];
                         if (utils.isElement(currentImage)) {
                             currentImage.crossOrigin = 'Anonymous';
-                            ag.addFrame(currentImage);
+                            ag.addFrame(currentImage, currentImage.src, options);
                             loadedImages += 1;
                             if (loadedImages === imagesLength) {
                                 gifshot._getBase64GIF(ag, callback);
@@ -1721,7 +1740,7 @@ _error_ = function () {
                             });
                             (function (tempImage, ag, currentImage) {
                                 tempImage.onload = function () {
-                                    ag.addFrame(tempImage, currentImage);
+                                    ag.addFrame(tempImage, currentImage, options);
                                     utils.removeElement(tempImage);
                                     loadedImages += 1;
                                     if (loadedImages === imagesLength) {
