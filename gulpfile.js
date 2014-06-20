@@ -70,7 +70,7 @@ gulp.task('test', function() {
 });
 
 // The default task (called when you run `gulp`)
-gulp.task('default', ['clean','lint', 'minify', 'add-unminified-file-to-build']);
+gulp.task('default', ['clean','minify', 'add-unminified-file-to-build']);
 
 // The watch task
 gulp.task('watch', function() {
