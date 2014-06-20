@@ -53,6 +53,18 @@ define(function() {
             }
             return Object.prototype.toString.call(obj) === '[object Object]';
         },
+        'isEmptyObject': function(obj) {
+            var isEmpty = true;
+
+            if(utils.isFunction(Object.keys)) {
+                isEmpty = !Object.keys(obj).length;
+            } else {
+                utils.each(obj, function() {
+                    isEmpty = false;
+                });
+            }
+            return isEmpty;
+        },
         'isArray': function(arr) {
             if(!arr) {
                 return false;

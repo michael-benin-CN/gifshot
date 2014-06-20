@@ -11,7 +11,7 @@ define([
 	'utils',
 	'processFrameWorker',
 	'NeuQuant',
-	'gifWriter'
+	'GifWriter'
 ], function(utils, frameWorkerCode, NeuQuant, GifWriter) {
 	var AnimatedGIF = function(options) {
 		options = utils.isObject(options) ? options : {};
@@ -243,19 +243,43 @@ define([
     'setRepeat': function(r) {
         this.repeat = r;
     },
-		'addFrame': function(element, src) {
+		'addFrame': function(element, src, gifshotOptions) {
+			gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
+
 			var self = this,
 				ctx = this.ctx,
 				options = this.options,
 				width = options.width,
 				height = options.height,
-				imageData;
+				imageData,
+				gifHeight = gifshotOptions.gifHeight,
+				gifWidth = gifshotOptions.gifWidth,
+				text = gifshotOptions.text,
+				fontWeight = gifshotOptions.fontWeight,
+				fontSize = gifshotOptions.fontSize,
+				fontFamily = gifshotOptions.fontFamily,
+				fontColor = gifshotOptions.fontColor,
+				textAlign = gifshotOptions.textAlign,
+				textBaseline = gifshotOptions.textBaseline,
+				textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width/2,
+				textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height/2 : height,
+				font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
 
 			try {
 				if(src) {
 					element.src = src;
 				}
+
 				ctx.drawImage(element, 0, 0, width, height);
+
+				if(text) {
+					ctx.font = font;
+					ctx.fillStyle = fontColor;
+					ctx.textAlign = textAlign;
+					ctx.textBaseline = textBaseline;
+					ctx.fillText(text, textXCoordinate, textYCoordinate);
+				}
+
 				imageData = ctx.getImageData(0, 0, width, height);
 
 				self.addFrameImageData(imageData);
