@@ -29,7 +29,10 @@ define([
 				crop = obj.crop,
 				interval = obj.interval,
 				progressCallback = obj.progressCallback,
-				numFrames = obj.numFrames,
+				savedRenderingContexts = obj.savedRenderingContexts,
+				saveRenderingContexts = obj.saveRenderingContexts,
+				renderingContextsToSave = [],
+				numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames,
 				pendingFrames = numFrames,
 				ag = new AnimatedGIF({
 					'sampleInterval': sampleInterval,
@@ -48,16 +51,24 @@ define([
 				textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth/2,
 				textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight/2 : gifHeight,
 				font = fontWeight + ' ' + fontSize + ' ' + fontFamily,
-				sourceX = Math.floor(crop.scaledWidth / 2),
-				sourceWidth = videoWidth - crop.scaledWidth,
-				sourceY = Math.floor(crop.scaledHeight / 2),
-				sourceHeight = videoHeight - crop.scaledHeight,
+				sourceX = crop ? Math.floor(crop.scaledWidth / 2): 0,
+				sourceWidth = crop ? videoWidth - crop.scaledWidth: 0,
+				sourceY = crop ? Math.floor(crop.scaledHeight / 2): 0,
+				sourceHeight = crop ? videoHeight - crop.scaledHeight: 0,
 				captureFrame = function() {
 					var framesLeft = pendingFrames - 1;
 
-					context.drawImage(videoElement,
-					  sourceX, sourceY, sourceWidth, sourceHeight,
-					  0, 0, gifWidth, gifHeight);
+					if(savedRenderingContexts.length) {
+						context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
+					} else {
+						context.drawImage(videoElement,
+						  sourceX, sourceY, sourceWidth, sourceHeight,
+						  0, 0, gifWidth, gifHeight);
+					}
+
+					if(saveRenderingContexts) {
+						renderingContextsToSave.push(context.getImageData(0, 0, gifWidth, gifHeight));
+					}
 
 					// If there is text to display, make sure to display it on the canvas after the image is drawn
 					if(text) {
@@ -88,7 +99,8 @@ define([
 								'image': image,
 								'cameraStream': cameraStream,
 								'videoElement': videoElement,
-								'webcamVideoElement': webcamVideoElement
+								'webcamVideoElement': webcamVideoElement,
+								'savedRenderingContexts': renderingContextsToSave
 							});
 						});
 					}

@@ -205,7 +205,7 @@ define(function() {
             if(!utils.isElement(node)) {
                 return;
             }
-            if (node.parentNode) {
+            if(node.parentNode) {
               node.parentNode.removeChild(node);
             }
         },
