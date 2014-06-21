@@ -176,10 +176,12 @@ gifshot.takeSnapShot(function(obj) {
 // the video will not be removed from the DOM.  You will need to handle this yourself.
 'webcamVideoElement': null,
 // Whether or not you would like the user's camera to stay on after the gif is created
-// If you keep the camera on, then you can reuse the returned cameraStream object to
-// create another gif and/or snapshot without asking for the user's permission to
-// access the camera again
+// Note: The cameraStream Media object is passed back to you in the createGIF() callback function
 'keepCameraOn': false,
+// Expects a cameraStream Media object
+// Note: Passing an existing camera stream will allow you to create another GIF and/or snapshot without
+//	asking for the user's permission to access the camera again if you are not using SSL
+'cameraStream': null,
 // The amount of time (in seconds) to wait between each frame capture of a video
 'interval': 0.1,
 // The number of frames to use to create the animated GIF
