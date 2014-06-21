@@ -1688,6 +1688,7 @@ _error_ = function () {
                 'images': [],
                 'video': null,
                 'webcamVideoElement': null,
+                'cameraStream': null,
                 'text': '',
                 'fontWeight': 'normal',
                 'fontSize': '16px',
