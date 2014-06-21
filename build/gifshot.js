@@ -952,7 +952,7 @@ processFrameWorker = function () {
 // including animation and compression.  It does not rely on any specific
 // underlying system, so should run in the browser, Node, or Plask.
 GifWriter = function () {
-    function GifWriter(buf, width, height, gopts) {
+    return function GifWriter(buf, width, height, gopts) {
         var p = 0;
         gopts = gopts === undefined ? {} : gopts;
         var loop_count = gopts.loop === undefined ? null : gopts.loop;
@@ -1271,8 +1271,7 @@ GifWriter = function () {
             }
             return p;
         }
-    }
-    return GifWriter;
+    };
 }();
 // animatedGif.js
 // ==============
@@ -1527,15 +1526,22 @@ screenShot = function (AnimatedGIF) {
         getWebcamGif: function (obj, callback) {
             callback = utils.isFunction(callback) ? callback : function () {
             };
-            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, numFrames = obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+            var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
                     'sampleInterval': sampleInterval,
                     'numWorkers': numWorkers,
                     'width': gifWidth,
                     'height': gifHeight,
                     'delay': interval
-                }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = Math.floor(crop.scaledWidth / 2), sourceWidth = videoWidth - crop.scaledWidth, sourceY = Math.floor(crop.scaledHeight / 2), sourceHeight = videoHeight - crop.scaledHeight, captureFrame = function () {
+                }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
-                    context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
+                    if (savedRenderingContexts.length) {
+                        context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
+                    } else {
+                        context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
+                    }
+                    if (saveRenderingContexts) {
+                        renderingContextsToSave.push(context.getImageData(0, 0, gifWidth, gifHeight));
+                    }
                     // If there is text to display, make sure to display it on the canvas after the image is drawn
                     if (text) {
                         context.font = font;
@@ -1560,7 +1566,8 @@ screenShot = function (AnimatedGIF) {
                                 'image': image,
                                 'cameraStream': cameraStream,
                                 'videoElement': videoElement,
-                                'webcamVideoElement': webcamVideoElement
+                                'webcamVideoElement': webcamVideoElement,
+                                'savedRenderingContexts': renderingContextsToSave
                             });
                         });
                     }
@@ -1693,7 +1700,9 @@ _error_ = function () {
                 'progressCallback': function (captureProgress) {
                 },
                 'completeCallback': function () {
-                }
+                },
+                'saveRenderingContexts': false,
+                'savedRenderingContexts': []
             },
             '_options': {},
             'createGIF': function (userOptions, callback) {
@@ -1784,6 +1793,12 @@ _error_ = function () {
                 } else {
                     if (!gifshot.isWebCamGIFSupported()) {
                         return callback(error.validate());
+                    }
+                    if (options.savedRenderingContexts.length) {
+                        screenShot.getWebcamGif(options, function (obj) {
+                            callback(obj);
+                        });
+                        return;
                     }
                     videoStream.startVideoStreaming(function (obj) {
                         gifshot._createAndGetGIF(obj, callback);
