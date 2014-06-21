@@ -30,7 +30,7 @@
 define([
   'utils'
 ], function(utils){
-  function GifWriter(buf, width, height, gopts) {
+  return function GifWriter(buf, width, height, gopts) {
     var p = 0;
 
     gopts = gopts === undefined ? { } : gopts;
@@ -332,5 +332,4 @@ define([
       return p;
     }
   }
-  return GifWriter;
 });

@@ -214,7 +214,14 @@ gifshot.takeSnapShot(function(obj) {
 //       speed-up, with a small quality penalty.
 'sampleInterval': 10,
 // how many web workers to use to process the animated GIF frames. Default is 2.
-'numWorkers': 2
+'numWorkers': 2,
+// Whether or not you would like to save all of the canvas image binary data from your created GIF
+// Note: This is particularly useful for when you want to re-use a GIF to add text to later
+'saveRenderingContexts': false,
+// Expects an array of canvas image data
+// Note: If you set the saveRenderingContexts option to true, then you get the savedRenderingContexts
+//	in the createGIF callback function
+'savedRenderingContexts': []
 ```
 
 ## Contributing

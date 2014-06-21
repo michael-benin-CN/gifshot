@@ -35,7 +35,9 @@ require([
 			'textXCoordinate': null,
 			'textYCoordinate': null,
 			'progressCallback': function(captureProgress) {},
-			'completeCallback': function() {}
+			'completeCallback': function() {},
+			'saveRenderingContexts': false,
+			'savedRenderingContexts': []
 		},
 		'_options': {},
 		'createGIF': function (userOptions, callback) {
@@ -154,6 +156,12 @@ require([
 			} else {
  				if(!gifshot.isWebCamGIFSupported()) {
 					return callback(error.validate());
+				}
+				if(options.savedRenderingContexts.length) {
+					screenShot.getWebcamGif(options, function(obj) {
+						callback(obj);
+					});
+					return;
 				}
 				videoStream.startVideoStreaming(function(obj) {
 					gifshot._createAndGetGIF(obj, callback);
