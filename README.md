@@ -317,26 +317,26 @@ gifshot.js would not have been possible without the help/inspiration of the foll
  * Copyright (c) Anthony Dekker 1994 - [MIT License](http://members.ozemail.com.au/~dekker/NEUQUANT.C)
 
 
-- [omggif](https://github.com/deanm/omggif)
+- [Dean McNamee](https://github.com/deanm)'s [omggif](https://github.com/deanm/omggif)
  * Encodes a GIF into the GIF89 spec
  * Copyright (c) Dean McNamee, 2013 - [MIT License](https://github.com/deanm/omggif)
 
 
-- [AMDclean](https://github.com/gfranko/amdclean)
+- [Greg Franko](https://github.com/gfranko)'s [AMDclean](https://github.com/gfranko/amdclean)
  * A build tool that converts AMD and/or CommonJS code to standard JavaScript
  * Copyright (c) 2014 Greg Franko - [MIT license](https://github.com/gfranko/amdclean/blob/master/LICENSE.txt).
 
 ###Inspiration
 
-- Soledad Penadés's [gumhelper.js](https://github.com/sole/gumhelper)
+- [Soledad Penadés](https://github.com/sole)'s [gumhelper.js](https://github.com/sole/gumhelper)
  * A module wrapping WebRTC's getUserMedia
 
-- Soledad Penadés's [animated_GIF.js](https://github.com/sole/Animated_GIF)
+- [Soledad Penadés](https://github.com/sole)'s [animated_GIF.js](https://github.com/sole/Animated_GIF)
  * Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
 
-- Jen Fong-Adwent's (aka Edna Piranha) [Meatspace Chat](https://chat.meatspac.es/)
+- [Jen Fong-Adwent](https://github.com/ednapiranha)'s (aka Edna Piranha) [Meatspace Chat](https://chat.meatspac.es/)
 
 ## Contributors
 
-- Chase West
-- Greg Franko
+- [Chase West](https://github.com/ChaseWest)
+- [Greg Franko](https://github.com/gfranko)
