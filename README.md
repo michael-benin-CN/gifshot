@@ -20,7 +20,7 @@ gifshot.js uses the following technologies:
 
 - `Typed Arrays` to handle binary image data
 
-- `Base 64 encoding` (both `window.btoa` and a polyfilled method)
+- `Base 64 encoding` to create a base 64 encoded image string
 
 
 ## Browser Support
@@ -72,24 +72,79 @@ gifshot.createGIF(function(obj) {
 
 ## API Methods
 
+### createGIF(options, callback)
+
+Creates an animated GIF from either a webcam stream, an existing video (e.g. mp4), or existing images
+
+**Note:** An object is passed back to the callback function with helpful data
+
 ```javascript
-// Creates an animated gif from either a webcam stream, an existing video (e.g. mp4), or existing images
-gifshot.createGIF(options, callback);
+gifshot.createGIF({}, function(obj) {
+	// callback object properties
+	// --------------------------
+	// image - Base 64 image
+	// cameraStream - The webRTC MediaStream object
+	// error - Boolean that determines if an error occurred
+	// errorCode - Helpful error label
+	// errorMsg - Helpful error message
+	// savedRenderingContexts - An array of canvas image data (will only be set if the saveRenderingContexts option was used)
+});
+```
 
-// Takes a snap shot (not animated) image from a webcam stream or existing video
+### takeSnapShot(options, callback)
+
+Takes a snap shot (not animated) image from a webcam stream or existing video
+
+**Note:** If you wish to use the default options, you can just pass a callback function as the only argument
+
+**Another Note:** An object is passed back to the callback function with helpful data
+
+```javascript
+// Hint: Takes the same arguments as the createGIF method
 gifshot.takeSnapShot(options, callback);
+```
 
-// Turns off the user's webcam (by default, the user's webcam is turned off)
+### stopVideoStreaming()
+
+Turns off the user's webcam (by default, the user's webcam is turned off)
+
+**Note:** This is helpful when you use the `keepCameraOn` option
+
+```javascript
 gifshot.stopVideoStreaming();
+```
 
-// If the current browser supports creating animated GIFs from a webcam video stream
+### isSupported()
+
+If the current browser supports all of the gifshot animated GIF options
+
+```javascript
+gifshot.isSupported();
+```
+
+### isWebCamGIFSupported()
+
+If the current browser supports creating animated GIFs from a webcam video stream
+
+```javascript
 gifshot.isWebCamGIFSupported();
+```
 
-// If the current browser supports creating animated GIFs from an existing HTML video (e.g. mp4, ogg, ogv, webm)
-// e.g. gifshot.isExistingVideoGIFSupported(['mp4', 'ogg']);
-gifshot.isExistingVideoGIFSupported(codecs);
+### isExistingVideoGIFSupported()
 
-// If the current browser supports creating animated GIFs from existing images (e.g. jpeg, png, gif)
+If the current browser supports creating animated GIFs from an existing HTML video (e.g. mp4, ogg, ogv, webm)
+
+**Note:** You can pass in an array of codec extensions to specifically check if the current browser supports at least one of them
+
+```javascript
+gifshot.isExistingVideoGIFSupported(['mp4', 'ogg']);
+```
+
+### isExistingImagesGIFSupported()
+
+If the current browser supports creating animated GIFs from existing images (e.g. jpeg, png, gif)
+
+```javascript
 gifshot.isExistingImagesGIFSupported();
 ```
 
