@@ -134,19 +134,19 @@ define([
         	frame,
         	worker,
         	done = function(ev) {
-			    var data = ev.data;
+						var data = ev.data;
 
-			    // Delete original data, and free memory
-			    delete(frame.data);
+						// Delete original data, and free memory
+						delete(frame.data);
 
-			    frame.pixels = Array.prototype.slice.call(data.pixels);
-			    frame.palette = Array.prototype.slice.call(data.palette);
-			    frame.done = true;
-			    frame.beingProcessed = false;
+						frame.pixels = Array.prototype.slice.call(data.pixels);
+						frame.palette = Array.prototype.slice.call(data.palette);
+						frame.done = true;
+						frame.beingProcessed = false;
 
-			    AnimatedGifContext.freeWorker(worker);
+						AnimatedGifContext.freeWorker(worker);
 
-			    AnimatedGifContext.onFrameFinished();
+						AnimatedGifContext.onFrameFinished();
         	};
 
         frame = frames[position];
@@ -158,13 +158,14 @@ define([
 
         frame.sampleInterval = sampleInterval;
         frame.beingProcessed = true;
+        frame.gifshot = true;
 
         worker = this.getWorker();
 
         if(worker) {
-        	// Process the frame in a web worker
-			worker.onmessage = done;
-			worker.postMessage(frame);
+					// Process the frame in a web worker
+					worker.onmessage = done;
+					worker.postMessage(frame);
         } else {
         	// Process the frame in the current thread
         	done({
