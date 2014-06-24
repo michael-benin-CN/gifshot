@@ -15,7 +15,9 @@ define([
             var data = ev.data,
                 response = workerMethods.run(data);
 
-            postMessage(response);
+            if(data && data.gifshot) {
+                postMessage(response);
+            }
         };
 
         var workerMethods = {
