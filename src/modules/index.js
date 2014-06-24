@@ -206,6 +206,9 @@ require([
 				'webcamVideoElement': webcamVideoElement
 			});
 		},
+		'isSupported': function() {
+			return error.isValid();
+		},
 		'isWebCamGIFSupported': function() {
 			return error.isValid();
 		},
