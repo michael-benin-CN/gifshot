@@ -8,7 +8,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ;(function(window, navigator, document, undefined) {
 // utils.js
 // ========
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 var videoStream, NeuQuant, processFrameWorker, GifWriter, animatedGif, screenShot, _utils_, _error_, utils;
@@ -205,6 +205,21 @@ _utils_ = utils = function () {
             },
             'getExtension': function (src) {
                 return src.substr(src.lastIndexOf('.') + 1, src.length);
+            },
+            'getFontSize': function (text, containerWidth, maxFontSize, minFontSize) {
+                var div = document.createElement('div'), span = document.createElement('span'), fontSize = maxFontSize;
+                div.setAttribute('width', containerWidth);
+                div.appendChild(span);
+                span.innerHTML = text;
+                span.style.fontSize = maxFontSize + 'px';
+                span.style.textIndent = '-9999px';
+                span.style.visibility = 'hidden';
+                document.body.appendChild(span);
+                while (span.offsetWidth > containerWidth && fontSize >= minFontSize) {
+                    span.style.fontSize = --fontSize + 'px';
+                }
+                document.body.removeChild(span);
+                return fontSize + 'px';
             },
             'webWorkerError': false
         };
@@ -1278,7 +1293,7 @@ GifWriter = function () {
 // animatedGif.js
 // ==============
 // Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 animatedGif = function (frameWorkerCode) {
@@ -1456,7 +1471,9 @@ animatedGif = function (frameWorkerCode) {
         },
         'addFrame': function (element, src, gifshotOptions) {
             gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
-            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = gifshotOptions.fontSize, fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
+            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10),
+                //gifshotOptions.fontSize,
+                fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
             try {
                 if (src) {
                     element.src = src;
@@ -1521,7 +1538,7 @@ animatedGif = function (frameWorkerCode) {
 // screenShot.js
 // =============
 // Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 screenShot = function (AnimatedGIF) {
@@ -1535,7 +1552,9 @@ screenShot = function (AnimatedGIF) {
                     'width': gifWidth,
                     'height': gifHeight,
                     'delay': interval
-                }), text = obj.text, fontWeight = obj.fontWeight, fontSize = obj.fontSize, fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
+                }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10),
+                //obj.fontSize,
+                fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
                     var framesLeft = pendingFrames - 1;
                     if (savedRenderingContexts.length) {
                         context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);

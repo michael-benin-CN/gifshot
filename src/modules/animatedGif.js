@@ -3,7 +3,7 @@
 
 // Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
 
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 
@@ -257,7 +257,7 @@ define([
 				gifWidth = gifshotOptions.gifWidth,
 				text = gifshotOptions.text,
 				fontWeight = gifshotOptions.fontWeight,
-				fontSize = gifshotOptions.fontSize,
+				fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10),//gifshotOptions.fontSize,
 				fontFamily = gifshotOptions.fontFamily,
 				fontColor = gifshotOptions.fontColor,
 				textAlign = gifshotOptions.textAlign,

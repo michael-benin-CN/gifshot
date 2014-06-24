@@ -3,7 +3,7 @@
 
 // Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
 
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 
@@ -43,7 +43,7 @@ define([
 				}),
 				text = obj.text,
 				fontWeight = obj.fontWeight,
-				fontSize = obj.fontSize,
+				fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10), //obj.fontSize,
 				fontFamily = obj.fontFamily,
 				fontColor = obj.fontColor,
 				textAlign = obj.textAlign,
