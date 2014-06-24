@@ -102,8 +102,15 @@ Takes a snap shot (not animated) image from a webcam stream or existing video
 **Another Note:** An object is passed back to the callback function with helpful data
 
 ```javascript
-// Hint: Takes the same arguments as the createGIF method
-gifshot.takeSnapShot(options, callback);
+gifshot.takeSnapShot({}, function(obj) {
+	// callback object properties
+	// --------------------------
+	// image - Base 64 image
+	// error - Boolean that determines if an error occurred
+	// errorCode - Helpful error label
+	// errorMsg - Helpful error message
+	// savedRenderingContexts - An array of canvas image data (will only be set if the saveRenderingContexts option was used)
+});
 ```
 
 ### stopVideoStreaming()
