@@ -49,7 +49,7 @@ gifshot.js uses the following technologies:
 
 ```javascript
 // By default, a user's webcam is used to create the animated GIF
-gifshot.createGIF(function(obj) {
+gifshot.createGIF({}, function(obj) {
 	if(!obj.error) {
 		var image = obj.image,
 		animatedImage = document.createElement('img');
@@ -76,7 +76,9 @@ gifshot.createGIF(function(obj) {
 
 Creates an animated GIF from either a webcam stream, an existing video (e.g. mp4), or existing images
 
-**Note:** An object is passed back to the callback function with helpful data
+**Note:** If you wish to use the default options, you can just pass a callback function as the only argument
+
+**Another Note:** An object is passed back to the callback function with helpful data
 
 ```javascript
 gifshot.createGIF({}, function(obj) {
