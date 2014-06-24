@@ -878,7 +878,9 @@ processFrameWorker = function () {
     var workerCode = function worker() {
         self.onmessage = function (ev) {
             var data = ev.data, response = workerMethods.run(data);
-            postMessage(response);
+            if (data && data.gifshot) {
+                postMessage(response);
+            }
         };
         var workerMethods = {
                 'dataToRGB': function (data, width, height) {
@@ -1391,6 +1393,7 @@ animatedGif = function (frameWorkerCode) {
             }
             frame.sampleInterval = sampleInterval;
             frame.beingProcessed = true;
+            frame.gifshot = true;
             worker = this.getWorker();
             if (worker) {
                 // Process the frame in a web worker
