@@ -1860,6 +1860,9 @@ _error_ = function () {
                     'webcamVideoElement': webcamVideoElement
                 });
             },
+            'isSupported': function () {
+                return error.isValid();
+            },
             'isWebCamGIFSupported': function () {
                 return error.isValid();
             },
