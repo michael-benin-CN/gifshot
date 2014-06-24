@@ -1,7 +1,7 @@
 // utils.js
 // ========
 
-/* Copyright  2014 Yahoo! Inc. 
+/* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
 
@@ -230,6 +230,30 @@ define(function() {
         },
         'getExtension': function(src) {
             return src.substr(src.lastIndexOf('.') + 1, src.length);
+        },
+        'getFontSize': function(text, containerWidth, maxFontSize, minFontSize){
+          var div = document.createElement("div"),
+              span = document.createElement("span"),
+              fontSize = maxFontSize;
+
+          div.setAttribute("width", containerWidth);
+          div.appendChild(span);
+
+          span.innerHTML = text;
+          span.style.fontSize = maxFontSize + "px";
+          span.style.textIndent = "-9999px";
+          span.style.visibility = "hidden";
+
+          document.body.appendChild(span);
+
+          while(span.offsetWidth > containerWidth && fontSize >= minFontSize){
+            span.style.fontSize = --fontSize + "px";
+          }
+
+          document.body.removeChild(span);
+
+          return fontSize + "px";
+
         },
         'webWorkerError': false
     };

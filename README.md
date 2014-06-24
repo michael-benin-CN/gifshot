@@ -1,4 +1,4 @@
-![](http://i.imgur.com/I17GUX9.gif) 
+![](http://i.imgur.com/I17GUX9.gif)
 =======
 
 JavaScript library that can create Animated GIFs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
@@ -246,11 +246,23 @@ If your PR is a code change:
 
 gifshot.js would not have been possible without the help/inspiration of the following libraries/awesome people:
 
-- Anthony Dekker's [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML)
- * An image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size). This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
+###Used
 
-- Dean McNamee's [omggif](https://github.com/deanm/omggif)
- * Encodes a gif into the GIF89 spec
+- [NeuQuant](http://members.ozemail.com.au/~dekker/NEUQUANT.HTML)
+ * An image quantization algorithm to reduce the number of colors required to represent the image (thus decreasing the file size). This script was ported from C into Java by Kevin Weiner and then to [ActionScript 3](http://www.bytearray.org/?p=93) by Thibault Imbert, and to [JavaScript](http://antimatter15.com/wp/2010/07/javascript-to-animated-gif/) by antimatter15, and fixed, patched and revised by [sole](http://soledadpenades.com).
+ * Copyright (c) Anthony Dekker 1994 - [MIT License](http://members.ozemail.com.au/~dekker/NEUQUANT.C)
+
+
+- [omggif](https://github.com/deanm/omggif)
+ * Encodes a GIF into the GIF89 spec
+ * Copyright (c) Dean McNamee, 2013 - [MIT License](https://github.com/deanm/omggif)
+
+
+- [AMDclean](https://github.com/gfranko/amdclean)
+ * A build tool that converts AMD and/or CommonJS code to standard JavaScript
+ * Copyright (c) 2014 Greg Franko - [MIT license](https://github.com/gfranko/amdclean/blob/master/LICENSE.txt).
+
+###Inspiration
 
 - Soledad Penadés's [gumhelper.js](https://github.com/sole/gumhelper)
  * A module wrapping WebRTC's getUserMedia
@@ -259,10 +271,6 @@ gifshot.js would not have been possible without the help/inspiration of the foll
  * Uses web workers and encoding/decoding algorithms to produce a Base 64 data URI image
 
 - Jen Fong-Adwent's (aka Edna Piranha) [Meatspace Chat](https://chat.meatspac.es/)
-
-- Greg Franko's [AMDclean](https://github.com/gfranko/amdclean)
- * A build tool that converts AMD and/or CommonJS code to standard JavaScript
-
 
 ## Contributors
 
