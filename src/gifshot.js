@@ -4,7 +4,7 @@
 /* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
-var videoStream, NeuQuant, processFrameWorker, GifWriter, animatedGif, screenShot, _utils_, _error_, utils;
+var videoStream, NeuQuant, processFrameWorker, animatedGIF, screenShot, _utils_, _gifWriter_, _error_, utils, AnimatedGIF;
 _utils_ = utils = function () {
     var utils = {
             'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -961,8 +961,8 @@ processFrameWorker = function () {
 // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
 // including animation and compression.  It does not rely on any specific
 // underlying system, so should run in the browser, Node, or Plask.
-GifWriter = function () {
-    return function GifWriter(buf, width, height, gopts) {
+_gifWriter_ = function () {
+    return function gifWriter(buf, width, height, gopts) {
         var p = 0;
         gopts = gopts === undefined ? {} : gopts;
         var loop_count = gopts.loop === undefined ? null : gopts.loop;
@@ -1283,13 +1283,13 @@ GifWriter = function () {
         }
     };
 }();
-// animatedGif.js
+// animatedGIF.js
 // ==============
 // Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
 /* Copyright  2014 Yahoo! Inc.
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
-animatedGif = function (frameWorkerCode) {
+animatedGIF = AnimatedGIF = function (frameWorkerCode, GifWriter) {
     var AnimatedGIF = function (options) {
         options = utils.isObject(options) ? options : {};
         this.canvas = null;
@@ -1303,7 +1303,6 @@ animatedGif = function (frameWorkerCode) {
         this.availableWorkers = [];
         this.generatingGIF = false;
         this.options = options = utils.mergeOptions(this.defaultOptions, options);
-        // Constructs and initializes the the web workers appropriately
         this.initializeWebWorkers(options);
     };
     AnimatedGIF.prototype = {
@@ -1342,11 +1341,9 @@ animatedGif = function (frameWorkerCode) {
             this.options.delay = this.options.delay * 0.1;
             this.frames = [];
         },
-        // Return a worker for processing a frame
         'getWorker': function () {
             return this.availableWorkers.pop();
         },
-        // Restores a worker to the pool
         'freeWorker': function (worker) {
             this.availableWorkers.push(worker);
         },
@@ -1365,8 +1362,6 @@ animatedGif = function (frameWorkerCode) {
             return str;
         },
         'onFrameFinished': function () {
-            // The GIF is not written until we're done with all the frames
-            // because they might not be processed in the same order
             var self = this, frames = this.frames, allDone = frames.every(function (frame) {
                     return !frame.beingProcessed && frame.done;
                 });
@@ -1385,7 +1380,6 @@ animatedGif = function (frameWorkerCode) {
         'processFrame': function (position) {
             var AnimatedGifContext = this, options = this.options, sampleInterval = options.sampleInterval, frames = this.frames, frame, worker, done = function (ev) {
                     var data = ev.data;
-                    // Delete original data, and free memory
                     delete frame.data;
                     frame.pixels = Array.prototype.slice.call(data.pixels);
                     frame.palette = Array.prototype.slice.call(data.palette);
@@ -1404,11 +1398,9 @@ animatedGif = function (frameWorkerCode) {
             frame.gifshot = true;
             worker = this.getWorker();
             if (worker) {
-                // Process the frame in a web worker
                 worker.onmessage = done;
                 worker.postMessage(frame);
             } else {
-                // Process the frame in the current thread
                 done({ 'data': AnimatedGifContext.workerMethods.run(frame) });
             }
         },
@@ -1431,14 +1423,8 @@ animatedGif = function (frameWorkerCode) {
                 this.processFrame(position);
             }
         },
-        // Takes the already processed data in frames and feeds it to a new
-        // GifWriter instance in order to get the binary GIF file
         'generateGIF': function (frames, callback) {
-            // TODO: Weird: using a simple JS array instead of a typed array,
-            // the files are WAY smaller o_o. Patches/explanations welcome!
-            var buffer = [],
-                // new Uint8Array(width * height * frames.length * 5);
-                gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
+            var buffer = [], gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
             this.generatingGIF = true;
             utils.each(frames, function (iterator, frame) {
                 var framePalette = frame.palette;
@@ -1458,15 +1444,12 @@ animatedGif = function (frameWorkerCode) {
                 callback(gif);
             }
         },
-        // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
         'setRepeat': function (r) {
             this.repeat = r;
         },
         'addFrame': function (element, src, gifshotOptions) {
             gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
-            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10),
-                //gifshotOptions.fontSize,
-                fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
+            var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10), fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
             try {
                 if (src) {
                     element.src = src;
@@ -1518,7 +1501,6 @@ animatedGif = function (frameWorkerCode) {
                 return;
             }
             var workers = this.workers;
-            // Explicitly ask web workers to die so they are explicitly GC'ed
             utils.each(workers, function (iterator, workerObj) {
                 var worker = workerObj.worker, objectUrl = workerObj.objectUrl;
                 worker.terminate();
@@ -1527,7 +1509,7 @@ animatedGif = function (frameWorkerCode) {
         }
     };
     return AnimatedGIF;
-}(processFrameWorker);
+}(processFrameWorker, _gifWriter_);
 // screenShot.js
 // =============
 // Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
@@ -1536,7 +1518,7 @@ animatedGif = function (frameWorkerCode) {
 */
 screenShot = function (AnimatedGIF) {
     return {
-        getWebcamGif: function (obj, callback) {
+        getWebcamGIF: function (obj, callback) {
             callback = utils.isFunction(callback) ? callback : function () {
             };
             var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
@@ -1612,7 +1594,7 @@ screenShot = function (AnimatedGIF) {
             return result;
         }
     };
-}(animatedGif);
+}(animatedGIF);
 // error.js
 // ========
 /* Copyright  2014 Yahoo! Inc. 
@@ -1689,7 +1671,7 @@ _error_ = function () {
 /* Copyright  2014 Yahoo! Inc. 
 * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
 */
-(function (utils, AnimatedGif, error) {
+(function (utils, AnimatedGIF, error) {
     var gifshot = {
             'utils': utils,
             '_defaultOptions': {
@@ -1739,7 +1721,7 @@ _error_ = function () {
                         return callback(errorObj);
                     }
                     // change workerPath to point to where Animated_GIF.worker.js is
-                    ag = new AnimatedGif(options);
+                    ag = new AnimatedGIF(options);
                     while (++x < imagesLength) {
                         currentImage = images[x];
                         if (utils.isElement(currentImage)) {
@@ -1811,7 +1793,7 @@ _error_ = function () {
                         return callback(error.validate());
                     }
                     if (options.savedRenderingContexts.length) {
-                        screenShot.getWebcamGif(options, function (obj) {
+                        screenShot.getWebcamGIF(options, function (obj) {
                             callback(obj);
                         });
                         return;
@@ -1908,7 +1890,7 @@ _error_ = function () {
                 // is loaded, so we must manually trigger play after adding it, or the video will be frozen
                 videoElement.play();
                 setTimeout(function () {
-                    screenShot.getWebcamGif(options, function (obj) {
+                    screenShot.getWebcamGIF(options, function (obj) {
                         gifshot.stopVideoStreaming(obj);
                         completeCallback(obj);
                     });
@@ -1934,5 +1916,5 @@ _error_ = function () {
     } else {
         window.gifshot = publicApi(gifshot);
     }
-}(_utils_, animatedGif, _error_));
+}(_utils_, animatedGIF, _error_));
 }(window, window.navigator, document));

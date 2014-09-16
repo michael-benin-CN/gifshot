@@ -9,9 +9,9 @@ require([
 	'utils',
 	'videoStream',
 	'screenShot',
-	'animatedGif',
+	'animatedGIF',
 	'error'
-], function(utils, videoStream, screenShot, AnimatedGif, error) {
+], function(utils, videoStream, screenShot, AnimatedGIF, error) {
 	var gifshot = {
 		'utils': utils,
 		'_defaultOptions': {
@@ -79,7 +79,7 @@ require([
 				}
 
 				// change workerPath to point to where Animated_GIF.worker.js is
-				ag = new AnimatedGif(options);
+				ag = new AnimatedGIF(options);
 
 				while(++x < imagesLength) {
 					currentImage = images[x];
@@ -159,7 +159,7 @@ require([
 					return callback(error.validate());
 				}
 				if(options.savedRenderingContexts.length) {
-					screenShot.getWebcamGif(options, function(obj) {
+					screenShot.getWebcamGIF(options, function(obj) {
 						callback(obj);
 					});
 					return;
@@ -285,7 +285,7 @@ require([
 			videoElement.play();
 
 			setTimeout(function() {
-				screenShot.getWebcamGif(options, function(obj) {
+				screenShot.getWebcamGIF(options, function(obj) {
 					gifshot.stopVideoStreaming(obj);
 					completeCallback(obj);
 				});
