@@ -9,10 +9,10 @@
 
 define([
 	'utils',
-	'animatedGif'
+	'animatedGIF'
 ], function(utils, AnimatedGIF) {
 	return {
-    	getWebcamGif: function (obj, callback) {
+    	getWebcamGIF: function (obj, callback) {
     		callback = utils.isFunction(callback) ? callback : function() {}
 
 			var canvas = document.createElement('canvas'),
