@@ -4,6 +4,7 @@
 var gulp = require('gulp'),
   uglify = require('gulp-uglify'),
   rename = require('gulp-rename'),
+  mocha = require('gulp-mocha'),
   jshint = require('gulp-jshint'),
   requirejs = require('requirejs'),
   amdclean = require('amdclean'),
@@ -51,8 +52,8 @@ gulp.task('clean', function() {
         'transformAMDChecks': false,
         // Wraps the library in an IIFE (Immediately Invoked Function Expression)
         'wrap': {
-          'start': ';(function(window, navigator, document, undefined) {\n',
-          'end': '\n}(window, window.navigator, document));'
+          'start': ';(function(window, document, navigator, undefined) {\n',
+          'end': '\n}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));'
         },
         'aggressiveOptimizations': true,
         'createAnonymousAMDModule': true
@@ -66,11 +67,12 @@ gulp.task('clean', function() {
 });
 
 gulp.task('test', function() {
-
+    return gulp.src('tests/gifshot-tests.js', {read: false})
+        .pipe(mocha({reporter: 'nyan'}));
 });
 
 // The default task (called when you run `gulp`)
-gulp.task('default', ['clean','minify', 'add-unminified-file-to-build']);
+gulp.task('default', ['clean', 'lint', 'test', 'minify', 'add-unminified-file-to-build']);
 
 // The watch task
 gulp.task('watch', function() {
