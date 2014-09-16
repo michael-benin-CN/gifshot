@@ -14,62 +14,38 @@ _utils_ = utils = function () {
             }(),
             'Blob': window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder,
             'btoa': function () {
-                var btoa = window.btoa || this.btoaPolyfill;
-                return btoa ? btoa.bind(window) : false;
+                var btoa = window.btoa || function (input) {
+                        var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+                        while (i < l) {
+                            chr1 = input.charCodeAt(i++);
+                            chr2 = input.charCodeAt(i++);
+                            chr3 = input.charCodeAt(i++);
+                            enc1 = chr1 >> 2;
+                            enc2 = (chr1 & 3) << 4 | chr2 >> 4;
+                            enc3 = (chr2 & 15) << 2 | chr3 >> 6;
+                            enc4 = chr3 & 63;
+                            if (isNaN(chr2))
+                                enc3 = enc4 = 64;
+                            else if (isNaN(chr3))
+                                enc4 = 64;
+                            output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
+                        }
+                        return output;
+                    };
+                return btoa ? btoa.bind(window) : function () {
+                };
             }(),
-            'btoaPolyfill': function (input) {
-                var output = '', i = 0, l = input.length, key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=', chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-                while (i < l) {
-                    chr1 = input.charCodeAt(i++);
-                    chr2 = input.charCodeAt(i++);
-                    chr3 = input.charCodeAt(i++);
-                    enc1 = chr1 >> 2;
-                    enc2 = (chr1 & 3) << 4 | chr2 >> 4;
-                    enc3 = (chr2 & 15) << 2 | chr3 >> 6;
-                    enc4 = chr3 & 63;
-                    if (isNaN(chr2))
-                        enc3 = enc4 = 64;
-                    else if (isNaN(chr3))
-                        enc4 = 64;
-                    output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
-                }
-                return output;
-            },
             'isObject': function (obj) {
-                if (!obj) {
-                    return false;
-                }
-                return Object.prototype.toString.call(obj) === '[object Object]';
+                return obj && Object.prototype.toString.call(obj) === '[object Object]';
             },
             'isEmptyObject': function (obj) {
-                var isEmpty = true;
-                if (!utils.isObject(obj)) {
-                    return false;
-                }
-                if (utils.isFunction(Object.keys)) {
-                    isEmpty = !Object.keys(obj).length;
-                } else {
-                    utils.each(obj, function () {
-                        isEmpty = false;
-                    });
-                }
-                return isEmpty;
+                return utils.isObject(obj) && !Object.keys(obj).length;
             },
             'isArray': function (arr) {
-                if (!arr) {
-                    return false;
-                }
-                if ('isArray' in Array) {
-                    return Array.isArray(arr);
-                } else {
-                    return Object.prototype.toString.call(arr) === '[object Array]';
-                }
+                return arr && Array.isArray(arr);
             },
             'isFunction': function (func) {
-                if (!func) {
-                    return false;
-                }
-                return Object.prototype.toString.call(func) === '[object Function]';
+                return func && typeof func === 'function';
             },
             'isElement': function (elem) {
                 return elem && elem.nodeType === 1;
