@@ -1,4 +1,4 @@
-// animatedGif.js
+// animatedGIF.js
 // ==============
 
 // Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
@@ -11,7 +11,7 @@ define([
 	'utils',
 	'processFrameWorker',
 	'NeuQuant',
-	'GifWriter'
+	'gifWriter'
 ], function(utils, frameWorkerCode, NeuQuant, GifWriter) {
 	var AnimatedGIF = function(options) {
 		options = utils.isObject(options) ? options : {};
@@ -79,7 +79,7 @@ define([
 		},
 		// Return a worker for processing a frame
 		'getWorker': function() {
-	        return this.availableWorkers.pop();
+		      return this.availableWorkers.pop();
 		},
 		// Restores a worker to the pool
 		'freeWorker': function(worker) {
@@ -126,14 +126,14 @@ define([
 		    }
 
 		},
-    'processFrame': function(position) {
-        var AnimatedGifContext = this,
-        	options = this.options,
-        	sampleInterval = options.sampleInterval,
-        	frames = this.frames,
-        	frame,
-        	worker,
-        	done = function(ev) {
+		'processFrame': function(position) {
+		    var AnimatedGifContext = this,
+		    	options = this.options,
+		    	sampleInterval = options.sampleInterval,
+		    	frames = this.frames,
+		    	frame,
+		    	worker,
+		    	done = function(ev) {
 						var data = ev.data;
 
 						// Delete original data, and free memory
@@ -147,60 +147,60 @@ define([
 						AnimatedGifContext.freeWorker(worker);
 
 						AnimatedGifContext.onFrameFinished();
-        	};
+		    	};
 
-        frame = frames[position];
+		    frame = frames[position];
 
-        if(frame.beingProcessed || frame.done) {
-            this.onFrameFinished();
-            return;
-        }
+		    if(frame.beingProcessed || frame.done) {
+		        this.onFrameFinished();
+		        return;
+		    }
 
-        frame.sampleInterval = sampleInterval;
-        frame.beingProcessed = true;
-        frame.gifshot = true;
+		    frame.sampleInterval = sampleInterval;
+		    frame.beingProcessed = true;
+		    frame.gifshot = true;
 
-        worker = this.getWorker();
+		    worker = this.getWorker();
 
-        if(worker) {
+		    if(worker) {
 					// Process the frame in a web worker
 					worker.onmessage = done;
 					worker.postMessage(frame);
-        } else {
-        	// Process the frame in the current thread
-        	done({
-        		'data': AnimatedGifContext.workerMethods.run(frame)
-        	});
-        }
-    },
-    'startRendering': function(completeCallback) {
-        this.onRenderCompleteCallback = completeCallback;
+		    } else {
+		    	// Process the frame in the current thread
+		    	done({
+		    		'data': AnimatedGifContext.workerMethods.run(frame)
+		    	});
+		    }
+		},
+		'startRendering': function(completeCallback) {
+		    this.onRenderCompleteCallback = completeCallback;
 
-        for(var i = 0; i < this.options.numWorkers && i < this.frames.length; i++) {
-            this.processFrame(i);
-        }
-    },
-    'processNextFrame': function() {
-        var position = -1;
+		    for(var i = 0; i < this.options.numWorkers && i < this.frames.length; i++) {
+		        this.processFrame(i);
+		    }
+		},
+		'processNextFrame': function() {
+		    var position = -1;
 
-        for(var i = 0; i < this.frames.length; i++) {
-            var frame = this.frames[i];
-            if(!frame.done && !frame.beingProcessed) {
-                position = i;
-                break;
-            }
-        }
+		    for(var i = 0; i < this.frames.length; i++) {
+		        var frame = this.frames[i];
+		        if(!frame.done && !frame.beingProcessed) {
+		            position = i;
+		            break;
+		        }
+		    }
 
-        if(position >= 0) {
-            this.processFrame(position);
-        }
-    },
-    // Takes the already processed data in frames and feeds it to a new
-    // GifWriter instance in order to get the binary GIF file
-    'generateGIF': function(frames, callback) {
-        // TODO: Weird: using a simple JS array instead of a typed array,
-        // the files are WAY smaller o_o. Patches/explanations welcome!
-        var buffer = [], // new Uint8Array(width * height * frames.length * 5);
+		    if(position >= 0) {
+		        this.processFrame(position);
+		    }
+		},
+		// Takes the already processed data in frames and feeds it to a new
+		// GifWriter instance in order to get the binary GIF file
+		'generateGIF': function(frames, callback) {
+		    // TODO: Weird: using a simple JS array instead of a typed array,
+		    // the files are WAY smaller o_o. Patches/explanations welcome!
+		    var buffer = [], // new Uint8Array(width * height * frames.length * 5);
 					gifOptions = {
 						'loop': this.repeat
 					},
@@ -239,11 +239,11 @@ define([
 				    gif = 'data:image/gif;base64,' + utils.btoa(bufferToString);
 						callback(gif);
 				}
-    },
-    // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
-    'setRepeat': function(r) {
-        this.repeat = r;
-    },
+		},
+		// From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
+		'setRepeat': function(r) {
+		    this.repeat = r;
+		},
 		'addFrame': function(element, src, gifshotOptions) {
 			gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
 
@@ -303,13 +303,13 @@ define([
 		        'position': frames.length
 		    });
 		},
-    'onRenderProgress': function(callback) {
-        this.onRenderProgressCallback = callback;
-    },
+		'onRenderProgress': function(callback) {
+		    this.onRenderProgressCallback = callback;
+		},
 		'isRendering': function() {
 			return this.generatingGIF;
 		},
-    'getBase64GIF': function(completeCallback) {
+		'getBase64GIF': function(completeCallback) {
 			var self = this,
 				onRenderComplete = function(gif) {
 				self.destroyWorkers();
@@ -319,13 +319,13 @@ define([
 			};
 
 			this.startRendering(onRenderComplete);
-    },
-    'destroyWorkers': function() {
-    	if(this.workerError) {
-    		return;
-    	}
+		},
+		'destroyWorkers': function() {
+			if(this.workerError) {
+				return;
+			}
 
-    	var workers = this.workers;
+			var workers = this.workers;
 
 			// Explicitly ask web workers to die so they are explicitly GC'ed
 			utils.each(workers, function(iterator, workerObj) {
@@ -335,7 +335,7 @@ define([
 				worker.terminate();
 				utils.URL.revokeObjectURL(objectUrl);
 			});
-    }
+		}
 	};
 	return AnimatedGIF;
 });
