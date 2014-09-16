@@ -1,4 +1,4 @@
-;(function(window, navigator, document, undefined) {
+;(function(window, document, navigator, undefined) {
 // utils.js
 // ========
 /* Copyright  2014 Yahoo! Inc.
@@ -43,6 +43,9 @@ _utils_ = utils = function () {
             },
             'isEmptyObject': function (obj) {
                 var isEmpty = true;
+                if (!utils.isObject(obj)) {
+                    return false;
+                }
                 if (utils.isFunction(Object.keys)) {
                     isEmpty = !Object.keys(obj).length;
                 } else {
@@ -77,7 +80,7 @@ _utils_ = utils = function () {
             'isSupported': {
                 'canvas': function () {
                     var el = document.createElement('canvas');
-                    return !!(el.getContext && el.getContext('2d'));
+                    return el && el.getContext && el.getContext('2d');
                 },
                 'console': function () {
                     var console = window.console;
@@ -103,7 +106,7 @@ _utils_ = utils = function () {
                             'ogg': false,
                             'webm': false
                         };
-                    if (testEl.canPlayType) {
+                    if (testEl && testEl.canPlayType) {
                         supportObj.mp4 = testEl.canPlayType('video/mp4; codecs="mp4v.20.8"') !== '';
                         supportObj.h264 = (testEl.canPlayType('video/mp4; codecs="avc1.42E01E"') || testEl.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) !== '';
                         supportObj.ogv = testEl.canPlayType('video/ogg; codecs="theora"') !== '';
@@ -884,12 +887,15 @@ NeuQuant = function () {
 */
 processFrameWorker = function () {
     var workerCode = function worker() {
-        self.onmessage = function (ev) {
-            var data = ev.data, response = workerMethods.run(data);
-            if (data && data.gifshot) {
-                postMessage(response);
-            }
-        };
+        try {
+            self.onmessage = function (ev) {
+                var data = ev.data, response = workerMethods.run(data);
+                if (data && data.gifshot) {
+                    postMessage(response);
+                }
+            };
+        } catch (e) {
+        }
         var workerMethods = {
                 'dataToRGB': function (data, width, height) {
                     var i = 0, length = width * height * 4, rgb = [];
@@ -1917,4 +1923,4 @@ _error_ = function () {
         window.gifshot = publicApi(gifshot);
     }
 }(_utils_, animatedGIF, _error_));
-}(window, window.navigator, document));
+}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));

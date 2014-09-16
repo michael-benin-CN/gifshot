@@ -56,6 +56,10 @@ define(function() {
         'isEmptyObject': function(obj) {
             var isEmpty = true;
 
+            if(!utils.isObject(obj)) {
+                return false;
+            }
+
             if(utils.isFunction(Object.keys)) {
                 isEmpty = !Object.keys(obj).length;
             } else {
@@ -90,7 +94,7 @@ define(function() {
         'isSupported': {
             'canvas': function() {
                 var el = document.createElement('canvas');
-                return !!(el.getContext && el.getContext('2d'));
+                return el && el.getContext && el.getContext('2d');
             },
             'console': function() {
                 var console = window.console;
@@ -117,7 +121,8 @@ define(function() {
                         'ogg': false,
                         'webm': false
                     };
-                if(testEl.canPlayType) {
+
+                if(testEl && testEl.canPlayType) {
                     // Check for MPEG-4 support
                     supportObj.mp4 = testEl.canPlayType('video/mp4; codecs="mp4v.20.8"') !== '';
 
