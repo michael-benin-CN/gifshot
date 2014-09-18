@@ -44,7 +44,7 @@ gulp.task('clean', function() {
     'skipModuleInsertion': true,
     'include': ['index'],
     'out': 'src/gifshot.js',
-    'onModuleBundleComplete': function (data) {
+    'onModuleBundleComplete': function(data) {
       var outputFile = data.path;
       fs.writeFileSync(outputFile, amdclean.clean({
         'filePath': outputFile,
@@ -55,20 +55,24 @@ gulp.task('clean', function() {
           'start': ';(function(window, document, navigator, undefined) {\n',
           'end': '\n}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));'
         },
-        'aggressiveOptimizations': true,
+        'aggressiveOptimizations': false,
         'createAnonymousAMDModule': true
       }));
     }
   }, function() {
     // Successfully built
-  }, function (err) {
-      console.log(err);
+  }, function(err) {
+    console.log(err);
   });
 });
 
 gulp.task('test', function() {
-    return gulp.src('tests/gifshot-tests.js', {read: false})
-        .pipe(mocha({reporter: 'nyan'}));
+  return gulp.src('tests/gifshot-tests.js', {
+      read: false
+    })
+    .pipe(mocha({
+      reporter: 'nyan'
+    }));
 });
 
 // The default task (called when you run `gulp`)
@@ -76,7 +80,7 @@ gulp.task('default', ['clean', 'lint', 'test', 'minify', 'add-unminified-file-to
 
 // The watch task
 gulp.task('watch', function() {
-  gulp.watch('src/modules/*.js', function(event) {
+  gulp.watch('src/modules/**/*.js', function(event) {
     gulp.start('default');
   });
 });
