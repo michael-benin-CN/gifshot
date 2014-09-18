@@ -28,12 +28,12 @@
 // underlying system, so should run in the browser, Node, or Plask.
 
 define([
-  'utils'
-], function(utils){
+  'core/utils'
+], function(utils) {
   return function gifWriter(buf, width, height, gopts) {
     var p = 0;
 
-    gopts = gopts === undefined ? { } : gopts;
+    gopts = gopts === undefined ? {} : gopts;
     var loop_count = gopts.loop === undefined ? null : gopts.loop;
     var global_palette = gopts.palette === undefined ? null : gopts.palette;
 
@@ -43,14 +43,18 @@ define([
     function check_palette_and_num_colors(palette) {
       var num_colors = palette.length;
 
-      if (num_colors < 2 || num_colors > 256 ||  num_colors & (num_colors-1))
+      if (num_colors < 2 || num_colors > 256 || num_colors & (num_colors - 1))
         throw "Invalid code/color length, must be power of 2 and 2 .. 256.";
       return num_colors;
     }
 
     // - Header.
-    buf[p++] = 0x47; buf[p++] = 0x49; buf[p++] = 0x46;  // GIF
-    buf[p++] = 0x38; buf[p++] = 0x39; buf[p++] = 0x61;  // 89a
+    buf[p++] = 0x47;
+    buf[p++] = 0x49;
+    buf[p++] = 0x46; // GIF
+    buf[p++] = 0x38;
+    buf[p++] = 0x39;
+    buf[p++] = 0x61; // 89a
 
     // Handling of Global Color Table (palette) and background index.
     var gp_num_colors_pow2 = 0;
@@ -58,37 +62,54 @@ define([
 
     // - Logical Screen Descriptor.
     // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
-    buf[p++] = width & 0xff; buf[p++] = width >> 8 & 0xff;
-    buf[p++] = height & 0xff; buf[p++] = height >> 8 & 0xff;
+    buf[p++] = width & 0xff;
+    buf[p++] = width >> 8 & 0xff;
+    buf[p++] = height & 0xff;
+    buf[p++] = height >> 8 & 0xff;
     // NOTE: Indicates 0-bpp original color resolution (unused?).
-    buf[p++] = (global_palette !== null ? 0x80 : 0) |  // Global Color Table Flag.
-               gp_num_colors_pow2;  // NOTE: No sort flag (unused?).
-    buf[p++] = background;  // Background Color Index.
-    buf[p++] = 0;  // Pixel aspect ratio (unused?).
+    buf[p++] = (global_palette !== null ? 0x80 : 0) | // Global Color Table Flag.
+    gp_num_colors_pow2; // NOTE: No sort flag (unused?).
+    buf[p++] = background; // Background Color Index.
+    buf[p++] = 0; // Pixel aspect ratio (unused?).
 
-    if (loop_count !== null) {  // Netscape block for looping.
+    if (loop_count !== null) { // Netscape block for looping.
       if (loop_count < 0 || loop_count > 65535)
         throw "Loop count invalid.";
 
       // Extension code, label, and length.
-      buf[p++] = 0x21; buf[p++] = 0xff; buf[p++] = 0x0b;
+      buf[p++] = 0x21;
+      buf[p++] = 0xff;
+      buf[p++] = 0x0b;
       // NETSCAPE2.0
-      buf[p++] = 0x4e; buf[p++] = 0x45; buf[p++] = 0x54; buf[p++] = 0x53;
-      buf[p++] = 0x43; buf[p++] = 0x41; buf[p++] = 0x50; buf[p++] = 0x45;
-      buf[p++] = 0x32; buf[p++] = 0x2e; buf[p++] = 0x30;
+      buf[p++] = 0x4e;
+      buf[p++] = 0x45;
+      buf[p++] = 0x54;
+      buf[p++] = 0x53;
+      buf[p++] = 0x43;
+      buf[p++] = 0x41;
+      buf[p++] = 0x50;
+      buf[p++] = 0x45;
+      buf[p++] = 0x32;
+      buf[p++] = 0x2e;
+      buf[p++] = 0x30;
       // Sub-block
-      buf[p++] = 0x03; buf[p++] = 0x01;
-      buf[p++] = loop_count & 0xff; buf[p++] = loop_count >> 8 & 0xff;
-      buf[p++] = 0x00;  // Terminator.
+      buf[p++] = 0x03;
+      buf[p++] = 0x01;
+      buf[p++] = loop_count & 0xff;
+      buf[p++] = loop_count >> 8 & 0xff;
+      buf[p++] = 0x00; // Terminator.
     }
 
 
     var ended = false;
 
     this.addFrame = function(x, y, w, h, indexed_pixels, opts) {
-      if (ended === true) { --p; ended = false; }  // Un-end.
+      if (ended === true) {
+        --p;
+        ended = false;
+      } // Un-end.
 
-      opts = opts === undefined ? { } : opts;
+      opts = opts === undefined ? {} : opts;
 
       // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
       // canvas width/height, I imagine?
@@ -115,8 +136,8 @@ define([
 
       // Compute the min_code_size (power of 2), destroying num_colors.
       var min_code_size = 0;
-      while (num_colors >>= 1) ++min_code_size;
-      num_colors = 1 << min_code_size;  // Now we can easily get it back.
+      while (num_colors >>= 1)++min_code_size;
+      num_colors = 1 << min_code_size; // Now we can easily get it back.
 
       var delay = opts.delay === undefined ? 0 : opts.delay;
 
@@ -134,7 +155,7 @@ define([
       // NOTE(deanm): Dispose background doesn't really work, apparently most
       // browsers ignore the background palette index and clear to transparency.
       var disposal = opts.disposal === undefined ? 0 : opts.disposal;
-      if (disposal < 0 || disposal > 3)  // 4-7 is reserved.
+      if (disposal < 0 || disposal > 3) // 4-7 is reserved.
         throw "Disposal out of range.";
 
       var use_transparency = false;
@@ -148,24 +169,30 @@ define([
 
       if (disposal !== 0 || use_transparency || delay !== 0) {
         // - Graphics Control Extension
-        buf[p++] = 0x21; buf[p++] = 0xf9;  // Extension / Label.
-        buf[p++] = 4;  // Byte size.
+        buf[p++] = 0x21;
+        buf[p++] = 0xf9; // Extension / Label.
+        buf[p++] = 4; // Byte size.
 
         buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
-        buf[p++] = delay & 0xff; buf[p++] = delay >> 8 & 0xff;
-        buf[p++] = transparent_index;  // Transparent color index.
-        buf[p++] = 0;  // Block Terminator.
+        buf[p++] = delay & 0xff;
+        buf[p++] = delay >> 8 & 0xff;
+        buf[p++] = transparent_index; // Transparent color index.
+        buf[p++] = 0; // Block Terminator.
       }
 
       // - Image Descriptor
-      buf[p++] = 0x2c;  // Image Seperator.
-      buf[p++] = x & 0xff; buf[p++] = x >> 8 & 0xff;  // Left.
-      buf[p++] = y & 0xff; buf[p++] = y >> 8 & 0xff;  // Top.
-      buf[p++] = w & 0xff; buf[p++] = w >> 8 & 0xff;
-      buf[p++] = h & 0xff; buf[p++] = h >> 8 & 0xff;
+      buf[p++] = 0x2c; // Image Seperator.
+      buf[p++] = x & 0xff;
+      buf[p++] = x >> 8 & 0xff; // Left.
+      buf[p++] = y & 0xff;
+      buf[p++] = y >> 8 & 0xff; // Top.
+      buf[p++] = w & 0xff;
+      buf[p++] = w >> 8 & 0xff;
+      buf[p++] = h & 0xff;
+      buf[p++] = h >> 8 & 0xff;
       // NOTE: No sort flag (unused?).
       // TODO(deanm): Support interlace.
-      buf[p++] = using_local_palette === true ? (0x80 | (min_code_size-1)) : 0;
+      buf[p++] = using_local_palette === true ? (0x80 | (min_code_size - 1)) : 0;
 
       // - Local Color Table
       if (using_local_palette === true) {
@@ -178,12 +205,12 @@ define([
       }
 
       p = GifWriterOutputLZWCodeStream(
-              buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
+        buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
     };
 
     this.end = function() {
       if (ended === false) {
-        buf[p++] = 0x3b;  // Trailer.
+        buf[p++] = 0x3b; // Trailer.
         ended = true;
       }
       return p;
@@ -193,14 +220,14 @@ define([
     // |index_stream| must have at least one entry.
     function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
       buf[p++] = min_code_size;
-      var cur_subblock = p++;  // Pointing at the length field.
+      var cur_subblock = p++; // Pointing at the length field.
 
       var clear_code = 1 << min_code_size;
       var code_mask = clear_code - 1;
       var eoi_code = clear_code + 1;
       var next_code = eoi_code + 1;
 
-      var cur_code_size = min_code_size + 1;  // Number of bits per code.
+      var cur_code_size = min_code_size + 1; // Number of bits per code.
       var cur_shift = 0;
       // We have at most 12-bit codes, so we should have to hold a max of 19
       // bits here (and then we would write out).
@@ -209,8 +236,9 @@ define([
       function emit_bytes_to_buffer(bit_block_size) {
         while (cur_shift >= bit_block_size) {
           buf[p++] = cur & 0xff;
-          cur >>= 8; cur_shift -= 8;
-          if (p === cur_subblock + 256) {  // Finished a subblock.
+          cur >>= 8;
+          cur_shift -= 8;
+          if (p === cur_subblock + 256) { // Finished a subblock.
             buf[cur_subblock] = 255;
             cur_subblock = p++;
           }
@@ -261,19 +289,19 @@ define([
       // fit in an SMI value and be used as a fast sparse array / object key.
 
       // Output code for the current contents of the index buffer.
-      var ib_code = index_stream[0] & code_mask;  // Load first input index.
-      var code_table = { };  // Key'd on our 20-bit "tuple".
+      var ib_code = index_stream[0] & code_mask; // Load first input index.
+      var code_table = {}; // Key'd on our 20-bit "tuple".
 
-      emit_code(clear_code);  // Spec says first code should be a clear code.
+      emit_code(clear_code); // Spec says first code should be a clear code.
 
       // First index already loaded, process the rest of the stream.
       for (var i = 1, il = index_stream.length; i < il; ++i) {
         var k = index_stream[i] & code_mask;
-        var cur_key = ib_code << 8 | k;  // (prev, k) unique tuple.
-        var cur_code = code_table[cur_key];  // buffer + k.
+        var cur_key = ib_code << 8 | k; // (prev, k) unique tuple.
+        var cur_code = code_table[cur_key]; // buffer + k.
 
         // Check if we have to create a new code table entry.
-        if (cur_code === undefined) {  // We don't have buffer + k.
+        if (cur_code === undefined) { // We don't have buffer + k.
           // Emit index buffer (without k).
           // This is an inline version of emit_code, because this is the core
           // writing routine of the compressor (and V8 cannot inline emit_code
@@ -286,36 +314,37 @@ define([
           cur_shift += cur_code_size;
           while (cur_shift >= 8) {
             buf[p++] = cur & 0xff;
-            cur >>= 8; cur_shift -= 8;
-            if (p === cur_subblock + 256) {  // Finished a subblock.
+            cur >>= 8;
+            cur_shift -= 8;
+            if (p === cur_subblock + 256) { // Finished a subblock.
               buf[cur_subblock] = 255;
               cur_subblock = p++;
             }
           }
 
-          if (next_code === 4096) {  // Table full, need a clear.
+          if (next_code === 4096) { // Table full, need a clear.
             emit_code(clear_code);
             next_code = eoi_code + 1;
             cur_code_size = min_code_size + 1;
-            code_table = { };
-          } else {  // Table not full, insert a new entry.
+            code_table = {};
+          } else { // Table not full, insert a new entry.
             // Increase our variable bit code sizes if necessary.  This is a bit
             // tricky as it is based on "timing" between the encoding and
             // decoder.  From the encoders perspective this should happen after
             // we've already emitted the index buffer and are about to create the
             // first table entry that would overflow our current code bit size.
-            if (next_code >= (1 << cur_code_size)) ++cur_code_size;
-            code_table[cur_key] = next_code++;  // Insert into code table.
+            if (next_code >= (1 << cur_code_size))++cur_code_size;
+            code_table[cur_key] = next_code++; // Insert into code table.
           }
 
-          ib_code = k;  // Index buffer to single input k.
+          ib_code = k; // Index buffer to single input k.
         } else {
-          ib_code = cur_code;  // Index buffer to sequence in code table.
+          ib_code = cur_code; // Index buffer to sequence in code table.
         }
       }
 
-      emit_code(ib_code);  // There will still be something in the index buffer.
-      emit_code(eoi_code);  // End Of Information.
+      emit_code(ib_code); // There will still be something in the index buffer.
+      emit_code(eoi_code); // End Of Information.
 
       // Flush / finalize the sub-blocks stream to the buffer.
       emit_bytes_to_buffer(1);
@@ -323,9 +352,9 @@ define([
       // Finish the sub-blocks, writing out any unfinished lengths and
       // terminating with a sub-block of length 0.  If we have already started
       // but not yet used a sub-block it can just become the terminator.
-      if (cur_subblock + 1 === p) {  // Started but unused.
+      if (cur_subblock + 1 === p) { // Started but unused.
         buf[cur_subblock] = 0;
-      } else {  // Started and used, write length and additional terminator block.
+      } else { // Started and used, write length and additional terminator block.
         buf[cur_subblock] = p - cur_subblock - 1;
         buf[p++] = 0;
       }
