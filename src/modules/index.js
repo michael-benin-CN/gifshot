@@ -6,9 +6,8 @@
  */
 
 require([
-  'core/utils',
   'API/API'
-], function(utils, API) {
+], function(API) {
   // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
   if (typeof define === 'function' && define.amd) {
     define([], function() {
