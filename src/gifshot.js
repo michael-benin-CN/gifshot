@@ -2019,7 +2019,7 @@ API_API = function (utils, support, createGIF, takeSnapShot, stopVideoStreaming)
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-(function (utils, API) {
+(function (API) {
   // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
   if (typeof define === 'function' && define.amd) {
     define([], function () {
@@ -2030,5 +2030,5 @@ API_API = function (utils, support, createGIF, takeSnapShot, stopVideoStreaming)
   } else {
     window.gifshot = API;
   }
-}(core_utils, API_API));
+}(API_API));
 }(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));
