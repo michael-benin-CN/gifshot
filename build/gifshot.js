@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-var core_utils, core_error, API_isExistingVideoGIFSupported, core_support, core_defaultOptions, dependencies_NeuQuant, core_processFrameWorker, dependencies_gifWriter, core_AnimatedGIF, core_getBase64GIF, core_existingImages, core_screenShot, core_videoStream, API_stopVideoStreaming, core_createAndGetGIF, core_existingVideo, core_existingWebcam, API_createGIF, API_takeSnapShot, API_API;
+var core_utils, core_error, API_isSupported, API_isWebCamGIFSupported, API_isExistingImagesGIFSupported, API_isExistingVideoGIFSupported, core_defaultOptions, dependencies_NeuQuant, core_processFrameWorker, dependencies_gifWriter, core_AnimatedGIF, core_getBase64GIF, core_existingImages, core_screenShot, core_videoStream, API_stopVideoStreaming, core_createAndGetGIF, core_existingVideo, core_existingWebcam, API_createGIF, API_takeSnapShot, API_API;
 core_utils = function () {
   var utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -280,6 +280,37 @@ core_error = function (utils) {
   };
   return error;
 }(core_utils);
+// isSupported.js
+// ==============
+/* Copyright  2014 Yahoo Inc.
+ * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+ */
+API_isSupported = function (error) {
+  return function () {
+    return error.isValid();
+  };
+}(core_error);
+// isWebCamGIFSupported.js
+// =======================
+/* Copyright  2014 Yahoo Inc.
+ * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+ */
+API_isWebCamGIFSupported = function (error) {
+  return function () {
+    return error.isValid();
+  };
+}(core_error);
+// isSupported.js
+// ==============
+/* Copyright  2014 Yahoo Inc.
+ * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
+ */
+API_isExistingImagesGIFSupported = function (error) {
+  return function () {
+    var skipObj = { 'getUserMedia': true };
+    return error.isValid(skippedChecks);
+  };
+}(core_error);
 // isExistingVideoGIFSupported.js
 // ==============================
 /* Copyright  2014 Yahoo Inc.
@@ -305,25 +336,6 @@ API_isExistingVideoGIFSupported = function (utils, error) {
     return error.isValid({ 'getUserMedia': true });
   };
 }(core_utils, core_error);
-// support.js
-// ==========
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-core_support = function (utils, error, isExistingVideoGIFSupported) {
-  return {
-    'isSupported': function () {
-      return error.isValid();
-    },
-    'isWebCamGIFSupported': function () {
-      return error.isValid();
-    },
-    'isExistingVideoGIFSupported': isExistingVideoGIFSupported,
-    'isExistingImagesGIFSupported': function () {
-      return error.isValid({ 'getUserMedia': true });
-    }
-  };
-}(core_utils, core_error, API_isExistingVideoGIFSupported);
 // defaultOptions.js
 // =================
 /* Copyright  2014 Yahoo Inc.
@@ -1925,10 +1937,10 @@ core_existingVideo = function (utils, createAndGetGIF, videoStream, error) {
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_existingWebcam = function (utils, error, support, createAndGetGIF, screenShot, videoStream) {
+core_existingWebcam = function (utils, error, createAndGetGIF, screenShot, videoStream, isWebCamGIFSupported) {
   return function (obj) {
     var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
-    if (!support.isWebCamGIFSupported()) {
+    if (!isWebCamGIFSupported()) {
       return callback(error.validate());
     }
     if (options.savedRenderingContexts.length) {
@@ -1946,7 +1958,7 @@ core_existingWebcam = function (utils, error, support, createAndGetGIF, screenSh
       'webcamVideoElement': webcamVideoElement
     });
   };
-}(core_utils, core_error, core_support, core_createAndGetGIF, core_screenShot, core_videoStream);
+}(core_utils, core_error, core_createAndGetGIF, core_screenShot, core_videoStream, API_isWebCamGIFSupported);
 // createGIF.js
 // ============
 /* Copyright  2014 Yahoo Inc.
@@ -2008,19 +2020,19 @@ API_takeSnapShot = function (utils, defaultOptions, createGIF) {
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_API = function (utils, support, createGIF, takeSnapShot, stopVideoStreaming) {
+API_API = function (utils, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming) {
   var gifshot = {
     'utils': utils,
     'createGIF': createGIF,
     'takeSnapShot': takeSnapShot,
     'stopVideoStreaming': stopVideoStreaming,
-    'isSupported': support.isSupported,
-    'isWebCamGIFSupported': support.isWebCamGIFSupported,
-    'isExistingVideoGIFSupported': support.isExistingVideoGIFSupported,
-    'isExistingImagesGIFSupported': support.isExistingImagesGIFSupported
+    'isSupported': isSupported,
+    'isWebCamGIFSupported': isWebCamGIFSupported,
+    'isExistingVideoGIFSupported': isExistingVideoGIFSupported,
+    'isExistingImagesGIFSupported': isExistingImagesGIFSupported
   };
   return gifshot;
-}(core_utils, core_support, API_createGIF, API_takeSnapShot, API_stopVideoStreaming);
+}(core_utils, API_isSupported, API_isWebCamGIFSupported, API_isExistingImagesGIFSupported, API_isExistingVideoGIFSupported, API_createGIF, API_takeSnapShot, API_stopVideoStreaming);
 // index.js
 // ========
 /* Copyright  2014 Yahoo Inc. 

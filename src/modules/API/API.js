@@ -7,13 +7,19 @@
 
 define([
   'core/utils',
-  'core/support',
+  'API/isSupported',
+  'API/isWebCamGIFSupported',
+  'API/isExistingImagesGIFSupported',
+  'API/isExistingVideoGIFSupported',
   'API/createGIF',
   'API/takeSnapShot',
   'API/stopVideoStreaming'
 ], function(
   utils,
-  support,
+  isSupported,
+  isWebCamGIFSupported,
+  isExistingImagesGIFSupported,
+  isExistingVideoGIFSupported,
   createGIF,
   takeSnapShot,
   stopVideoStreaming
@@ -23,10 +29,10 @@ define([
     'createGIF': createGIF,
     'takeSnapShot': takeSnapShot,
     'stopVideoStreaming': stopVideoStreaming,
-    'isSupported': support.isSupported,
-    'isWebCamGIFSupported': support.isWebCamGIFSupported,
-    'isExistingVideoGIFSupported': support.isExistingVideoGIFSupported,
-    'isExistingImagesGIFSupported': support.isExistingImagesGIFSupported
+    'isSupported': isSupported,
+    'isWebCamGIFSupported': isWebCamGIFSupported,
+    'isExistingVideoGIFSupported': isExistingVideoGIFSupported,
+    'isExistingImagesGIFSupported': isExistingImagesGIFSupported
   };
 
   return gifshot;
