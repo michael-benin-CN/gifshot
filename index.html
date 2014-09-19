@@ -113,7 +113,7 @@ function downloadURI(uri, name) {
       gifshot.createGIF({
         // 'keepCameraOn': true,
         // 'webcamVideoElement': document.querySelector('video'),
-        // 'video': ['example.mp4'],
+        // 'video': ['example.mp4', 'example.ogv'],
         // 'video': document.querySelector('video'),
         // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://www.google.com/think/images/google-trends_tools_sm.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
         'text': text.value || '',
@@ -151,8 +151,8 @@ function downloadURI(uri, name) {
 
     snapShot.onclick = function(e){
       gifshot.takeSnapShot({
-        // 'video': ['example.mp4', 'example.ogv'] : null,
-        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : [],
+        // 'video': ['example.mp4', 'example.ogv'],
+        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
         'text': text.value || '',
         'fontWeight': fontWeight.value || 'normal',
         'fontColor': '#FFF',
