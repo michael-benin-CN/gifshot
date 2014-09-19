@@ -8,18 +8,18 @@
 define([
   'core/utils',
   'core/error',
-  'core/support',
   'core/createAndGetGIF',
   'core/screenShot',
-  'core/videoStream'
-], function(utils, error, support, createAndGetGIF, screenShot, videoStream) {
+  'core/videoStream',
+  'API/isWebCamGIFSupported',
+], function(utils, error, createAndGetGIF, screenShot, videoStream, isWebCamGIFSupported) {
   return function(obj) {
     var lastCameraStream = obj.lastCameraStream,
       callback = obj.callback,
       webcamVideoElement = obj.webcamVideoElement,
       options = obj.options;
 
-    if (!support.isWebCamGIFSupported()) {
+    if (!isWebCamGIFSupported()) {
       return callback(error.validate());
     }
     if (options.savedRenderingContexts.length) {
