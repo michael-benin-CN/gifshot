@@ -4,8 +4,8 @@
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-var core_utils, core_error, API_isSupported, API_isWebCamGIFSupported, API_isExistingImagesGIFSupported, API_isExistingVideoGIFSupported, core_defaultOptions, dependencies_NeuQuant, core_processFrameWorker, dependencies_gifWriter, core_AnimatedGIF, core_getBase64GIF, core_existingImages, core_screenShot, core_videoStream, API_stopVideoStreaming, core_createAndGetGIF, core_existingVideo, core_existingWebcam, API_createGIF, API_takeSnapShot, API_API;
-core_utils = function () {
+var utils, error, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, defaultOptions, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
+utils = function () {
   var utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
     'getUserMedia': function () {
@@ -207,7 +207,7 @@ core_utils = function () {
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_error = function (utils) {
+error = function () {
   var error = {
     'validate': function (skipObj) {
       skipObj = utils.isObject(skipObj) ? skipObj : {};
@@ -272,69 +272,61 @@ core_error = function (utils) {
     }
   };
   return error;
-}(core_utils);
+}();
 // isSupported.js
 // ==============
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_isSupported = function (error) {
-  return function () {
-    return error.isValid();
-  };
-}(core_error);
+isSupported = function () {
+  return error.isValid();
+};
 // isWebCamGIFSupported.js
 // =======================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_isWebCamGIFSupported = function (error) {
-  return function () {
-    return error.isValid();
-  };
-}(core_error);
+isWebCamGIFSupported = function () {
+  return error.isValid();
+};
 // isSupported.js
 // ==============
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_isExistingImagesGIFSupported = function (error) {
-  return function () {
-    var skipObj = { 'getUserMedia': true };
-    return error.isValid(skippedChecks);
-  };
-}(core_error);
+isExistingImagesGIFSupported = function () {
+  var skipObj = { 'getUserMedia': true };
+  return error.isValid(skippedChecks);
+};
 // isExistingVideoGIFSupported.js
 // ==============================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_isExistingVideoGIFSupported = function (utils, error) {
-  return function (codecs) {
-    var isSupported = false, hasValidCodec = false;
-    if (utils.isArray(codecs) && codecs.length) {
-      utils.each(codecs, function (indece, currentCodec) {
-        if (utils.isSupported.videoCodecs[currentCodec]) {
-          hasValidCodec = true;
-        }
-      });
-      if (!hasValidCodec) {
-        return false;
+isExistingVideoGIFSupported = function (codecs) {
+  var isSupported = false, hasValidCodec = false;
+  if (utils.isArray(codecs) && codecs.length) {
+    utils.each(codecs, function (indece, currentCodec) {
+      if (utils.isSupported.videoCodecs[currentCodec]) {
+        hasValidCodec = true;
       }
-    } else if (utils.isString(codecs) && codecs.length) {
-      if (!utils.isSupported.videoCodecs[codecs]) {
-        return false;
-      }
+    });
+    if (!hasValidCodec) {
+      return false;
     }
-    return error.isValid({ 'getUserMedia': true });
-  };
-}(core_utils, core_error);
+  } else if (utils.isString(codecs) && codecs.length) {
+    if (!utils.isSupported.videoCodecs[codecs]) {
+      return false;
+    }
+  }
+  return error.isValid({ 'getUserMedia': true });
+};
 // defaultOptions.js
 // =================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_defaultOptions = {
+defaultOptions = {
   'sampleInterval': 10,
   'numWorkers': 2,
   'gifWidth': 200,
@@ -393,7 +385,7 @@ core_defaultOptions = {
  * @version 0.3 JS clean up + using modern JS idioms by sole - http://soledadpenades.com
  * Also implement fix in color conversion described at http://stackoverflow.com/questions/16371712/neuquant-js-javascript-color-quantization-hidden-bug-in-js-conversion
  */
-dependencies_NeuQuant = function () {
+NeuQuant = function () {
   function NeuQuant() {
     var netsize = 256;
     // number of colours used
@@ -838,7 +830,7 @@ dependencies_NeuQuant = function () {
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_processFrameWorker = function (NeuQuant) {
+processFrameWorker = function () {
   var workerCode = function worker() {
     try {
       self.onmessage = function (ev) {
@@ -892,7 +884,7 @@ core_processFrameWorker = function (NeuQuant) {
     return workerMethods;
   };
   return workerCode;
-}(dependencies_NeuQuant);
+}();
 // gifWriter.js
 // ============
 // (c) Dean McNamee <dean@gmail.com>, 2013.
@@ -920,197 +912,275 @@ core_processFrameWorker = function (NeuQuant) {
 // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
 // including animation and compression.  It does not rely on any specific
 // underlying system, so should run in the browser, Node, or Plask.
-dependencies_gifWriter = function (utils) {
-  return function gifWriter(buf, width, height, gopts) {
-    var p = 0;
-    gopts = gopts === undefined ? {} : gopts;
-    var loop_count = gopts.loop === undefined ? null : gopts.loop;
-    var global_palette = gopts.palette === undefined ? null : gopts.palette;
-    if (width <= 0 || height <= 0 || width > 65535 || height > 65535)
-      throw 'Width/Height invalid.';
-    function check_palette_and_num_colors(palette) {
-      var num_colors = palette.length;
-      if (num_colors < 2 || num_colors > 256 || num_colors & num_colors - 1)
-        throw 'Invalid code/color length, must be power of 2 and 2 .. 256.';
-      return num_colors;
-    }
-    // - Header.
-    buf[p++] = 71;
-    buf[p++] = 73;
-    buf[p++] = 70;
-    // GIF
-    buf[p++] = 56;
-    buf[p++] = 57;
-    buf[p++] = 97;
-    // 89a
-    // Handling of Global Color Table (palette) and background index.
-    var gp_num_colors_pow2 = 0;
-    var background = 0;
-    // - Logical Screen Descriptor.
-    // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
-    buf[p++] = width & 255;
-    buf[p++] = width >> 8 & 255;
-    buf[p++] = height & 255;
-    buf[p++] = height >> 8 & 255;
-    // NOTE: Indicates 0-bpp original color resolution (unused?).
-    buf[p++] = (global_palette !== null ? 128 : 0) | // Global Color Table Flag.
-    gp_num_colors_pow2;
-    // NOTE: No sort flag (unused?).
-    buf[p++] = background;
-    // Background Color Index.
+gifWriter = function gifWriter(buf, width, height, gopts) {
+  var p = 0;
+  gopts = gopts === undefined ? {} : gopts;
+  var loop_count = gopts.loop === undefined ? null : gopts.loop;
+  var global_palette = gopts.palette === undefined ? null : gopts.palette;
+  if (width <= 0 || height <= 0 || width > 65535 || height > 65535)
+    throw 'Width/Height invalid.';
+  function check_palette_and_num_colors(palette) {
+    var num_colors = palette.length;
+    if (num_colors < 2 || num_colors > 256 || num_colors & num_colors - 1)
+      throw 'Invalid code/color length, must be power of 2 and 2 .. 256.';
+    return num_colors;
+  }
+  // - Header.
+  buf[p++] = 71;
+  buf[p++] = 73;
+  buf[p++] = 70;
+  // GIF
+  buf[p++] = 56;
+  buf[p++] = 57;
+  buf[p++] = 97;
+  // 89a
+  // Handling of Global Color Table (palette) and background index.
+  var gp_num_colors_pow2 = 0;
+  var background = 0;
+  // - Logical Screen Descriptor.
+  // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
+  buf[p++] = width & 255;
+  buf[p++] = width >> 8 & 255;
+  buf[p++] = height & 255;
+  buf[p++] = height >> 8 & 255;
+  // NOTE: Indicates 0-bpp original color resolution (unused?).
+  buf[p++] = (global_palette !== null ? 128 : 0) | // Global Color Table Flag.
+  gp_num_colors_pow2;
+  // NOTE: No sort flag (unused?).
+  buf[p++] = background;
+  // Background Color Index.
+  buf[p++] = 0;
+  // Pixel aspect ratio (unused?).
+  if (loop_count !== null) {
+    // Netscape block for looping.
+    if (loop_count < 0 || loop_count > 65535)
+      throw 'Loop count invalid.';
+    // Extension code, label, and length.
+    buf[p++] = 33;
+    buf[p++] = 255;
+    buf[p++] = 11;
+    // NETSCAPE2.0
+    buf[p++] = 78;
+    buf[p++] = 69;
+    buf[p++] = 84;
+    buf[p++] = 83;
+    buf[p++] = 67;
+    buf[p++] = 65;
+    buf[p++] = 80;
+    buf[p++] = 69;
+    buf[p++] = 50;
+    buf[p++] = 46;
+    buf[p++] = 48;
+    // Sub-block
+    buf[p++] = 3;
+    buf[p++] = 1;
+    buf[p++] = loop_count & 255;
+    buf[p++] = loop_count >> 8 & 255;
     buf[p++] = 0;
-    // Pixel aspect ratio (unused?).
-    if (loop_count !== null) {
-      // Netscape block for looping.
-      if (loop_count < 0 || loop_count > 65535)
-        throw 'Loop count invalid.';
-      // Extension code, label, and length.
+  }
+  var ended = false;
+  this.addFrame = function (x, y, w, h, indexed_pixels, opts) {
+    if (ended === true) {
+      --p;
+      ended = false;
+    }
+    // Un-end.
+    opts = opts === undefined ? {} : opts;
+    // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
+    // canvas width/height, I imagine?
+    if (x < 0 || y < 0 || x > 65535 || y > 65535)
+      throw 'x/y invalid.';
+    if (w <= 0 || h <= 0 || w > 65535 || h > 65535)
+      throw 'Width/Height invalid.';
+    if (indexed_pixels.length < w * h)
+      throw 'Not enough pixels for the frame size.';
+    var using_local_palette = true;
+    var palette = opts.palette;
+    if (palette === undefined || palette === null) {
+      using_local_palette = false;
+      palette = global_palette;
+    }
+    if (palette === undefined || palette === null)
+      throw 'Must supply either a local or global palette.';
+    var num_colors = check_palette_and_num_colors(palette);
+    // Compute the min_code_size (power of 2), destroying num_colors.
+    var min_code_size = 0;
+    while (num_colors >>= 1)
+      ++min_code_size;
+    num_colors = 1 << min_code_size;
+    // Now we can easily get it back.
+    var delay = opts.delay === undefined ? 0 : opts.delay;
+    // From the spec:
+    //     0 -   No disposal specified. The decoder is
+    //           not required to take any action.
+    //     1 -   Do not dispose. The graphic is to be left
+    //           in place.
+    //     2 -   Restore to background color. The area used by the
+    //           graphic must be restored to the background color.
+    //     3 -   Restore to previous. The decoder is required to
+    //           restore the area overwritten by the graphic with
+    //           what was there prior to rendering the graphic.
+    //  4-7 -    To be defined.
+    // NOTE(deanm): Dispose background doesn't really work, apparently most
+    // browsers ignore the background palette index and clear to transparency.
+    var disposal = opts.disposal === undefined ? 0 : opts.disposal;
+    if (disposal < 0 || disposal > 3)
+      // 4-7 is reserved.
+      throw 'Disposal out of range.';
+    var use_transparency = false;
+    var transparent_index = 0;
+    if (opts.transparent !== undefined && opts.transparent !== null) {
+      use_transparency = true;
+      transparent_index = opts.transparent;
+      if (transparent_index < 0 || transparent_index >= num_colors)
+        throw 'Transparent color index.';
+    }
+    if (disposal !== 0 || use_transparency || delay !== 0) {
+      // - Graphics Control Extension
       buf[p++] = 33;
-      buf[p++] = 255;
-      buf[p++] = 11;
-      // NETSCAPE2.0
-      buf[p++] = 78;
-      buf[p++] = 69;
-      buf[p++] = 84;
-      buf[p++] = 83;
-      buf[p++] = 67;
-      buf[p++] = 65;
-      buf[p++] = 80;
-      buf[p++] = 69;
-      buf[p++] = 50;
-      buf[p++] = 46;
-      buf[p++] = 48;
-      // Sub-block
-      buf[p++] = 3;
-      buf[p++] = 1;
-      buf[p++] = loop_count & 255;
-      buf[p++] = loop_count >> 8 & 255;
+      buf[p++] = 249;
+      // Extension / Label.
+      buf[p++] = 4;
+      // Byte size.
+      buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
+      buf[p++] = delay & 255;
+      buf[p++] = delay >> 8 & 255;
+      buf[p++] = transparent_index;
+      // Transparent color index.
       buf[p++] = 0;
     }
-    var ended = false;
-    this.addFrame = function (x, y, w, h, indexed_pixels, opts) {
-      if (ended === true) {
-        --p;
-        ended = false;
+    // - Image Descriptor
+    buf[p++] = 44;
+    // Image Seperator.
+    buf[p++] = x & 255;
+    buf[p++] = x >> 8 & 255;
+    // Left.
+    buf[p++] = y & 255;
+    buf[p++] = y >> 8 & 255;
+    // Top.
+    buf[p++] = w & 255;
+    buf[p++] = w >> 8 & 255;
+    buf[p++] = h & 255;
+    buf[p++] = h >> 8 & 255;
+    // NOTE: No sort flag (unused?).
+    // TODO(deanm): Support interlace.
+    buf[p++] = using_local_palette === true ? 128 | min_code_size - 1 : 0;
+    // - Local Color Table
+    if (using_local_palette === true) {
+      for (var i = 0, il = palette.length; i < il; ++i) {
+        var rgb = palette[i];
+        buf[p++] = rgb >> 16 & 255;
+        buf[p++] = rgb >> 8 & 255;
+        buf[p++] = rgb & 255;
       }
-      // Un-end.
-      opts = opts === undefined ? {} : opts;
-      // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
-      // canvas width/height, I imagine?
-      if (x < 0 || y < 0 || x > 65535 || y > 65535)
-        throw 'x/y invalid.';
-      if (w <= 0 || h <= 0 || w > 65535 || h > 65535)
-        throw 'Width/Height invalid.';
-      if (indexed_pixels.length < w * h)
-        throw 'Not enough pixels for the frame size.';
-      var using_local_palette = true;
-      var palette = opts.palette;
-      if (palette === undefined || palette === null) {
-        using_local_palette = false;
-        palette = global_palette;
-      }
-      if (palette === undefined || palette === null)
-        throw 'Must supply either a local or global palette.';
-      var num_colors = check_palette_and_num_colors(palette);
-      // Compute the min_code_size (power of 2), destroying num_colors.
-      var min_code_size = 0;
-      while (num_colors >>= 1)
-        ++min_code_size;
-      num_colors = 1 << min_code_size;
-      // Now we can easily get it back.
-      var delay = opts.delay === undefined ? 0 : opts.delay;
-      // From the spec:
-      //     0 -   No disposal specified. The decoder is
-      //           not required to take any action.
-      //     1 -   Do not dispose. The graphic is to be left
-      //           in place.
-      //     2 -   Restore to background color. The area used by the
-      //           graphic must be restored to the background color.
-      //     3 -   Restore to previous. The decoder is required to
-      //           restore the area overwritten by the graphic with
-      //           what was there prior to rendering the graphic.
-      //  4-7 -    To be defined.
-      // NOTE(deanm): Dispose background doesn't really work, apparently most
-      // browsers ignore the background palette index and clear to transparency.
-      var disposal = opts.disposal === undefined ? 0 : opts.disposal;
-      if (disposal < 0 || disposal > 3)
-        // 4-7 is reserved.
-        throw 'Disposal out of range.';
-      var use_transparency = false;
-      var transparent_index = 0;
-      if (opts.transparent !== undefined && opts.transparent !== null) {
-        use_transparency = true;
-        transparent_index = opts.transparent;
-        if (transparent_index < 0 || transparent_index >= num_colors)
-          throw 'Transparent color index.';
-      }
-      if (disposal !== 0 || use_transparency || delay !== 0) {
-        // - Graphics Control Extension
-        buf[p++] = 33;
-        buf[p++] = 249;
-        // Extension / Label.
-        buf[p++] = 4;
-        // Byte size.
-        buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
-        buf[p++] = delay & 255;
-        buf[p++] = delay >> 8 & 255;
-        buf[p++] = transparent_index;
-        // Transparent color index.
-        buf[p++] = 0;
-      }
-      // - Image Descriptor
-      buf[p++] = 44;
-      // Image Seperator.
-      buf[p++] = x & 255;
-      buf[p++] = x >> 8 & 255;
-      // Left.
-      buf[p++] = y & 255;
-      buf[p++] = y >> 8 & 255;
-      // Top.
-      buf[p++] = w & 255;
-      buf[p++] = w >> 8 & 255;
-      buf[p++] = h & 255;
-      buf[p++] = h >> 8 & 255;
-      // NOTE: No sort flag (unused?).
-      // TODO(deanm): Support interlace.
-      buf[p++] = using_local_palette === true ? 128 | min_code_size - 1 : 0;
-      // - Local Color Table
-      if (using_local_palette === true) {
-        for (var i = 0, il = palette.length; i < il; ++i) {
-          var rgb = palette[i];
-          buf[p++] = rgb >> 16 & 255;
-          buf[p++] = rgb >> 8 & 255;
-          buf[p++] = rgb & 255;
+    }
+    p = GifWriterOutputLZWCodeStream(buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
+  };
+  this.end = function () {
+    if (ended === false) {
+      buf[p++] = 59;
+      // Trailer.
+      ended = true;
+    }
+    return p;
+  };
+  // Main compression routine, palette indexes -> LZW code stream.
+  // |index_stream| must have at least one entry.
+  function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
+    buf[p++] = min_code_size;
+    var cur_subblock = p++;
+    // Pointing at the length field.
+    var clear_code = 1 << min_code_size;
+    var code_mask = clear_code - 1;
+    var eoi_code = clear_code + 1;
+    var next_code = eoi_code + 1;
+    var cur_code_size = min_code_size + 1;
+    // Number of bits per code.
+    var cur_shift = 0;
+    // We have at most 12-bit codes, so we should have to hold a max of 19
+    // bits here (and then we would write out).
+    var cur = 0;
+    function emit_bytes_to_buffer(bit_block_size) {
+      while (cur_shift >= bit_block_size) {
+        buf[p++] = cur & 255;
+        cur >>= 8;
+        cur_shift -= 8;
+        if (p === cur_subblock + 256) {
+          // Finished a subblock.
+          buf[cur_subblock] = 255;
+          cur_subblock = p++;
         }
       }
-      p = GifWriterOutputLZWCodeStream(buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
-    };
-    this.end = function () {
-      if (ended === false) {
-        buf[p++] = 59;
-        // Trailer.
-        ended = true;
-      }
-      return p;
-    };
-    // Main compression routine, palette indexes -> LZW code stream.
-    // |index_stream| must have at least one entry.
-    function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
-      buf[p++] = min_code_size;
-      var cur_subblock = p++;
-      // Pointing at the length field.
-      var clear_code = 1 << min_code_size;
-      var code_mask = clear_code - 1;
-      var eoi_code = clear_code + 1;
-      var next_code = eoi_code + 1;
-      var cur_code_size = min_code_size + 1;
-      // Number of bits per code.
-      var cur_shift = 0;
-      // We have at most 12-bit codes, so we should have to hold a max of 19
-      // bits here (and then we would write out).
-      var cur = 0;
-      function emit_bytes_to_buffer(bit_block_size) {
-        while (cur_shift >= bit_block_size) {
+    }
+    function emit_code(c) {
+      cur |= c << cur_shift;
+      cur_shift += cur_code_size;
+      emit_bytes_to_buffer(8);
+    }
+    // I am not an expert on the topic, and I don't want to write a thesis.
+    // However, it is good to outline here the basic algorithm and the few data
+    // structures and optimizations here that make this implementation fast.
+    // The basic idea behind LZW is to build a table of previously seen runs
+    // addressed by a short id (herein called output code).  All data is
+    // referenced by a code, which represents one or more values from the
+    // original input stream.  All input bytes can be referenced as the same
+    // value as an output code.  So if you didn't want any compression, you
+    // could more or less just output the original bytes as codes (there are
+    // some details to this, but it is the idea).  In order to achieve
+    // compression, values greater then the input range (codes can be up to
+    // 12-bit while input only 8-bit) represent a sequence of previously seen
+    // inputs.  The decompressor is able to build the same mapping while
+    // decoding, so there is always a shared common knowledge between the
+    // encoding and decoder, which is also important for "timing" aspects like
+    // how to handle variable bit width code encoding.
+    //
+    // One obvious but very important consequence of the table system is there
+    // is always a unique id (at most 12-bits) to map the runs.  'A' might be
+    // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
+    // can be used for an effecient lookup strategy for the code mapping.  We
+    // need to know if a run has been seen before, and be able to map that run
+    // to the output code.  Since we start with known unique ids (input bytes),
+    // and then from those build more unique ids (table entries), we can
+    // continue this chain (almost like a linked list) to always have small
+    // integer values that represent the current byte chains in the encoder.
+    // This means instead of tracking the input bytes (AAAABCD) to know our
+    // current state, we can track the table entry for AAAABC (it is guaranteed
+    // to exist by the nature of the algorithm) and the next character D.
+    // Therefor the tuple of (table_entry, byte) is guaranteed to also be
+    // unique.  This allows us to create a simple lookup key for mapping input
+    // sequences to codes (table indices) without having to store or search
+    // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
+    // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
+    // key.  This leads to a integer value at most 20-bits, which can always
+    // fit in an SMI value and be used as a fast sparse array / object key.
+    // Output code for the current contents of the index buffer.
+    var ib_code = index_stream[0] & code_mask;
+    // Load first input index.
+    var code_table = {};
+    // Key'd on our 20-bit "tuple".
+    emit_code(clear_code);
+    // Spec says first code should be a clear code.
+    // First index already loaded, process the rest of the stream.
+    for (var i = 1, il = index_stream.length; i < il; ++i) {
+      var k = index_stream[i] & code_mask;
+      var cur_key = ib_code << 8 | k;
+      // (prev, k) unique tuple.
+      var cur_code = code_table[cur_key];
+      // buffer + k.
+      // Check if we have to create a new code table entry.
+      if (cur_code === undefined) {
+        // We don't have buffer + k.
+        // Emit index buffer (without k).
+        // This is an inline version of emit_code, because this is the core
+        // writing routine of the compressor (and V8 cannot inline emit_code
+        // because it is a closure here in a different context).  Additionally
+        // we can call emit_byte_to_buffer less often, because we can have
+        // 30-bits (from our 31-bit signed SMI), and we know our codes will only
+        // be 12-bits, so can safely have 18-bits there without overflow.
+        // emit_code(ib_code);
+        cur |= ib_code << cur_shift;
+        cur_shift += cur_code_size;
+        while (cur_shift >= 8) {
           buf[p++] = cur & 255;
           cur >>= 8;
           cur_shift -= 8;
@@ -1120,135 +1190,55 @@ dependencies_gifWriter = function (utils) {
             cur_subblock = p++;
           }
         }
-      }
-      function emit_code(c) {
-        cur |= c << cur_shift;
-        cur_shift += cur_code_size;
-        emit_bytes_to_buffer(8);
-      }
-      // I am not an expert on the topic, and I don't want to write a thesis.
-      // However, it is good to outline here the basic algorithm and the few data
-      // structures and optimizations here that make this implementation fast.
-      // The basic idea behind LZW is to build a table of previously seen runs
-      // addressed by a short id (herein called output code).  All data is
-      // referenced by a code, which represents one or more values from the
-      // original input stream.  All input bytes can be referenced as the same
-      // value as an output code.  So if you didn't want any compression, you
-      // could more or less just output the original bytes as codes (there are
-      // some details to this, but it is the idea).  In order to achieve
-      // compression, values greater then the input range (codes can be up to
-      // 12-bit while input only 8-bit) represent a sequence of previously seen
-      // inputs.  The decompressor is able to build the same mapping while
-      // decoding, so there is always a shared common knowledge between the
-      // encoding and decoder, which is also important for "timing" aspects like
-      // how to handle variable bit width code encoding.
-      //
-      // One obvious but very important consequence of the table system is there
-      // is always a unique id (at most 12-bits) to map the runs.  'A' might be
-      // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
-      // can be used for an effecient lookup strategy for the code mapping.  We
-      // need to know if a run has been seen before, and be able to map that run
-      // to the output code.  Since we start with known unique ids (input bytes),
-      // and then from those build more unique ids (table entries), we can
-      // continue this chain (almost like a linked list) to always have small
-      // integer values that represent the current byte chains in the encoder.
-      // This means instead of tracking the input bytes (AAAABCD) to know our
-      // current state, we can track the table entry for AAAABC (it is guaranteed
-      // to exist by the nature of the algorithm) and the next character D.
-      // Therefor the tuple of (table_entry, byte) is guaranteed to also be
-      // unique.  This allows us to create a simple lookup key for mapping input
-      // sequences to codes (table indices) without having to store or search
-      // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
-      // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
-      // key.  This leads to a integer value at most 20-bits, which can always
-      // fit in an SMI value and be used as a fast sparse array / object key.
-      // Output code for the current contents of the index buffer.
-      var ib_code = index_stream[0] & code_mask;
-      // Load first input index.
-      var code_table = {};
-      // Key'd on our 20-bit "tuple".
-      emit_code(clear_code);
-      // Spec says first code should be a clear code.
-      // First index already loaded, process the rest of the stream.
-      for (var i = 1, il = index_stream.length; i < il; ++i) {
-        var k = index_stream[i] & code_mask;
-        var cur_key = ib_code << 8 | k;
-        // (prev, k) unique tuple.
-        var cur_code = code_table[cur_key];
-        // buffer + k.
-        // Check if we have to create a new code table entry.
-        if (cur_code === undefined) {
-          // We don't have buffer + k.
-          // Emit index buffer (without k).
-          // This is an inline version of emit_code, because this is the core
-          // writing routine of the compressor (and V8 cannot inline emit_code
-          // because it is a closure here in a different context).  Additionally
-          // we can call emit_byte_to_buffer less often, because we can have
-          // 30-bits (from our 31-bit signed SMI), and we know our codes will only
-          // be 12-bits, so can safely have 18-bits there without overflow.
-          // emit_code(ib_code);
-          cur |= ib_code << cur_shift;
-          cur_shift += cur_code_size;
-          while (cur_shift >= 8) {
-            buf[p++] = cur & 255;
-            cur >>= 8;
-            cur_shift -= 8;
-            if (p === cur_subblock + 256) {
-              // Finished a subblock.
-              buf[cur_subblock] = 255;
-              cur_subblock = p++;
-            }
-          }
-          if (next_code === 4096) {
-            // Table full, need a clear.
-            emit_code(clear_code);
-            next_code = eoi_code + 1;
-            cur_code_size = min_code_size + 1;
-            code_table = {};
-          } else {
-            // Table not full, insert a new entry.
-            // Increase our variable bit code sizes if necessary.  This is a bit
-            // tricky as it is based on "timing" between the encoding and
-            // decoder.  From the encoders perspective this should happen after
-            // we've already emitted the index buffer and are about to create the
-            // first table entry that would overflow our current code bit size.
-            if (next_code >= 1 << cur_code_size)
-              ++cur_code_size;
-            code_table[cur_key] = next_code++;
-          }
-          ib_code = k;
+        if (next_code === 4096) {
+          // Table full, need a clear.
+          emit_code(clear_code);
+          next_code = eoi_code + 1;
+          cur_code_size = min_code_size + 1;
+          code_table = {};
         } else {
-          ib_code = cur_code;
+          // Table not full, insert a new entry.
+          // Increase our variable bit code sizes if necessary.  This is a bit
+          // tricky as it is based on "timing" between the encoding and
+          // decoder.  From the encoders perspective this should happen after
+          // we've already emitted the index buffer and are about to create the
+          // first table entry that would overflow our current code bit size.
+          if (next_code >= 1 << cur_code_size)
+            ++cur_code_size;
+          code_table[cur_key] = next_code++;
         }
-      }
-      emit_code(ib_code);
-      // There will still be something in the index buffer.
-      emit_code(eoi_code);
-      // End Of Information.
-      // Flush / finalize the sub-blocks stream to the buffer.
-      emit_bytes_to_buffer(1);
-      // Finish the sub-blocks, writing out any unfinished lengths and
-      // terminating with a sub-block of length 0.  If we have already started
-      // but not yet used a sub-block it can just become the terminator.
-      if (cur_subblock + 1 === p) {
-        // Started but unused.
-        buf[cur_subblock] = 0;
+        ib_code = k;
       } else {
-        // Started and used, write length and additional terminator block.
-        buf[cur_subblock] = p - cur_subblock - 1;
-        buf[p++] = 0;
+        ib_code = cur_code;
       }
-      return p;
     }
-  };
-}(core_utils);
+    emit_code(ib_code);
+    // There will still be something in the index buffer.
+    emit_code(eoi_code);
+    // End Of Information.
+    // Flush / finalize the sub-blocks stream to the buffer.
+    emit_bytes_to_buffer(1);
+    // Finish the sub-blocks, writing out any unfinished lengths and
+    // terminating with a sub-block of length 0.  If we have already started
+    // but not yet used a sub-block it can just become the terminator.
+    if (cur_subblock + 1 === p) {
+      // Started but unused.
+      buf[cur_subblock] = 0;
+    } else {
+      // Started and used, write length and additional terminator block.
+      buf[cur_subblock] = p - cur_subblock - 1;
+      buf[p++] = 0;
+    }
+    return p;
+  }
+};
 // animatedGIF.js
 // ==============
 // Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_AnimatedGIF = function (utils, frameWorkerCode, NeuQuant, GifWriter) {
+AnimatedGIF = function (frameWorkerCode, GifWriter) {
   var AnimatedGIF = function (options) {
     options = utils.isObject(options) ? options : {};
     this.canvas = null;
@@ -1486,13 +1476,13 @@ core_AnimatedGIF = function (utils, frameWorkerCode, NeuQuant, GifWriter) {
     }
   };
   return AnimatedGIF;
-}(core_utils, core_processFrameWorker, dependencies_NeuQuant, dependencies_gifWriter);
+}(processFrameWorker, gifWriter);
 // getBase64GIF.js
 // ===============
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
+getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
   // This is asynchronous, rendered with WebWorkers
   animatedGifInstance.getBase64GIF(function (image) {
     callback({
@@ -1508,512 +1498,496 @@ core_getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_existingImages = function (utils, AnimatedGIF, getBase64GIF, error) {
-  return function (obj) {
-    var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
-        'getUserMedia': true,
-        'window.URL': true
-      }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
-    if (errorObj.error) {
-      return callback(errorObj);
-    }
-    // change workerPath to point to where Animated_GIF.worker.js is
-    ag = new AnimatedGIF(options);
-    utils.each(images, function (index, currentImage) {
-      if (utils.isElement(currentImage)) {
-        currentImage.crossOrigin = 'Anonymous';
-        ag.addFrame(currentImage, currentImage.src, options);
-        loadedImages += 1;
-        if (loadedImages === imagesLength) {
-          getBase64GIF(ag, callback);
+existingImages = function (obj) {
+  var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
+      'getUserMedia': true,
+      'window.URL': true
+    }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
+  if (errorObj.error) {
+    return callback(errorObj);
+  }
+  // change workerPath to point to where Animated_GIF.worker.js is
+  ag = new AnimatedGIF(options);
+  utils.each(images, function (index, currentImage) {
+    if (utils.isElement(currentImage)) {
+      currentImage.crossOrigin = 'Anonymous';
+      ag.addFrame(currentImage, currentImage.src, options);
+      loadedImages += 1;
+      if (loadedImages === imagesLength) {
+        getBase64GIF(ag, callback);
+      }
+    } else if (utils.isString(currentImage)) {
+      tempImage = document.createElement('img');
+      tempImage.crossOrigin = 'Anonymous';
+      tempImage.onerror = function (e) {
+        // If there is an error, ignore the image
+        if (imagesLength > 0) {
+          imagesLength -= 1;
         }
-      } else if (utils.isString(currentImage)) {
-        tempImage = document.createElement('img');
-        tempImage.crossOrigin = 'Anonymous';
-        tempImage.onerror = function (e) {
-          // If there is an error, ignore the image
-          if (imagesLength > 0) {
-            imagesLength -= 1;
+      };
+      tempImage.src = currentImage;
+      utils.setCSSAttr(tempImage, {
+        'position': 'fixed',
+        'opacity': '0'
+      });
+      (function (tempImage, ag, currentImage) {
+        tempImage.onload = function () {
+          ag.addFrame(tempImage, currentImage, options);
+          utils.removeElement(tempImage);
+          loadedImages += 1;
+          if (loadedImages === imagesLength) {
+            getBase64GIF(ag, callback);
           }
         };
-        tempImage.src = currentImage;
-        utils.setCSSAttr(tempImage, {
-          'position': 'fixed',
-          'opacity': '0'
-        });
-        (function (tempImage, ag, currentImage) {
-          tempImage.onload = function () {
-            ag.addFrame(tempImage, currentImage, options);
-            utils.removeElement(tempImage);
-            loadedImages += 1;
-            if (loadedImages === imagesLength) {
-              getBase64GIF(ag, callback);
-            }
-          };
-        }(tempImage, ag, currentImage));
-        document.body.appendChild(tempImage);
-      }
-    });
-  };
-}(core_utils, core_AnimatedGIF, core_getBase64GIF, core_error);
+      }(tempImage, ag, currentImage));
+      document.body.appendChild(tempImage);
+    }
+  });
+};
 // screenShot.js
 // =============
 // Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_screenShot = function (utils, AnimatedGIF) {
-  return {
-    getWebcamGIF: function (obj, callback) {
-      callback = utils.isFunction(callback) ? callback : function () {
-      };
-      var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
-          'sampleInterval': sampleInterval,
-          'numWorkers': numWorkers,
-          'width': gifWidth,
-          'height': gifHeight,
-          'delay': interval
-        }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10),
-        //obj.fontSize,
-        fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
-          var framesLeft = pendingFrames - 1;
-          if (savedRenderingContexts.length) {
-            context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
-          } else {
-            context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
-          }
-          if (saveRenderingContexts) {
-            renderingContextsToSave.push(context.getImageData(0, 0, gifWidth, gifHeight));
-          }
-          // If there is text to display, make sure to display it on the canvas after the image is drawn
-          if (text) {
-            context.font = font;
-            context.fillStyle = fontColor;
-            context.textAlign = textAlign;
-            context.textBaseline = textBaseline;
-            context.fillText(text, textXCoordinate, textYCoordinate);
-          }
-          ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
-          pendingFrames = framesLeft;
-          // Call back with an r value indicating how far along we are in capture
-          progressCallback((numFrames - pendingFrames) / numFrames);
-          if (framesLeft > 0) {
-            setTimeout(captureFrame, interval * 1000);
-          }
-          if (!pendingFrames) {
-            ag.getBase64GIF(function (image) {
-              callback({
-                'error': false,
-                'errorCode': '',
-                'errorMsg': '',
-                'image': image,
-                'cameraStream': cameraStream,
-                'videoElement': videoElement,
-                'webcamVideoElement': webcamVideoElement,
-                'savedRenderingContexts': renderingContextsToSave
-              });
+screenShot = {
+  getWebcamGIF: function (obj, callback) {
+    callback = utils.isFunction(callback) ? callback : function () {
+    };
+    var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+        'sampleInterval': sampleInterval,
+        'numWorkers': numWorkers,
+        'width': gifWidth,
+        'height': gifHeight,
+        'delay': interval
+      }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10),
+      //obj.fontSize,
+      fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
+        var framesLeft = pendingFrames - 1;
+        if (savedRenderingContexts.length) {
+          context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
+        } else {
+          context.drawImage(videoElement, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, gifWidth, gifHeight);
+        }
+        if (saveRenderingContexts) {
+          renderingContextsToSave.push(context.getImageData(0, 0, gifWidth, gifHeight));
+        }
+        // If there is text to display, make sure to display it on the canvas after the image is drawn
+        if (text) {
+          context.font = font;
+          context.fillStyle = fontColor;
+          context.textAlign = textAlign;
+          context.textBaseline = textBaseline;
+          context.fillText(text, textXCoordinate, textYCoordinate);
+        }
+        ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
+        pendingFrames = framesLeft;
+        // Call back with an r value indicating how far along we are in capture
+        progressCallback((numFrames - pendingFrames) / numFrames);
+        if (framesLeft > 0) {
+          setTimeout(captureFrame, interval * 1000);
+        }
+        if (!pendingFrames) {
+          ag.getBase64GIF(function (image) {
+            callback({
+              'error': false,
+              'errorCode': '',
+              'errorMsg': '',
+              'image': image,
+              'cameraStream': cameraStream,
+              'videoElement': videoElement,
+              'webcamVideoElement': webcamVideoElement,
+              'savedRenderingContexts': renderingContextsToSave
             });
-          }
-        };
-      numFrames = numFrames !== undefined ? numFrames : 10;
-      interval = interval !== undefined ? interval : 0.1;
-      // In seconds
-      canvas.width = gifWidth;
-      canvas.height = gifHeight;
-      context = canvas.getContext('2d');
-      captureFrame();
-    },
-    'getCropDimensions': function (obj) {
-      var width = obj.videoWidth, height = obj.videoHeight, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, result = {
-          width: 0,
-          height: 0,
-          scaledWidth: 0,
-          scaledHeight: 0
-        };
-      if (width > height) {
-        result.width = Math.round(width * (gifHeight / height)) - gifWidth;
-        result.scaledWidth = Math.round(result.width * (height / gifHeight));
-      } else {
-        result.height = Math.round(height * (gifWidth / width)) - gifHeight;
-        result.scaledHeight = Math.round(result.height * (width / gifWidth));
-      }
-      return result;
+          });
+        }
+      };
+    numFrames = numFrames !== undefined ? numFrames : 10;
+    interval = interval !== undefined ? interval : 0.1;
+    // In seconds
+    canvas.width = gifWidth;
+    canvas.height = gifHeight;
+    context = canvas.getContext('2d');
+    captureFrame();
+  },
+  'getCropDimensions': function (obj) {
+    var width = obj.videoWidth, height = obj.videoHeight, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, result = {
+        width: 0,
+        height: 0,
+        scaledWidth: 0,
+        scaledHeight: 0
+      };
+    if (width > height) {
+      result.width = Math.round(width * (gifHeight / height)) - gifWidth;
+      result.scaledWidth = Math.round(result.width * (height / gifHeight));
+    } else {
+      result.height = Math.round(height * (gifWidth / width)) - gifHeight;
+      result.scaledHeight = Math.round(result.height * (width / gifWidth));
     }
-  };
-}(core_utils, core_AnimatedGIF);
+    return result;
+  }
+};
 // videoStream.js
 // ==============
 // Inspired from https://github.com/sole/gumhelper/blob/master/gumhelper.js
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_videoStream = function (utils) {
-  return {
-    'loadedData': false,
-    'defaultVideoDimensions': {
-      'width': 640,
-      'height': 480
-    },
-    'findVideoSize': function findVideoSizeMethod(obj) {
-      findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
-      var self = this, videoElement = obj.videoElement, cameraStream = obj.cameraStream, completedCallback = obj.completedCallback;
-      if (!videoElement) {
-        return;
-      }
-      if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-        videoElement.removeEventListener('loadeddata', self.findVideoSize);
+videoStream = {
+  'loadedData': false,
+  'defaultVideoDimensions': {
+    'width': 640,
+    'height': 480
+  },
+  'findVideoSize': function findVideoSizeMethod(obj) {
+    findVideoSizeMethod.attempts = findVideoSizeMethod.attempts || 0;
+    var self = this, videoElement = obj.videoElement, cameraStream = obj.cameraStream, completedCallback = obj.completedCallback;
+    if (!videoElement) {
+      return;
+    }
+    if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+      videoElement.removeEventListener('loadeddata', self.findVideoSize);
+      completedCallback({
+        'videoElement': videoElement,
+        'cameraStream': cameraStream,
+        'videoWidth': videoElement.videoWidth,
+        'videoHeight': videoElement.videoHeight
+      });
+    } else {
+      if (findVideoSizeMethod.attempts < 10) {
+        findVideoSizeMethod.attempts += 1;
+        setTimeout(function () {
+          self.findVideoSize(obj);
+        }, 200);
+      } else {
         completedCallback({
           'videoElement': videoElement,
           'cameraStream': cameraStream,
-          'videoWidth': videoElement.videoWidth,
-          'videoHeight': videoElement.videoHeight
+          'videoWidth': self.defaultVideoDimensions.width,
+          'videoHeight': self.defaultVideoDimensions.height
         });
+      }
+    }
+  },
+  'onStreamingTimeout': function (callback) {
+    if (utils.isFunction(callback)) {
+      callback({
+        'error': true,
+        'errorCode': 'getUserMedia',
+        'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
+        'image': null,
+        'cameraStream': {}
+      });
+    }
+  },
+  'stream': function (obj) {
+    var self = this, existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
+    if (utils.isFunction(streamedCallback)) {
+      streamedCallback();
+    }
+    if (existingVideo) {
+      if (utils.isString(existingVideo)) {
+        videoElement.src = existingVideo;
+        videoElement.innerHTML = '<source src="' + existingVideo + '" type="video/' + utils.getExtension(existingVideo) + '" />';
+      }
+    } else if (videoElement.mozSrcObject) {
+      videoElement.mozSrcObject = cameraStream;
+    } else if (utils.URL) {
+      videoElement.src = utils.URL.createObjectURL(cameraStream);
+    }
+    videoElement.play();
+    setTimeout(function checkLoadedData() {
+      checkLoadedData.count = checkLoadedData.count || 0;
+      if (self.loadedData === true) {
+        self.findVideoSize({
+          'videoElement': videoElement,
+          'cameraStream': cameraStream,
+          'completedCallback': completedCallback
+        });
+        self.loadedData = false;
       } else {
-        if (findVideoSizeMethod.attempts < 10) {
-          findVideoSizeMethod.attempts += 1;
-          setTimeout(function () {
-            self.findVideoSize(obj);
-          }, 200);
-        } else {
-          completedCallback({
-            'videoElement': videoElement,
-            'cameraStream': cameraStream,
-            'videoWidth': self.defaultVideoDimensions.width,
-            'videoHeight': self.defaultVideoDimensions.height
-          });
-        }
-      }
-    },
-    'onStreamingTimeout': function (callback) {
-      if (utils.isFunction(callback)) {
-        callback({
-          'error': true,
-          'errorCode': 'getUserMedia',
-          'errorMsg': 'There was an issue with the getUserMedia API - Timed out while trying to start streaming',
-          'image': null,
-          'cameraStream': {}
-        });
-      }
-    },
-    'stream': function (obj) {
-      var self = this, existingVideo = utils.isArray(obj.existingVideo) ? obj.existingVideo[0] : obj.existingVideo, videoElement = obj.videoElement, cameraStream = obj.cameraStream, streamedCallback = obj.streamedCallback, completedCallback = obj.completedCallback;
-      if (utils.isFunction(streamedCallback)) {
-        streamedCallback();
-      }
-      if (existingVideo) {
-        if (utils.isString(existingVideo)) {
-          videoElement.src = existingVideo;
-          videoElement.innerHTML = '<source src="' + existingVideo + '" type="video/' + utils.getExtension(existingVideo) + '" />';
-        }
-      } else if (videoElement.mozSrcObject) {
-        videoElement.mozSrcObject = cameraStream;
-      } else if (utils.URL) {
-        videoElement.src = utils.URL.createObjectURL(cameraStream);
-      }
-      videoElement.play();
-      setTimeout(function checkLoadedData() {
-        checkLoadedData.count = checkLoadedData.count || 0;
-        if (self.loadedData === true) {
+        checkLoadedData.count += 1;
+        if (checkLoadedData.count > 10) {
           self.findVideoSize({
             'videoElement': videoElement,
             'cameraStream': cameraStream,
             'completedCallback': completedCallback
           });
-          self.loadedData = false;
         } else {
-          checkLoadedData.count += 1;
-          if (checkLoadedData.count > 10) {
-            self.findVideoSize({
-              'videoElement': videoElement,
-              'cameraStream': cameraStream,
-              'completedCallback': completedCallback
-            });
-          } else {
-            checkLoadedData();
-          }
+          checkLoadedData();
         }
-      }, 100);
-    },
-    'startStreaming': function (obj) {
-      var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, webcamVideoElement = obj.webcamVideoElement, videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
-      videoElement.crossOrigin = 'Anonymous';
-      videoElement.autoplay = true;
-      videoElement.loop = true;
-      videoElement.muted = true;
-      videoElement.addEventListener('loadeddata', function (event) {
-        self.loadedData = true;
+      }
+    }, 100);
+  },
+  'startStreaming': function (obj) {
+    var self = this, errorCallback = utils.isFunction(obj.error) ? obj.error : utils.noop, streamedCallback = utils.isFunction(obj.streamed) ? obj.streamed : utils.noop, completedCallback = utils.isFunction(obj.completed) ? obj.completed : utils.noop, existingVideo = obj.existingVideo, webcamVideoElement = obj.webcamVideoElement, videoElement = utils.isElement(existingVideo) ? existingVideo : webcamVideoElement ? webcamVideoElement : document.createElement('video'), lastCameraStream = obj.lastCameraStream, cameraStream;
+    videoElement.crossOrigin = 'Anonymous';
+    videoElement.autoplay = true;
+    videoElement.loop = true;
+    videoElement.muted = true;
+    videoElement.addEventListener('loadeddata', function (event) {
+      self.loadedData = true;
+    });
+    if (existingVideo) {
+      self.stream({
+        'videoElement': videoElement,
+        'existingVideo': existingVideo,
+        'completedCallback': completedCallback
       });
-      if (existingVideo) {
+    } else if (lastCameraStream) {
+      self.stream({
+        'videoElement': videoElement,
+        'cameraStream': lastCameraStream,
+        'streamedCallback': streamedCallback,
+        'completedCallback': completedCallback
+      });
+    } else {
+      utils.getUserMedia({ 'video': true }, function (stream) {
         self.stream({
           'videoElement': videoElement,
-          'existingVideo': existingVideo,
-          'completedCallback': completedCallback
-        });
-      } else if (lastCameraStream) {
-        self.stream({
-          'videoElement': videoElement,
-          'cameraStream': lastCameraStream,
+          'cameraStream': stream,
           'streamedCallback': streamedCallback,
           'completedCallback': completedCallback
         });
-      } else {
-        utils.getUserMedia({ 'video': true }, function (stream) {
-          self.stream({
-            'videoElement': videoElement,
-            'cameraStream': stream,
-            'streamedCallback': streamedCallback,
-            'completedCallback': completedCallback
-          });
-        }, errorCallback);
-      }
-    },
-    startVideoStreaming: function (callback, options) {
-      options = options || {};
-      var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
-      // Some browsers apparently have support for video streaming because of the
-      // presence of the getUserMedia function, but then do not answer our
-      // calls for streaming.
-      // So we'll set up this timeout and if nothing happens after a while, we'll
-      // conclude that there's no actual getUserMedia support.
-      if (timeoutLength > 0) {
-        noGetUserMediaSupportTimeout = setTimeout(function () {
-          self.onStreamingTimeout(originalCallback);
-        }, 10000);
-      }
-      this.startStreaming({
-        'error': function () {
-          originalCallback({
-            'error': true,
-            'errorCode': 'getUserMedia',
-            'errorMsg': 'There was an issue with the getUserMedia API - the user probably denied permission',
-            'image': null,
-            'cameraStream': {}
-          });
-        },
-        'streamed': function () {
-          // The streaming started somehow, so we can assume there is getUserMedia support
-          clearTimeout(noGetUserMediaSupportTimeout);
-        },
-        'completed': function (obj) {
-          var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight;
-          callback({
-            'cameraStream': cameraStream,
-            'videoElement': videoElement,
-            'videoWidth': videoWidth,
-            'videoHeight': videoHeight
-          });
-        },
-        'lastCameraStream': options.lastCameraStream,
-        'webcamVideoElement': webcamVideoElement
-      });
-    },
-    'stopVideoStreaming': function (obj) {
-      obj = utils.isObject(obj) ? obj : {};
-      var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
-      if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
-        // Stops the camera stream
-        cameraStream.stop();
-      }
-      if (utils.isElement(videoElement) && !webcamVideoElement) {
-        // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
-        videoElement.pause();
-        // Destroys the object url
-        if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
-          if (videoElement.src) {
-            utils.URL.revokeObjectURL(videoElement.src);
-          }
-        }
-        // Removes the video element from the DOM
-        utils.removeElement(videoElement);
-      }
+      }, errorCallback);
     }
-  };
-}(core_utils);
+  },
+  startVideoStreaming: function (callback, options) {
+    options = options || {};
+    var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
+    // Some browsers apparently have support for video streaming because of the
+    // presence of the getUserMedia function, but then do not answer our
+    // calls for streaming.
+    // So we'll set up this timeout and if nothing happens after a while, we'll
+    // conclude that there's no actual getUserMedia support.
+    if (timeoutLength > 0) {
+      noGetUserMediaSupportTimeout = setTimeout(function () {
+        self.onStreamingTimeout(originalCallback);
+      }, 10000);
+    }
+    this.startStreaming({
+      'error': function () {
+        originalCallback({
+          'error': true,
+          'errorCode': 'getUserMedia',
+          'errorMsg': 'There was an issue with the getUserMedia API - the user probably denied permission',
+          'image': null,
+          'cameraStream': {}
+        });
+      },
+      'streamed': function () {
+        // The streaming started somehow, so we can assume there is getUserMedia support
+        clearTimeout(noGetUserMediaSupportTimeout);
+      },
+      'completed': function (obj) {
+        var cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight;
+        callback({
+          'cameraStream': cameraStream,
+          'videoElement': videoElement,
+          'videoWidth': videoWidth,
+          'videoHeight': videoHeight
+        });
+      },
+      'lastCameraStream': options.lastCameraStream,
+      'webcamVideoElement': webcamVideoElement
+    });
+  },
+  'stopVideoStreaming': function (obj) {
+    obj = utils.isObject(obj) ? obj : {};
+    var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
+    if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
+      // Stops the camera stream
+      cameraStream.stop();
+    }
+    if (utils.isElement(videoElement) && !webcamVideoElement) {
+      // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
+      videoElement.pause();
+      // Destroys the object url
+      if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
+        if (videoElement.src) {
+          utils.URL.revokeObjectURL(videoElement.src);
+        }
+      }
+      // Removes the video element from the DOM
+      utils.removeElement(videoElement);
+    }
+  }
+};
 // stopVideoStreaming.js
 // =====================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_stopVideoStreaming = function (utils, videoStream) {
-  return function (obj) {
-    obj = utils.isObject(obj) ? obj : {};
-    var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
-    videoStream.stopVideoStreaming({
-      'cameraStream': cameraStream,
-      'videoElement': videoElement,
-      'keepCameraOn': options.keepCameraOn,
-      'webcamVideoElement': webcamVideoElement
-    });
-  };
-}(core_utils, core_videoStream);
+stopVideoStreaming = function (obj) {
+  obj = utils.isObject(obj) ? obj : {};
+  var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
+  videoStream.stopVideoStreaming({
+    'cameraStream': cameraStream,
+    'videoElement': videoElement,
+    'keepCameraOn': options.keepCameraOn,
+    'webcamVideoElement': webcamVideoElement
+  });
+};
 // createAndGetGIF.js
 // ==================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_createAndGetGIF = function (utils, screenShot, stopVideoStreaming) {
-  return function (obj, callback) {
-    var options = obj.options || {}, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
-        'videoWidth': videoWidth,
-        'videoHeight': videoHeight,
-        'gifHeight': gifHeight,
-        'gifWidth': gifWidth
-      }), completeCallback = callback;
-    options.crop = cropDimensions;
-    options.videoElement = videoElement;
-    options.videoWidth = videoWidth;
-    options.videoHeight = videoHeight;
-    options.cameraStream = cameraStream;
-    if (!utils.isElement(videoElement)) {
-      return;
-    }
-    videoElement.width = gifWidth + cropDimensions.width;
-    videoElement.height = gifHeight + cropDimensions.height;
-    if (!options.webcamVideoElement) {
-      utils.setCSSAttr(videoElement, {
-        'position': 'fixed',
-        'opacity': '0'
-      });
-      document.body.appendChild(videoElement);
-    }
-    // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
-    // is loaded, so we must manually trigger play after adding it, or the video will be frozen
-    videoElement.play();
-    setTimeout(function () {
-      screenShot.getWebcamGIF(options, function (obj) {
+createAndGetGIF = function (obj, callback) {
+  var options = obj.options || {}, images = options.images, video = options.video, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
+      'videoWidth': videoWidth,
+      'videoHeight': videoHeight,
+      'gifHeight': gifHeight,
+      'gifWidth': gifWidth
+    }), completeCallback = callback;
+  options.crop = cropDimensions;
+  options.videoElement = videoElement;
+  options.videoWidth = videoWidth;
+  options.videoHeight = videoHeight;
+  options.cameraStream = cameraStream;
+  if (!utils.isElement(videoElement)) {
+    return;
+  }
+  videoElement.width = gifWidth + cropDimensions.width;
+  videoElement.height = gifHeight + cropDimensions.height;
+  if (!options.webcamVideoElement) {
+    utils.setCSSAttr(videoElement, {
+      'position': 'fixed',
+      'opacity': '0'
+    });
+    document.body.appendChild(videoElement);
+  }
+  // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
+  // is loaded, so we must manually trigger play after adding it, or the video will be frozen
+  videoElement.play();
+  setTimeout(function () {
+    screenShot.getWebcamGIF(options, function (obj) {
+      if (!images && !video) {
         stopVideoStreaming(obj);
-        completeCallback(obj);
-      });
-    }, wait);
-  };
-}(core_utils, core_screenShot, API_stopVideoStreaming);
+      }
+      completeCallback(obj);
+    });
+  }, wait);
+};
 // existingImages.js
 // =================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_existingVideo = function (utils, createAndGetGIF, videoStream, error) {
-  return function (obj) {
-    var existingVideo = obj.existingVideo, callback = obj.callback, options = obj.options, skipObj = {
-        'getUserMedia': true,
-        'window.URL': true
-      }, errorObj = error.validate(skipObj), loadedImages = 0, videoType, videoSrc, tempImage, ag;
-    if (errorObj.error) {
-      return callback(errorObj);
+existingVideo = function (obj) {
+  var existingVideo = obj.existingVideo, callback = obj.callback, options = obj.options, skipObj = {
+      'getUserMedia': true,
+      'window.URL': true
+    }, errorObj = error.validate(skipObj), loadedImages = 0, videoType, videoSrc, tempImage, ag;
+  if (errorObj.error) {
+    return callback(errorObj);
+  }
+  if (utils.isElement(existingVideo) && existingVideo.src) {
+    videoSrc = existingVideo.src;
+    videoType = utils.getExtension(videoSrc);
+    if (!utils.isSupported.videoCodecs[videoType]) {
+      return callback(error.messages.videoCodecs);
     }
-    if (utils.isElement(existingVideo) && existingVideo.src) {
-      videoSrc = existingVideo.src;
-      videoType = utils.getExtension(videoSrc);
-      if (!utils.isSupported.videoCodecs[videoType]) {
-        return callback(error.messages.videoCodecs);
+  } else if (utils.isArray(existingVideo)) {
+    utils.each(existingVideo, function (iterator, videoSrc) {
+      videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
+      if (utils.isSupported.videoCodecs[videoType]) {
+        existingVideo = videoSrc;
+        return false;
       }
-    } else if (utils.isArray(existingVideo)) {
-      utils.each(existingVideo, function (iterator, videoSrc) {
-        videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
-        if (utils.isSupported.videoCodecs[videoType]) {
-          existingVideo = videoSrc;
-          return false;
-        }
-      });
-    }
-    videoStream.startStreaming({
-      'completed': function (obj) {
-        obj.options = options || {};
-        createAndGetGIF(obj, callback);
-      },
-      'existingVideo': existingVideo
     });
-  };
-}(core_utils, core_createAndGetGIF, core_videoStream, core_error);
+  }
+  videoStream.startStreaming({
+    'completed': function (obj) {
+      obj.options = options || {};
+      createAndGetGIF(obj, callback);
+    },
+    'existingVideo': existingVideo
+  });
+};
 // existingWebcam.js
 // =================
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-core_existingWebcam = function (utils, error, createAndGetGIF, screenShot, videoStream, isWebCamGIFSupported) {
-  return function (obj) {
-    var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
-    if (!isWebCamGIFSupported()) {
-      return callback(error.validate());
-    }
-    if (options.savedRenderingContexts.length) {
-      screenShot.getWebcamGIF(options, function (obj) {
-        callback(obj);
-      });
-      return;
-    }
-    videoStream.startVideoStreaming(function (obj) {
-      obj.options = options || {};
-      createAndGetGIF(obj, callback);
-    }, {
-      'lastCameraStream': lastCameraStream,
-      'callback': callback,
-      'webcamVideoElement': webcamVideoElement
+existingWebcam = function (obj) {
+  var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
+  if (!isWebCamGIFSupported()) {
+    return callback(error.validate());
+  }
+  if (options.savedRenderingContexts.length) {
+    screenShot.getWebcamGIF(options, function (obj) {
+      callback(obj);
     });
-  };
-}(core_utils, core_error, core_createAndGetGIF, core_screenShot, core_videoStream, API_isWebCamGIFSupported);
+    return;
+  }
+  videoStream.startVideoStreaming(function (obj) {
+    obj.options = options || {};
+    createAndGetGIF(obj, callback);
+  }, {
+    'lastCameraStream': lastCameraStream,
+    'callback': callback,
+    'webcamVideoElement': webcamVideoElement
+  });
+};
 // createGIF.js
 // ============
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_createGIF = function (utils, defaultOptions, existingImages, existingVideo, existingWebcam) {
-  return function (userOptions, callback) {
-    callback = utils.isFunction(userOptions) ? userOptions : callback;
-    userOptions = utils.isObject(userOptions) ? userOptions : {};
-    if (!utils.isFunction(callback)) {
-      return;
-    }
-    var options = utils.mergeOptions(defaultOptions, userOptions) || {}, lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0, video = options.video, webcamVideoElement = options.webcamVideoElement;
-    // If the user would like to create a GIF from an existing image(s)
-    if (imagesLength) {
-      existingImages({
-        'images': images,
-        'imagesLength': imagesLength,
-        'callback': callback,
-        'options': options
-      });
-    } else if (video) {
-      existingVideo({
-        'existingVideo': video,
-        'callback': callback,
-        'options': options
-      });
-    } else {
-      existingWebcam({
-        'lastCameraStream': lastCameraStream,
-        'callback': callback,
-        'webcamVideoElement': webcamVideoElement,
-        'options': options
-      });
-    }
-  };
-}(core_utils, core_defaultOptions, core_existingImages, core_existingVideo, core_existingWebcam);
+createGIF = function (userOptions, callback) {
+  callback = utils.isFunction(userOptions) ? userOptions : callback;
+  userOptions = utils.isObject(userOptions) ? userOptions : {};
+  if (!utils.isFunction(callback)) {
+    return;
+  }
+  var options = utils.mergeOptions(defaultOptions, userOptions) || {}, lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0, video = options.video, webcamVideoElement = options.webcamVideoElement;
+  // If the user would like to create a GIF from an existing image(s)
+  if (imagesLength) {
+    existingImages({
+      'images': images,
+      'imagesLength': imagesLength,
+      'callback': callback,
+      'options': options
+    });
+  } else if (video) {
+    existingVideo({
+      'existingVideo': video,
+      'callback': callback,
+      'options': options
+    });
+  } else {
+    existingWebcam({
+      'lastCameraStream': lastCameraStream,
+      'callback': callback,
+      'webcamVideoElement': webcamVideoElement,
+      'options': options
+    });
+  }
+};
 // takeSnapShot.js
 // ===============
 /* Copyright  2014 Yahoo Inc.
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_takeSnapShot = function (utils, defaultOptions, createGIF) {
-  return function (userOptions, callback) {
-    callback = utils.isFunction(userOptions) ? userOptions : callback;
-    userOptions = utils.isObject(userOptions) ? userOptions : {};
-    if (!utils.isFunction(callback)) {
-      return;
-    }
-    var mergedOptions = utils.mergeOptions(defaultOptions, userOptions), options = utils.mergeOptions(mergedOptions, {
-        'interval': 0.1,
-        'numFrames': 1
-      });
-    createGIF(options, callback);
-  };
-}(core_utils, core_defaultOptions, API_createGIF);
+takeSnapShot = function (userOptions, callback) {
+  callback = utils.isFunction(userOptions) ? userOptions : callback;
+  userOptions = utils.isObject(userOptions) ? userOptions : {};
+  if (!utils.isFunction(callback)) {
+    return;
+  }
+  var mergedOptions = utils.mergeOptions(defaultOptions, userOptions), options = utils.mergeOptions(mergedOptions, {
+      'interval': 0.1,
+      'numFrames': 1
+    });
+  createGIF(options, callback);
+};
 // API.js
 // ======
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-API_API = function (utils, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming) {
+API = function () {
   var gifshot = {
     'utils': utils,
     'createGIF': createGIF,
@@ -2025,13 +1999,13 @@ API_API = function (utils, isSupported, isWebCamGIFSupported, isExistingImagesGI
     'isExistingImagesGIFSupported': isExistingImagesGIFSupported
   };
   return gifshot;
-}(core_utils, API_isSupported, API_isWebCamGIFSupported, API_isExistingImagesGIFSupported, API_isExistingVideoGIFSupported, API_createGIF, API_takeSnapShot, API_stopVideoStreaming);
+}();
 // index.js
 // ========
 /* Copyright  2014 Yahoo Inc. 
  * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
-(function (API) {
+(function () {
   // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
   if (typeof define === 'function' && define.amd) {
     define([], function () {
@@ -2042,5 +2016,5 @@ API_API = function (utils, isSupported, isWebCamGIFSupported, isExistingImagesGI
   } else {
     window.gifshot = API;
   }
-}(API_API));
+}());
 }(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));
