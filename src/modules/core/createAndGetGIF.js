@@ -12,6 +12,8 @@ define([
 ], function(utils, screenShot, stopVideoStreaming) {
   return function(obj, callback) {
     var options = obj.options || {},
+      images = options.images,
+      video = options.video,
       numFrames = options.numFrames,
       interval = options.interval,
       wait = options.video ? 0 : interval * 10000,
@@ -56,7 +58,9 @@ define([
 
     setTimeout(function() {
       screenShot.getWebcamGIF(options, function(obj) {
-        stopVideoStreaming(obj);
+        if (!images && !video) {
+          stopVideoStreaming(obj);
+        }
         completeCallback(obj);
       });
     }, wait);
