@@ -290,6 +290,26 @@ gifshot.takeSnapShot(function(obj) {
 'savedRenderingContexts': []
 ```
 
+
+## Custom Builds
+
+We provide a **gulp** `custom-build` task, that allows you to remove certain dependencies that you may not need.  Pass in the custom build name that you would like:
+
+`gulp custom-build --webcam`
+
+
+**Note:** For custom builds, you need to clone this repo locally.  Also, the unminified and minified custom build files will be in the `build/custom` directory of the local gifshot repo.
+
+
+###Possible build options:
+
+`webcam` - The webcam-to-GIF functionality of gifshot (the existing image/video logic is removed)
+
+`image` - The image-to-GIF functionality of gifshot (the existing webcam/video logic is removed)
+
+`video` - The HTML5 video-to-GIF functionality of gifshot (the existing webcam/image logic is removed)
+
+
 ## Contributing
 
 Please send all PR's to the `dev` branch.
