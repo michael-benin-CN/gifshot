@@ -7,8 +7,8 @@ describe('gifshot', function() {
   describe('#utils', function() {
     it('should correctly detect objects', function() {
       var obj = {
-        'test': true
-      },
+          'test': true
+        },
         func = function() {},
         arr = [],
         str = new String('test'),
@@ -27,8 +27,8 @@ describe('gifshot', function() {
 
     it('should correctly detect empty objects', function() {
       var obj = {
-        'test': true
-      },
+          'test': true
+        },
         obj1 = {},
         func = function() {},
         arr = [],
@@ -49,8 +49,8 @@ describe('gifshot', function() {
 
     it('should correctly detect arrays', function() {
       var obj = {
-        'test': true
-      },
+          'test': true
+        },
         func = function() {},
         arr = [],
         str = new String('test'),
@@ -69,8 +69,8 @@ describe('gifshot', function() {
 
     it('should correctly detect functions', function() {
       var obj = {
-        'test': true
-      },
+          'test': true
+        },
         func = function() {},
         arr = [],
         str = new String('test'),
@@ -89,8 +89,8 @@ describe('gifshot', function() {
 
     it('should correctly detect strings', function() {
       var obj = {
-        'test': true
-      },
+          'test': true
+        },
         func = function() {},
         arr = [],
         str = new String('test'),
@@ -158,11 +158,11 @@ describe('gifshot', function() {
 
     it('should correctly merge objects together', function() {
       var defaultOptions = {
-        'test': 'testing',
-        'nestedTest': {
-          'test': 'blah'
-        }
-      },
+          'test': 'testing',
+          'nestedTest': {
+            'test': 'blah'
+          }
+        },
         userOptions = {
           'nestedTest': {
             'test': 'this is a test'
