@@ -13,6 +13,6 @@ define([
       'getUserMedia': true
     };
 
-    return error.isValid(skippedChecks);
+    return error.isValid(skipObj);
   };
 });
