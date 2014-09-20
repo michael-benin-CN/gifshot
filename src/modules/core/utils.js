@@ -70,10 +70,6 @@ define(function() {
         var el = document.createElement('canvas');
         return el && el.getContext && el.getContext('2d');
       },
-      'console': function() {
-        var console = window.console;
-        return console && utils.isFunction(console.log);
-      },
       'webworkers': function() {
         return window.Worker;
       },
@@ -116,11 +112,6 @@ define(function() {
 
         return supportObj;
       }())
-    },
-    'log': function() {
-      if (utils.isSupported.console()) {
-        console.log.apply(window.console, arguments);
-      }
     },
     'noop': function() {},
     'each': function(collection, callback) {
@@ -211,6 +202,10 @@ define(function() {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
     'getFontSize': function(text, containerWidth, maxFontSize, minFontSize) {
+      if(!document.body) {
+        return;
+      }
+
       var div = document.createElement("div"),
         span = document.createElement("span"),
         fontSize = maxFontSize;

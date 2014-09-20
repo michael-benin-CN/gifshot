@@ -6,7 +6,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 ;(function(window, document, navigator, undefined) {
-var utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
+var utils, error, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, defaultOptions, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
 utils = function () {
   var utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -60,6 +60,10 @@ utils = function () {
         var el = document.createElement('canvas');
         return el && el.getContext && el.getContext('2d');
       },
+      'console': function () {
+        var console = window.console;
+        return console && utils.isFunction(console.log);
+      },
       'webworkers': function () {
         return window.Worker;
       },
@@ -89,6 +93,11 @@ utils = function () {
         }
         return supportObj;
       }()
+    },
+    'log': function () {
+      if (utils.isSupported.console()) {
+        console.log.apply(window.console, arguments);
+      }
     },
     'noop': function () {
     },
@@ -172,9 +181,6 @@ utils = function () {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
     'getFontSize': function (text, containerWidth, maxFontSize, minFontSize) {
-      if (!document.body) {
-        return;
-      }
       var div = document.createElement('div'), span = document.createElement('span'), fontSize = maxFontSize;
       div.setAttribute('width', containerWidth);
       div.appendChild(span);
@@ -259,6 +265,12 @@ error = function () {
   };
   return error;
 }();
+isSupported = function () {
+  return error.isValid();
+};
+isWebCamGIFSupported = function () {
+  return error.isValid();
+};
 defaultOptions = {
   'sampleInterval': 10,
   'numWorkers': 2,
@@ -286,34 +298,6 @@ defaultOptions = {
   },
   'saveRenderingContexts': false,
   'savedRenderingContexts': []
-};
-isSupported = function () {
-  return error.isValid();
-};
-isWebCamGIFSupported = function () {
-  return error.isValid();
-};
-isExistingImagesGIFSupported = function () {
-  var skipObj = { 'getUserMedia': true };
-  return error.isValid(skipObj);
-};
-isExistingVideoGIFSupported = function (codecs) {
-  var isSupported = false, hasValidCodec = false;
-  if (utils.isArray(codecs) && codecs.length) {
-    utils.each(codecs, function (indece, currentCodec) {
-      if (utils.isSupported.videoCodecs[currentCodec]) {
-        hasValidCodec = true;
-      }
-    });
-    if (!hasValidCodec) {
-      return false;
-    }
-  } else if (utils.isString(codecs) && codecs.length) {
-    if (!utils.isSupported.videoCodecs[codecs]) {
-      return false;
-    }
-  }
-  return error.isValid({ 'getUserMedia': true });
 };
 NeuQuant = function () {
   function NeuQuant() {
@@ -1187,50 +1171,6 @@ getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
     });
   });
 };
-existingImages = function (obj) {
-  var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
-      'getUserMedia': true,
-      'window.URL': true
-    }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
-  if (errorObj.error) {
-    return callback(errorObj);
-  }
-  ag = new AnimatedGIF(options);
-  utils.each(images, function (index, currentImage) {
-    if (utils.isElement(currentImage)) {
-      currentImage.crossOrigin = 'Anonymous';
-      ag.addFrame(currentImage, currentImage.src, options);
-      loadedImages += 1;
-      if (loadedImages === imagesLength) {
-        getBase64GIF(ag, callback);
-      }
-    } else if (utils.isString(currentImage)) {
-      tempImage = document.createElement('img');
-      tempImage.crossOrigin = 'Anonymous';
-      tempImage.onerror = function (e) {
-        if (imagesLength > 0) {
-          imagesLength -= 1;
-        }
-      };
-      tempImage.src = currentImage;
-      utils.setCSSAttr(tempImage, {
-        'position': 'fixed',
-        'opacity': '0'
-      });
-      (function (tempImage, ag, currentImage) {
-        tempImage.onload = function () {
-          ag.addFrame(tempImage, currentImage, options);
-          utils.removeElement(tempImage);
-          loadedImages += 1;
-          if (loadedImages === imagesLength) {
-            getBase64GIF(ag, callback);
-          }
-        };
-      }(tempImage, ag, currentImage));
-      document.body.appendChild(tempImage);
-    }
-  });
-};
 screenShot = {
   getWebcamGIF: function (obj, callback) {
     callback = utils.isFunction(callback) ? callback : function () {
@@ -1517,37 +1457,6 @@ createAndGetGIF = function (obj, callback) {
     });
   }, wait);
 };
-existingVideo = function (obj) {
-  var existingVideo = obj.existingVideo, callback = obj.callback, options = obj.options, skipObj = {
-      'getUserMedia': true,
-      'window.URL': true
-    }, errorObj = error.validate(skipObj), loadedImages = 0, videoType, videoSrc, tempImage, ag;
-  if (errorObj.error) {
-    return callback(errorObj);
-  }
-  if (utils.isElement(existingVideo) && existingVideo.src) {
-    videoSrc = existingVideo.src;
-    videoType = utils.getExtension(videoSrc);
-    if (!utils.isSupported.videoCodecs[videoType]) {
-      return callback(error.messages.videoCodecs);
-    }
-  } else if (utils.isArray(existingVideo)) {
-    utils.each(existingVideo, function (iterator, videoSrc) {
-      videoType = videoSrc.substr(videoSrc.lastIndexOf('.') + 1, videoSrc.length);
-      if (utils.isSupported.videoCodecs[videoType]) {
-        existingVideo = videoSrc;
-        return false;
-      }
-    });
-  }
-  videoStream.startStreaming({
-    'completed': function (obj) {
-      obj.options = options || {};
-      createAndGetGIF(obj, callback);
-    },
-    'existingVideo': existingVideo
-  });
-};
 existingWebcam = function (obj) {
   var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
   if (!isWebCamGIFSupported()) {
@@ -1612,8 +1521,6 @@ takeSnapShot = function (userOptions, callback) {
 API = function () {
   var gifshot = {
     'utils': utils,
-    'error': error,
-    'defaultOptions': defaultOptions,
     'createGIF': createGIF,
     'takeSnapShot': takeSnapShot,
     'stopVideoStreaming': stopVideoStreaming,
