@@ -32,6 +32,7 @@
     "express": "^4.2.0",
     "gulp": "^3.6.2",
     "gulp-insert": "^0.3.0",
+    "gulp-istanbul": "^0.3.1",
     "gulp-jshint": "^1.6.0",
     "gulp-mocha": "^1.1.0",
     "gulp-rename": "^1.2.0",

@@ -7,6 +7,8 @@
 
 define([
   'core/utils',
+  'core/error',
+  'core/defaultOptions',
   'API/isSupported',
   'API/isWebCamGIFSupported',
   'API/isExistingImagesGIFSupported',
@@ -16,6 +18,8 @@ define([
   'API/stopVideoStreaming'
 ], function(
   utils,
+  error,
+  defaultOptions,
   isSupported,
   isWebCamGIFSupported,
   isExistingImagesGIFSupported,
@@ -26,6 +30,8 @@ define([
 ) {
   var gifshot = {
     'utils': utils,
+    'error': error,
+    'defaultOptions': defaultOptions,
     'createGIF': createGIF,
     'takeSnapShot': takeSnapShot,
     'stopVideoStreaming': stopVideoStreaming,
