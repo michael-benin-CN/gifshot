@@ -1,10 +1,5 @@
 ;(function(window, document, navigator, undefined) {
-// utils.js
-// ========
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-var utils, error, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, defaultOptions, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
+var utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
 utils = function () {
   var utils = {
     'URL': window.URL || window.webkitURL || window.mozURL || window.msURL,
@@ -58,10 +53,6 @@ utils = function () {
         var el = document.createElement('canvas');
         return el && el.getContext && el.getContext('2d');
       },
-      'console': function () {
-        var console = window.console;
-        return console && utils.isFunction(console.log);
-      },
       'webworkers': function () {
         return window.Worker;
       },
@@ -83,24 +74,14 @@ utils = function () {
             'webm': false
           };
         if (testEl && testEl.canPlayType) {
-          // Check for MPEG-4 support
           supportObj.mp4 = testEl.canPlayType('video/mp4; codecs="mp4v.20.8"') !== '';
-          // Check for h264 support
           supportObj.h264 = (testEl.canPlayType('video/mp4; codecs="avc1.42E01E"') || testEl.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) !== '';
-          // Check for Ogv support
           supportObj.ogv = testEl.canPlayType('video/ogg; codecs="theora"') !== '';
-          // Check for Ogg support
           supportObj.ogg = testEl.canPlayType('video/ogg; codecs="theora"') !== '';
-          // Check for Webm support
           supportObj.webm = testEl.canPlayType('video/webm; codecs="vp8, vorbis"') !== -1;
         }
         return supportObj;
       }()
-    },
-    'log': function () {
-      if (utils.isSupported.console()) {
-        console.log.apply(window.console, arguments);
-      }
     },
     'noop': function () {
     },
@@ -184,6 +165,9 @@ utils = function () {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
     'getFontSize': function (text, containerWidth, maxFontSize, minFontSize) {
+      if (!document.body) {
+        return;
+      }
       var div = document.createElement('div'), span = document.createElement('span'), fontSize = maxFontSize;
       div.setAttribute('width', containerWidth);
       div.appendChild(span);
@@ -202,11 +186,6 @@ utils = function () {
   };
   return utils;
 }();
-// error.js
-// ========
-/* Copyright  2014 Yahoo Inc. 
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 error = function () {
   var error = {
     'validate': function (skipObj) {
@@ -273,59 +252,6 @@ error = function () {
   };
   return error;
 }();
-// isSupported.js
-// ==============
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-isSupported = function () {
-  return error.isValid();
-};
-// isWebCamGIFSupported.js
-// =======================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-isWebCamGIFSupported = function () {
-  return error.isValid();
-};
-// isSupported.js
-// ==============
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-isExistingImagesGIFSupported = function () {
-  var skipObj = { 'getUserMedia': true };
-  return error.isValid(skippedChecks);
-};
-// isExistingVideoGIFSupported.js
-// ==============================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
-isExistingVideoGIFSupported = function (codecs) {
-  var isSupported = false, hasValidCodec = false;
-  if (utils.isArray(codecs) && codecs.length) {
-    utils.each(codecs, function (indece, currentCodec) {
-      if (utils.isSupported.videoCodecs[currentCodec]) {
-        hasValidCodec = true;
-      }
-    });
-    if (!hasValidCodec) {
-      return false;
-    }
-  } else if (utils.isString(codecs) && codecs.length) {
-    if (!utils.isSupported.videoCodecs[codecs]) {
-      return false;
-    }
-  }
-  return error.isValid({ 'getUserMedia': true });
-};
-// defaultOptions.js
-// =================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 defaultOptions = {
   'sampleInterval': 10,
   'numWorkers': 2,
@@ -354,96 +280,70 @@ defaultOptions = {
   'saveRenderingContexts': false,
   'savedRenderingContexts': []
 };
-// NeuQuant.js
-// ===========
-/*
- * NeuQuant Neural-Net Quantization Algorithm
- * ------------------------------------------
- *
- * Copyright (c) 1994 Anthony Dekker
- *
- * NEUQUANT Neural-Net quantization algorithm by Anthony Dekker, 1994. See
- * "Kohonen neural networks for optimal colour quantization" in "Network:
- * Computation in Neural Systems" Vol. 5 (1994) pp 351-367. for a discussion of
- * the algorithm.
- *
- * Any party obtaining a copy of these files from the author, directly or
- * indirectly, is granted, free of charge, a full and unrestricted irrevocable,
- * world-wide, paid up, royalty-free, nonexclusive right and license to deal in
- * this software and documentation files (the "Software"), including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons who
- * receive copies from any such party to do so, with the only requirement being
- * that this copyright notice remain intact.
- */
-/*
- * This class handles Neural-Net quantization algorithm
- * @author Kevin Weiner (original Java version - kweiner@fmsware.com)
- * @author Thibault Imbert (AS3 version - bytearray.org)
- * @version 0.1 AS3 implementation
- * @version 0.2 JS->AS3 "translation" by antimatter15
- * @version 0.3 JS clean up + using modern JS idioms by sole - http://soledadpenades.com
- * Also implement fix in color conversion described at http://stackoverflow.com/questions/16371712/neuquant-js-javascript-color-quantization-hidden-bug-in-js-conversion
- */
+isSupported = function () {
+  return error.isValid();
+};
+isWebCamGIFSupported = function () {
+  return error.isValid();
+};
+isExistingImagesGIFSupported = function () {
+  var skipObj = { 'getUserMedia': true };
+  return error.isValid(skipObj);
+};
+isExistingVideoGIFSupported = function (codecs) {
+  var isSupported = false, hasValidCodec = false;
+  if (utils.isArray(codecs) && codecs.length) {
+    utils.each(codecs, function (indece, currentCodec) {
+      if (utils.isSupported.videoCodecs[currentCodec]) {
+        hasValidCodec = true;
+      }
+    });
+    if (!hasValidCodec) {
+      return false;
+    }
+  } else if (utils.isString(codecs) && codecs.length) {
+    if (!utils.isSupported.videoCodecs[codecs]) {
+      return false;
+    }
+  }
+  return error.isValid({ 'getUserMedia': true });
+};
 NeuQuant = function () {
   function NeuQuant() {
     var netsize = 256;
-    // number of colours used
-    // four primes near 500 - assume no image has a length so large
-    // that it is divisible by all four primes
     var prime1 = 499;
     var prime2 = 491;
     var prime3 = 487;
     var prime4 = 503;
-    // minimum size for input image
     var minpicturebytes = 3 * prime4;
-    // Network Definitions
     var maxnetpos = netsize - 1;
     var netbiasshift = 4;
-    // bias for colour values
     var ncycles = 100;
-    // no. of learning cycles
-    // defs for freq and bias
     var intbiasshift = 16;
-    // bias for fractions
     var intbias = 1 << intbiasshift;
     var gammashift = 10;
-    // gamma = 1024
     var gamma = 1 << gammashift;
     var betashift = 10;
     var beta = intbias >> betashift;
-    // beta = 1/1024
     var betagamma = intbias << gammashift - betashift;
-    // defs for decreasing radius factor
-    // For 256 colors, radius starts at 32.0 biased by 6 bits
-    // and decreases by a factor of 1/30 each cycle
     var initrad = netsize >> 3;
     var radiusbiasshift = 6;
     var radiusbias = 1 << radiusbiasshift;
     var initradius = initrad * radiusbias;
     var radiusdec = 30;
-    // defs for decreasing alpha factor
-    // Alpha starts at 1.0 biased by 10 bits
     var alphabiasshift = 10;
     var initalpha = 1 << alphabiasshift;
     var alphadec;
-    // radbias and alpharadbias used for radpower calculation
     var radbiasshift = 8;
     var radbias = 1 << radbiasshift;
     var alpharadbshift = alphabiasshift + radbiasshift;
     var alpharadbias = 1 << alpharadbshift;
-    // Input image
     var thepicture;
-    // Height * Width * 3
     var lengthcount;
-    // Sampling factor 1..30
     var samplefac;
-    // The network itself
     var network;
     var netindex = [];
-    // for network lookup - really 256
     var bias = [];
-    // bias and freq arrays for learning
     var freq = [];
     var radpower = [];
     function NeuQuantConstructor(thepic, len, sample) {
@@ -458,7 +358,6 @@ NeuQuant = function () {
         p = network[i];
         p[0] = p[1] = p[2] = (i << netbiasshift + 8) / netsize | 0;
         freq[i] = intbias / netsize | 0;
-        // 1 / netsize
         bias[i] = 0;
       }
     }
@@ -476,8 +375,6 @@ NeuQuant = function () {
       }
       return map;
     }
-    // Insertion sort of network and building of netindex[0..255]
-    // (to do after unbias)
     function inxbuild() {
       var i;
       var j;
@@ -493,18 +390,14 @@ NeuQuant = function () {
         p = network[i];
         smallpos = i;
         smallval = p[1];
-        // index on g
-        // find smallest in i..netsize-1
         for (j = i + 1; j < netsize; j++) {
           q = network[j];
           if (q[1] < smallval) {
-            // index on g
             smallpos = j;
             smallval = q[1];
           }
         }
         q = network[smallpos];
-        // swap p (i) and q (smallpos) entries
         if (i != smallpos) {
           j = q[0];
           q[0] = p[0];
@@ -519,7 +412,6 @@ NeuQuant = function () {
           q[3] = p[3];
           p[3] = j;
         }
-        // smallval entry is now in position i
         if (smallval != previouscol) {
           netindex[previouscol] = startpos + i >> 1;
           for (j = previouscol + 1; j < smallval; j++) {
@@ -534,7 +426,6 @@ NeuQuant = function () {
         netindex[j] = maxnetpos;
       }
     }
-    // Main Learning Loop
     function learn() {
       var i;
       var j;
@@ -591,7 +482,6 @@ NeuQuant = function () {
         j = contest(b, g, r);
         altersingle(alpha, j, b, g, r);
         if (rad !== 0) {
-          // Alter neighbours
           alterneigh(rad, j, b, g, r);
         }
         pix += step;
@@ -615,7 +505,6 @@ NeuQuant = function () {
         }
       }
     }
-    // Search for BGR values 0..255 (after net is unbiased) and return colour index
     function map(b, g, r) {
       var i;
       var j;
@@ -624,18 +513,14 @@ NeuQuant = function () {
       var bestd;
       var p;
       var best;
-      // Biggest possible distance is 256 * 3
       bestd = 1000;
       best = -1;
       i = netindex[g];
-      // index on g
       j = i - 1;
-      // start at netindex[g] and work outwards
       while (i < netsize || j >= 0) {
         if (i < netsize) {
           p = network[i];
           dist = p[1] - g;
-          // inx key
           if (dist >= bestd) {
             i = netsize;
           } else {
@@ -664,7 +549,6 @@ NeuQuant = function () {
         if (j >= 0) {
           p = network[j];
           dist = g - p[1];
-          // inx key - reverse dif
           if (dist >= bestd) {
             j = -1;
           } else {
@@ -699,8 +583,6 @@ NeuQuant = function () {
       inxbuild();
       return colorMap();
     }
-    // Unbias network to give byte values 0..255 and record position i
-    // to prepare for sort
     function unbiasnet() {
       var i;
       var j;
@@ -711,8 +593,6 @@ NeuQuant = function () {
         network[i][3] = i;
       }
     }
-    // Move adjacent neurons by precomputed alpha*(1-((i-j)^2/[r]^2))
-    // in radpower[|i-j|]
     function alterneigh(rad, i, b, g, r) {
       var j;
       var k;
@@ -754,21 +634,14 @@ NeuQuant = function () {
         }
       }
     }
-    // Move neuron i towards biased (b,g,r) by factor alpha
     function altersingle(alpha, i, b, g, r) {
-      // alter hit neuron
       var n = network[i];
       var alphaMult = alpha / initalpha;
       n[0] -= alphaMult * (n[0] - b) | 0;
       n[1] -= alphaMult * (n[1] - g) | 0;
       n[2] -= alphaMult * (n[2] - r) | 0;
     }
-    // Search for biased BGR values
     function contest(b, g, r) {
-      // finds closest neuron (min dist) and updates freq
-      // finds best neuron (min dist-bias) and returns position
-      // for frequently chosen neurons, freq[i] is high and bias[i] is negative
-      // bias[i] = gamma*((1/netsize)-freq[i])
       var i;
       var dist;
       var a;
@@ -824,12 +697,6 @@ NeuQuant = function () {
   }
   return NeuQuant;
 }();
-// processFrameWorker.js
-// =====================
-// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.worker.js
-/* Copyright  2014 Yahoo Inc. 
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 processFrameWorker = function () {
   var workerCode = function worker() {
     try {
@@ -862,7 +729,6 @@ processFrameWorker = function () {
         }
         return paletteArray;
       },
-      // This is the "traditional" Animated_GIF style of going from RGBA to indexed color frames
       'processFrameWithQuantizer': function (imageData, width, height, sampleInterval) {
         var rgbComponents = this.dataToRGB(imageData, width, height), nq = new NeuQuant(rgbComponents, rgbComponents.length, sampleInterval), paletteRGB = nq.process(), paletteArray = new Uint32Array(this.componentizedPaletteToArray(paletteRGB)), numberPixels = width * height, indexedPixels = new Uint8Array(numberPixels), k = 0, i;
         for (i = 0; i < numberPixels; i++) {
@@ -885,33 +751,6 @@ processFrameWorker = function () {
   };
   return workerCode;
 }();
-// gifWriter.js
-// ============
-// (c) Dean McNamee <dean@gmail.com>, 2013.
-//
-// https://github.com/deanm/omggif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to
-// deal in the Software without restriction, including without limitation the
-// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-// sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-// IN THE SOFTWARE.
-//
-// omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
-// including animation and compression.  It does not rely on any specific
-// underlying system, so should run in the browser, Node, or Plask.
 gifWriter = function gifWriter(buf, width, height, gopts) {
   var p = 0;
   gopts = gopts === undefined ? {} : gopts;
@@ -925,41 +764,27 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
       throw 'Invalid code/color length, must be power of 2 and 2 .. 256.';
     return num_colors;
   }
-  // - Header.
   buf[p++] = 71;
   buf[p++] = 73;
   buf[p++] = 70;
-  // GIF
   buf[p++] = 56;
   buf[p++] = 57;
   buf[p++] = 97;
-  // 89a
-  // Handling of Global Color Table (palette) and background index.
   var gp_num_colors_pow2 = 0;
   var background = 0;
-  // - Logical Screen Descriptor.
-  // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
   buf[p++] = width & 255;
   buf[p++] = width >> 8 & 255;
   buf[p++] = height & 255;
   buf[p++] = height >> 8 & 255;
-  // NOTE: Indicates 0-bpp original color resolution (unused?).
-  buf[p++] = (global_palette !== null ? 128 : 0) | // Global Color Table Flag.
-  gp_num_colors_pow2;
-  // NOTE: No sort flag (unused?).
+  buf[p++] = (global_palette !== null ? 128 : 0) | gp_num_colors_pow2;
   buf[p++] = background;
-  // Background Color Index.
   buf[p++] = 0;
-  // Pixel aspect ratio (unused?).
   if (loop_count !== null) {
-    // Netscape block for looping.
     if (loop_count < 0 || loop_count > 65535)
       throw 'Loop count invalid.';
-    // Extension code, label, and length.
     buf[p++] = 33;
     buf[p++] = 255;
     buf[p++] = 11;
-    // NETSCAPE2.0
     buf[p++] = 78;
     buf[p++] = 69;
     buf[p++] = 84;
@@ -971,7 +796,6 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
     buf[p++] = 50;
     buf[p++] = 46;
     buf[p++] = 48;
-    // Sub-block
     buf[p++] = 3;
     buf[p++] = 1;
     buf[p++] = loop_count & 255;
@@ -984,10 +808,7 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
       --p;
       ended = false;
     }
-    // Un-end.
     opts = opts === undefined ? {} : opts;
-    // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
-    // canvas width/height, I imagine?
     if (x < 0 || y < 0 || x > 65535 || y > 65535)
       throw 'x/y invalid.';
     if (w <= 0 || h <= 0 || w > 65535 || h > 65535)
@@ -1003,29 +824,13 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
     if (palette === undefined || palette === null)
       throw 'Must supply either a local or global palette.';
     var num_colors = check_palette_and_num_colors(palette);
-    // Compute the min_code_size (power of 2), destroying num_colors.
     var min_code_size = 0;
     while (num_colors >>= 1)
       ++min_code_size;
     num_colors = 1 << min_code_size;
-    // Now we can easily get it back.
     var delay = opts.delay === undefined ? 0 : opts.delay;
-    // From the spec:
-    //     0 -   No disposal specified. The decoder is
-    //           not required to take any action.
-    //     1 -   Do not dispose. The graphic is to be left
-    //           in place.
-    //     2 -   Restore to background color. The area used by the
-    //           graphic must be restored to the background color.
-    //     3 -   Restore to previous. The decoder is required to
-    //           restore the area overwritten by the graphic with
-    //           what was there prior to rendering the graphic.
-    //  4-7 -    To be defined.
-    // NOTE(deanm): Dispose background doesn't really work, apparently most
-    // browsers ignore the background palette index and clear to transparency.
     var disposal = opts.disposal === undefined ? 0 : opts.disposal;
     if (disposal < 0 || disposal > 3)
-      // 4-7 is reserved.
       throw 'Disposal out of range.';
     var use_transparency = false;
     var transparent_index = 0;
@@ -1036,36 +841,25 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
         throw 'Transparent color index.';
     }
     if (disposal !== 0 || use_transparency || delay !== 0) {
-      // - Graphics Control Extension
       buf[p++] = 33;
       buf[p++] = 249;
-      // Extension / Label.
       buf[p++] = 4;
-      // Byte size.
       buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
       buf[p++] = delay & 255;
       buf[p++] = delay >> 8 & 255;
       buf[p++] = transparent_index;
-      // Transparent color index.
       buf[p++] = 0;
     }
-    // - Image Descriptor
     buf[p++] = 44;
-    // Image Seperator.
     buf[p++] = x & 255;
     buf[p++] = x >> 8 & 255;
-    // Left.
     buf[p++] = y & 255;
     buf[p++] = y >> 8 & 255;
-    // Top.
     buf[p++] = w & 255;
     buf[p++] = w >> 8 & 255;
     buf[p++] = h & 255;
     buf[p++] = h >> 8 & 255;
-    // NOTE: No sort flag (unused?).
-    // TODO(deanm): Support interlace.
     buf[p++] = using_local_palette === true ? 128 | min_code_size - 1 : 0;
-    // - Local Color Table
     if (using_local_palette === true) {
       for (var i = 0, il = palette.length; i < il; ++i) {
         var rgb = palette[i];
@@ -1079,26 +873,19 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
   this.end = function () {
     if (ended === false) {
       buf[p++] = 59;
-      // Trailer.
       ended = true;
     }
     return p;
   };
-  // Main compression routine, palette indexes -> LZW code stream.
-  // |index_stream| must have at least one entry.
   function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
     buf[p++] = min_code_size;
     var cur_subblock = p++;
-    // Pointing at the length field.
     var clear_code = 1 << min_code_size;
     var code_mask = clear_code - 1;
     var eoi_code = clear_code + 1;
     var next_code = eoi_code + 1;
     var cur_code_size = min_code_size + 1;
-    // Number of bits per code.
     var cur_shift = 0;
-    // We have at most 12-bit codes, so we should have to hold a max of 19
-    // bits here (and then we would write out).
     var cur = 0;
     function emit_bytes_to_buffer(bit_block_size) {
       while (cur_shift >= bit_block_size) {
@@ -1106,7 +893,6 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
         cur >>= 8;
         cur_shift -= 8;
         if (p === cur_subblock + 256) {
-          // Finished a subblock.
           buf[cur_subblock] = 255;
           cur_subblock = p++;
         }
@@ -1117,67 +903,14 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
       cur_shift += cur_code_size;
       emit_bytes_to_buffer(8);
     }
-    // I am not an expert on the topic, and I don't want to write a thesis.
-    // However, it is good to outline here the basic algorithm and the few data
-    // structures and optimizations here that make this implementation fast.
-    // The basic idea behind LZW is to build a table of previously seen runs
-    // addressed by a short id (herein called output code).  All data is
-    // referenced by a code, which represents one or more values from the
-    // original input stream.  All input bytes can be referenced as the same
-    // value as an output code.  So if you didn't want any compression, you
-    // could more or less just output the original bytes as codes (there are
-    // some details to this, but it is the idea).  In order to achieve
-    // compression, values greater then the input range (codes can be up to
-    // 12-bit while input only 8-bit) represent a sequence of previously seen
-    // inputs.  The decompressor is able to build the same mapping while
-    // decoding, so there is always a shared common knowledge between the
-    // encoding and decoder, which is also important for "timing" aspects like
-    // how to handle variable bit width code encoding.
-    //
-    // One obvious but very important consequence of the table system is there
-    // is always a unique id (at most 12-bits) to map the runs.  'A' might be
-    // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
-    // can be used for an effecient lookup strategy for the code mapping.  We
-    // need to know if a run has been seen before, and be able to map that run
-    // to the output code.  Since we start with known unique ids (input bytes),
-    // and then from those build more unique ids (table entries), we can
-    // continue this chain (almost like a linked list) to always have small
-    // integer values that represent the current byte chains in the encoder.
-    // This means instead of tracking the input bytes (AAAABCD) to know our
-    // current state, we can track the table entry for AAAABC (it is guaranteed
-    // to exist by the nature of the algorithm) and the next character D.
-    // Therefor the tuple of (table_entry, byte) is guaranteed to also be
-    // unique.  This allows us to create a simple lookup key for mapping input
-    // sequences to codes (table indices) without having to store or search
-    // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
-    // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
-    // key.  This leads to a integer value at most 20-bits, which can always
-    // fit in an SMI value and be used as a fast sparse array / object key.
-    // Output code for the current contents of the index buffer.
     var ib_code = index_stream[0] & code_mask;
-    // Load first input index.
     var code_table = {};
-    // Key'd on our 20-bit "tuple".
     emit_code(clear_code);
-    // Spec says first code should be a clear code.
-    // First index already loaded, process the rest of the stream.
     for (var i = 1, il = index_stream.length; i < il; ++i) {
       var k = index_stream[i] & code_mask;
       var cur_key = ib_code << 8 | k;
-      // (prev, k) unique tuple.
       var cur_code = code_table[cur_key];
-      // buffer + k.
-      // Check if we have to create a new code table entry.
       if (cur_code === undefined) {
-        // We don't have buffer + k.
-        // Emit index buffer (without k).
-        // This is an inline version of emit_code, because this is the core
-        // writing routine of the compressor (and V8 cannot inline emit_code
-        // because it is a closure here in a different context).  Additionally
-        // we can call emit_byte_to_buffer less often, because we can have
-        // 30-bits (from our 31-bit signed SMI), and we know our codes will only
-        // be 12-bits, so can safely have 18-bits there without overflow.
-        // emit_code(ib_code);
         cur |= ib_code << cur_shift;
         cur_shift += cur_code_size;
         while (cur_shift >= 8) {
@@ -1185,24 +918,16 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
           cur >>= 8;
           cur_shift -= 8;
           if (p === cur_subblock + 256) {
-            // Finished a subblock.
             buf[cur_subblock] = 255;
             cur_subblock = p++;
           }
         }
         if (next_code === 4096) {
-          // Table full, need a clear.
           emit_code(clear_code);
           next_code = eoi_code + 1;
           cur_code_size = min_code_size + 1;
           code_table = {};
         } else {
-          // Table not full, insert a new entry.
-          // Increase our variable bit code sizes if necessary.  This is a bit
-          // tricky as it is based on "timing" between the encoding and
-          // decoder.  From the encoders perspective this should happen after
-          // we've already emitted the index buffer and are about to create the
-          // first table entry that would overflow our current code bit size.
           if (next_code >= 1 << cur_code_size)
             ++cur_code_size;
           code_table[cur_key] = next_code++;
@@ -1213,31 +938,17 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
       }
     }
     emit_code(ib_code);
-    // There will still be something in the index buffer.
     emit_code(eoi_code);
-    // End Of Information.
-    // Flush / finalize the sub-blocks stream to the buffer.
     emit_bytes_to_buffer(1);
-    // Finish the sub-blocks, writing out any unfinished lengths and
-    // terminating with a sub-block of length 0.  If we have already started
-    // but not yet used a sub-block it can just become the terminator.
     if (cur_subblock + 1 === p) {
-      // Started but unused.
       buf[cur_subblock] = 0;
     } else {
-      // Started and used, write length and additional terminator block.
       buf[cur_subblock] = p - cur_subblock - 1;
       buf[p++] = 0;
     }
     return p;
   }
 };
-// animatedGIF.js
-// ==============
-// Inspired from https://github.com/sole/Animated_GIF/blob/master/src/Animated_GIF.js
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 AnimatedGIF = function (frameWorkerCode, GifWriter) {
   var AnimatedGIF = function (options) {
     options = utils.isObject(options) ? options : {};
@@ -1252,7 +963,6 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     this.availableWorkers = [];
     this.generatingGIF = false;
     this.options = options = utils.mergeOptions(this.defaultOptions, options);
-    // Constructs and initializes the the web workers appropriately
     this.initializeWebWorkers(options);
   };
   AnimatedGIF.prototype = {
@@ -1291,11 +1001,9 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
       this.options.delay = this.options.delay * 0.1;
       this.frames = [];
     },
-    // Return a worker for processing a frame
     'getWorker': function () {
       return this.availableWorkers.pop();
     },
-    // Restores a worker to the pool
     'freeWorker': function (worker) {
       this.availableWorkers.push(worker);
     },
@@ -1314,8 +1022,6 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
       return str;
     },
     'onFrameFinished': function () {
-      // The GIF is not written until we're done with all the frames
-      // because they might not be processed in the same order
       var self = this, frames = this.frames, allDone = frames.every(function (frame) {
           return !frame.beingProcessed && frame.done;
         });
@@ -1334,7 +1040,6 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     'processFrame': function (position) {
       var AnimatedGifContext = this, options = this.options, sampleInterval = options.sampleInterval, frames = this.frames, frame, worker, done = function (ev) {
           var data = ev.data;
-          // Delete original data, and free memory
           delete frame.data;
           frame.pixels = Array.prototype.slice.call(data.pixels);
           frame.palette = Array.prototype.slice.call(data.palette);
@@ -1353,11 +1058,9 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
       frame.gifshot = true;
       worker = this.getWorker();
       if (worker) {
-        // Process the frame in a web worker
         worker.onmessage = done;
         worker.postMessage(frame);
       } else {
-        // Process the frame in the current thread
         done({ 'data': AnimatedGifContext.workerMethods.run(frame) });
       }
     },
@@ -1380,14 +1083,8 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
         this.processFrame(position);
       }
     },
-    // Takes the already processed data in frames and feeds it to a new
-    // GifWriter instance in order to get the binary GIF file
     'generateGIF': function (frames, callback) {
-      // TODO: Weird: using a simple JS array instead of a typed array,
-      // the files are WAY smaller o_o. Patches/explanations welcome!
-      var buffer = [],
-        // new Uint8Array(width * height * frames.length * 5);
-        gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
+      var buffer = [], gifOptions = { 'loop': this.repeat }, options = this.options, height = options.height, width = options.width, gifWriter = new GifWriter(buffer, width, height, gifOptions), onRenderProgressCallback = this.onRenderProgressCallback, delay = options.delay, bufferToString, gif;
       this.generatingGIF = true;
       utils.each(frames, function (iterator, frame) {
         var framePalette = frame.palette;
@@ -1407,15 +1104,12 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
         callback(gif);
       }
     },
-    // From GIF: 0 = loop forever, null = not looping, n > 0 = loop n times and stop
     'setRepeat': function (r) {
       this.repeat = r;
     },
     'addFrame': function (element, src, gifshotOptions) {
       gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
-      var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10),
-        //gifshotOptions.fontSize,
-        fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
+      var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10), fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
       try {
         if (src) {
           element.src = src;
@@ -1467,7 +1161,6 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
         return;
       }
       var workers = this.workers;
-      // Explicitly ask web workers to die so they are explicitly GC'ed
       utils.each(workers, function (iterator, workerObj) {
         var worker = workerObj.worker, objectUrl = workerObj.objectUrl;
         worker.terminate();
@@ -1477,13 +1170,7 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
   };
   return AnimatedGIF;
 }(processFrameWorker, gifWriter);
-// getBase64GIF.js
-// ===============
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
-  // This is asynchronous, rendered with WebWorkers
   animatedGifInstance.getBase64GIF(function (image) {
     callback({
       'error': false,
@@ -1493,11 +1180,6 @@ getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
     });
   });
 };
-// existingImages.js
-// =================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 existingImages = function (obj) {
   var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
       'getUserMedia': true,
@@ -1506,7 +1188,6 @@ existingImages = function (obj) {
   if (errorObj.error) {
     return callback(errorObj);
   }
-  // change workerPath to point to where Animated_GIF.worker.js is
   ag = new AnimatedGIF(options);
   utils.each(images, function (index, currentImage) {
     if (utils.isElement(currentImage)) {
@@ -1520,7 +1201,6 @@ existingImages = function (obj) {
       tempImage = document.createElement('img');
       tempImage.crossOrigin = 'Anonymous';
       tempImage.onerror = function (e) {
-        // If there is an error, ignore the image
         if (imagesLength > 0) {
           imagesLength -= 1;
         }
@@ -1544,12 +1224,6 @@ existingImages = function (obj) {
     }
   });
 };
-// screenShot.js
-// =============
-// Inspired from https://github.com/meatspaces/meatspace-chat/blob/master/public/javascripts/base/videoShooter.js
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 screenShot = {
   getWebcamGIF: function (obj, callback) {
     callback = utils.isFunction(callback) ? callback : function () {
@@ -1560,9 +1234,7 @@ screenShot = {
         'width': gifWidth,
         'height': gifHeight,
         'delay': interval
-      }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10),
-      //obj.fontSize,
-      fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
+      }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10), fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
         var framesLeft = pendingFrames - 1;
         if (savedRenderingContexts.length) {
           context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
@@ -1572,7 +1244,6 @@ screenShot = {
         if (saveRenderingContexts) {
           renderingContextsToSave.push(context.getImageData(0, 0, gifWidth, gifHeight));
         }
-        // If there is text to display, make sure to display it on the canvas after the image is drawn
         if (text) {
           context.font = font;
           context.fillStyle = fontColor;
@@ -1582,7 +1253,6 @@ screenShot = {
         }
         ag.addFrameImageData(context.getImageData(0, 0, gifWidth, gifHeight));
         pendingFrames = framesLeft;
-        // Call back with an r value indicating how far along we are in capture
         progressCallback((numFrames - pendingFrames) / numFrames);
         if (framesLeft > 0) {
           setTimeout(captureFrame, interval * 1000);
@@ -1604,7 +1274,6 @@ screenShot = {
       };
     numFrames = numFrames !== undefined ? numFrames : 10;
     interval = interval !== undefined ? interval : 0.1;
-    // In seconds
     canvas.width = gifWidth;
     canvas.height = gifHeight;
     context = canvas.getContext('2d');
@@ -1627,12 +1296,6 @@ screenShot = {
     return result;
   }
 };
-// videoStream.js
-// ==============
-// Inspired from https://github.com/sole/gumhelper/blob/master/gumhelper.js
-/* Copyright  2014 Yahoo Inc. 
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 videoStream = {
   'loadedData': false,
   'defaultVideoDimensions': {
@@ -1755,11 +1418,6 @@ videoStream = {
   startVideoStreaming: function (callback, options) {
     options = options || {};
     var self = this, noGetUserMediaSupportTimeout, timeoutLength = options.timeout !== undefined ? options.timeout : 0, originalCallback = options.callback, webcamVideoElement = options.webcamVideoElement;
-    // Some browsers apparently have support for video streaming because of the
-    // presence of the getUserMedia function, but then do not answer our
-    // calls for streaming.
-    // So we'll set up this timeout and if nothing happens after a while, we'll
-    // conclude that there's no actual getUserMedia support.
     if (timeoutLength > 0) {
       noGetUserMediaSupportTimeout = setTimeout(function () {
         self.onStreamingTimeout(originalCallback);
@@ -1776,7 +1434,6 @@ videoStream = {
         });
       },
       'streamed': function () {
-        // The streaming started somehow, so we can assume there is getUserMedia support
         clearTimeout(noGetUserMediaSupportTimeout);
       },
       'completed': function (obj) {
@@ -1796,28 +1453,19 @@ videoStream = {
     obj = utils.isObject(obj) ? obj : {};
     var cameraStream = obj.cameraStream, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement;
     if (!keepCameraOn && cameraStream && utils.isFunction(cameraStream.stop)) {
-      // Stops the camera stream
       cameraStream.stop();
     }
     if (utils.isElement(videoElement) && !webcamVideoElement) {
-      // Pauses the video, revokes the object URL (freeing up memory), and remove the video element
       videoElement.pause();
-      // Destroys the object url
       if (utils.isFunction(utils.URL.revokeObjectURL) && !utils.webWorkerError) {
         if (videoElement.src) {
           utils.URL.revokeObjectURL(videoElement.src);
         }
       }
-      // Removes the video element from the DOM
       utils.removeElement(videoElement);
     }
   }
 };
-// stopVideoStreaming.js
-// =====================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 stopVideoStreaming = function (obj) {
   obj = utils.isObject(obj) ? obj : {};
   var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
@@ -1828,11 +1476,6 @@ stopVideoStreaming = function (obj) {
     'webcamVideoElement': webcamVideoElement
   });
 };
-// createAndGetGIF.js
-// ==================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 createAndGetGIF = function (obj, callback) {
   var options = obj.options || {}, images = options.images, video = options.video, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
       'videoWidth': videoWidth,
@@ -1857,8 +1500,6 @@ createAndGetGIF = function (obj, callback) {
     });
     document.body.appendChild(videoElement);
   }
-  // Firefox doesn't seem to obey autoplay if the element is not in the DOM when the content
-  // is loaded, so we must manually trigger play after adding it, or the video will be frozen
   videoElement.play();
   setTimeout(function () {
     screenShot.getWebcamGIF(options, function (obj) {
@@ -1869,11 +1510,6 @@ createAndGetGIF = function (obj, callback) {
     });
   }, wait);
 };
-// existingImages.js
-// =================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 existingVideo = function (obj) {
   var existingVideo = obj.existingVideo, callback = obj.callback, options = obj.options, skipObj = {
       'getUserMedia': true,
@@ -1905,11 +1541,6 @@ existingVideo = function (obj) {
     'existingVideo': existingVideo
   });
 };
-// existingWebcam.js
-// =================
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 existingWebcam = function (obj) {
   var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
   if (!isWebCamGIFSupported()) {
@@ -1930,11 +1561,6 @@ existingWebcam = function (obj) {
     'webcamVideoElement': webcamVideoElement
   });
 };
-// createGIF.js
-// ============
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 createGIF = function (userOptions, callback) {
   callback = utils.isFunction(userOptions) ? userOptions : callback;
   userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -1942,7 +1568,6 @@ createGIF = function (userOptions, callback) {
     return;
   }
   var options = utils.mergeOptions(defaultOptions, userOptions) || {}, lastCameraStream = userOptions.cameraStream, images = options.images, imagesLength = images ? images.length : 0, video = options.video, webcamVideoElement = options.webcamVideoElement;
-  // If the user would like to create a GIF from an existing image(s)
   if (imagesLength) {
     existingImages({
       'images': images,
@@ -1965,11 +1590,6 @@ createGIF = function (userOptions, callback) {
     });
   }
 };
-// takeSnapShot.js
-// ===============
-/* Copyright  2014 Yahoo Inc.
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 takeSnapShot = function (userOptions, callback) {
   callback = utils.isFunction(userOptions) ? userOptions : callback;
   userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -1982,14 +1602,11 @@ takeSnapShot = function (userOptions, callback) {
     });
   createGIF(options, callback);
 };
-// API.js
-// ======
-/* Copyright  2014 Yahoo Inc. 
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 API = function () {
   var gifshot = {
     'utils': utils,
+    'error': error,
+    'defaultOptions': defaultOptions,
     'createGIF': createGIF,
     'takeSnapShot': takeSnapShot,
     'stopVideoStreaming': stopVideoStreaming,
@@ -2000,13 +1617,7 @@ API = function () {
   };
   return gifshot;
 }();
-// index.js
-// ========
-/* Copyright  2014 Yahoo Inc. 
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file for terms.
- */
 (function () {
-  // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, and plain browser loading
   if (typeof define === 'function' && define.amd) {
     define([], function () {
       return API;
