@@ -97,6 +97,7 @@ var gulp = require('gulp'),
 // Task that uses the Require.js optimizer to concatenate all of the gifshot
 // AMD modules into a single source file
 gulp.task('concat', function(cb) {
+  console.log('is concat called');
   var outputFile = 'src/gifshot.js',
     rjsOptions = _.merge(_.clone(configs.rjs), {
       'out': outputFile

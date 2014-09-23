@@ -1190,7 +1190,7 @@ getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
 existingImages = function (obj) {
   var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
       'getUserMedia': true,
-      'window.URL': true
+      'window.URL': tru
     }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
   if (errorObj.error) {
     return callback(errorObj);
