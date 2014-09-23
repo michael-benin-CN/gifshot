@@ -98,12 +98,12 @@ var gulp = require('gulp'),
 // AMD modules into a single source file
 gulp.task('concat', function(cb) {
   var outputFile = 'src/gifshot.js',
-    rjsOptions = _.merge(configs.rjs, {
+    rjsOptions = _.merge(_.clone(configs.rjs), {
       'out': outputFile
     });
 
   rjs.optimize(rjsOptions, function() {
-    var amdcleanOptions = _.merge(configs.amdclean, {
+    var amdcleanOptions = _.merge(_.clone(configs.amdclean), {
       'filePath': outputFile
     });
 
@@ -127,12 +127,12 @@ gulp.task('lint', ['concat'], function() {
 // and runs the Mocha unit tests and Instanbul test coverage
 gulp.task('test', ['concat', 'lint'], function(cb) {
   var outputFile = 'tests/gifshot.test.js',
-    rjsOptions = _.merge(configs.rjs, {
+    rjsOptions = _.merge(_.clone(configs.rjs), {
       'out': outputFile
     });
 
   rjs.optimize(rjsOptions, function() {
-    var amdcleanOptions = _.merge(configs.amdclean, {
+    var amdcleanOptions = _.merge(_.clone(configs.amdclean), {
       'filePath': outputFile,
       'removeModules': [
         'gifWriter',
@@ -215,12 +215,12 @@ gulp.task('custom-build', function() {
     }
   });
 
-  rjsOptions = _.merge(configs.rjs, {
+  rjsOptions = _.merge(_.clone(configs.rjs), {
     'out': outputFile
   });
 
   rjs.optimize(rjsOptions, function() {
-    var amdcleanOptions = _.merge(configs.amdclean, {
+    var amdcleanOptions = _.merge(_.clone(configs.amdclean), {
       'filePath': outputFile,
       'removeModules': modulesToRemove
     });
@@ -246,7 +246,9 @@ gulp.task('default', ['concat', 'lint', 'test', 'copy', 'minify', 'cleanup']);
 
 // The watch task that runs the default task on any gifshot module file changes
 gulp.task('watch', function() {
-  gulp.watch('src/modules/**/*.js', function(event) {
-    gulp.start('default');
+  var watcher = gulp.watch('src/modules/**/*.js', ['default']);
+
+  watcher.on('change', function(event) {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
   });
 });
