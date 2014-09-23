@@ -63,11 +63,9 @@ gifshot.createGIF({}, function(obj) {
 
 1.  git clone this repo: `git clone https://git.corp.yahoo.com/sports/gifshot.git`
 2.  Install [Node.js](http://nodejs.org/)
-3.  Install the gulp module globally: `sudo npm install gulp -g`
-4.  Install all local dependencies: `npm install`
-5.  Run the gulp build: `gulp`
-6.  Start up the included node.js preview server: `node server/server.js`
-7.  Go to `localhost:8001` to try out gifshot.js.
+3.  Install all local dependencies: `npm install`
+4.  Start up the included node.js preview server: `npm run preview`
+5.  Go to `localhost:8001` to try out gifshot.js.
 
 
 ## API Methods
@@ -293,7 +291,7 @@ gifshot.takeSnapShot(function(obj) {
 
 ## Custom Builds
 
-We provide a **gulp** `custom-build` task, that allows you to remove certain dependencies that you may not need.  Pass in the custom build name that you would like:
+We provide a **gulp** `custom-build` task, that allows you to remove certain dependencies that you may not need.  Pass in the custom build name that you would like (it default to `webcam`):
 
 `gulp custom-build --webcam`
 
@@ -319,7 +317,7 @@ If your PR is a code change:
 1.  Install all node.js dev dependencies: `npm install`
 2.  Update the appropriate module inside of the `src/modules` directory.
 3.  Install gulp.js globally: `sudo npm install gulp -g`
-4.  Lint, Test, and Minify with Gulp: `gulp`
+4.  Concatenate, Lint, Test, and Minify gifshot with Gulp: `gulp`
 5.  Verify that the minified output file has been updated in `build/gifshot.js` and `build/gifshot.min.js` and that no unit tests are failing.
 6.  Send the PR!
 

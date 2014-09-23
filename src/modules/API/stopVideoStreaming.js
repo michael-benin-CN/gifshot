@@ -15,12 +15,13 @@ define([
     var options = utils.isObject(obj.options) ? obj.options : {},
       cameraStream = obj.cameraStream,
       videoElement = obj.videoElement,
-      webcamVideoElement = obj.webcamVideoElement
+      webcamVideoElement = obj.webcamVideoElement,
+      keepCameraOn = obj.keepCameraOn
 
     videoStream.stopVideoStreaming({
       'cameraStream': cameraStream,
       'videoElement': videoElement,
-      'keepCameraOn': options.keepCameraOn,
+      'keepCameraOn': keepCameraOn,
       'webcamVideoElement': webcamVideoElement
     });
   };

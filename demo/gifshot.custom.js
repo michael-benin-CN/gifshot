@@ -1,3 +1,10 @@
+/*Copyrights for code authored by Yahoo Inc. is licensed under the following terms:
+MIT License
+Copyright  2014 Yahoo Inc.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 ;(function(window, document, navigator, undefined) {
 var utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, NeuQuant, processFrameWorker, gifWriter, AnimatedGIF, getBase64GIF, existingImages, screenShot, videoStream, stopVideoStreaming, createAndGetGIF, existingVideo, existingWebcam, createGIF, takeSnapShot, API, _index_;
 utils = function () {
@@ -282,13 +289,6 @@ defaultOptions = {
 };
 isSupported = function () {
   return error.isValid();
-};
-isWebCamGIFSupported = function () {
-  return error.isValid();
-};
-isExistingImagesGIFSupported = function () {
-  var skipObj = { 'getUserMedia': true };
-  return error.isValid(skipObj);
 };
 isExistingVideoGIFSupported = function (codecs) {
   var isSupported = false, hasValidCodec = false;
@@ -1180,50 +1180,6 @@ getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
     });
   });
 };
-existingImages = function (obj) {
-  var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
-      'getUserMedia': true,
-      'window.URL': true
-    }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
-  if (errorObj.error) {
-    return callback(errorObj);
-  }
-  ag = new AnimatedGIF(options);
-  utils.each(images, function (index, currentImage) {
-    if (utils.isElement(currentImage)) {
-      currentImage.crossOrigin = 'Anonymous';
-      ag.addFrame(currentImage, currentImage.src, options);
-      loadedImages += 1;
-      if (loadedImages === imagesLength) {
-        getBase64GIF(ag, callback);
-      }
-    } else if (utils.isString(currentImage)) {
-      tempImage = document.createElement('img');
-      tempImage.crossOrigin = 'Anonymous';
-      tempImage.onerror = function (e) {
-        if (imagesLength > 0) {
-          imagesLength -= 1;
-        }
-      };
-      tempImage.src = currentImage;
-      utils.setCSSAttr(tempImage, {
-        'position': 'fixed',
-        'opacity': '0'
-      });
-      (function (tempImage, ag, currentImage) {
-        tempImage.onload = function () {
-          ag.addFrame(tempImage, currentImage, options);
-          utils.removeElement(tempImage);
-          loadedImages += 1;
-          if (loadedImages === imagesLength) {
-            getBase64GIF(ag, callback);
-          }
-        };
-      }(tempImage, ag, currentImage));
-      document.body.appendChild(tempImage);
-    }
-  });
-};
 screenShot = {
   getWebcamGIF: function (obj, callback) {
     callback = utils.isFunction(callback) ? callback : function () {
@@ -1466,16 +1422,6 @@ videoStream = {
     }
   }
 };
-stopVideoStreaming = function (obj) {
-  obj = utils.isObject(obj) ? obj : {};
-  var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
-  videoStream.stopVideoStreaming({
-    'cameraStream': cameraStream,
-    'videoElement': videoElement,
-    'keepCameraOn': options.keepCameraOn,
-    'webcamVideoElement': webcamVideoElement
-  });
-};
 createAndGetGIF = function (obj, callback) {
   var options = obj.options || {}, images = options.images, video = options.video, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
       'videoWidth': videoWidth,
@@ -1539,26 +1485,6 @@ existingVideo = function (obj) {
       createAndGetGIF(obj, callback);
     },
     'existingVideo': existingVideo
-  });
-};
-existingWebcam = function (obj) {
-  var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
-  if (!isWebCamGIFSupported()) {
-    return callback(error.validate());
-  }
-  if (options.savedRenderingContexts.length) {
-    screenShot.getWebcamGIF(options, function (obj) {
-      callback(obj);
-    });
-    return;
-  }
-  videoStream.startVideoStreaming(function (obj) {
-    obj.options = options || {};
-    createAndGetGIF(obj, callback);
-  }, {
-    'lastCameraStream': lastCameraStream,
-    'callback': callback,
-    'webcamVideoElement': webcamVideoElement
   });
 };
 createGIF = function (userOptions, callback) {

@@ -18,6 +18,7 @@ define([
       var canvas = document.createElement('canvas'),
         context,
         videoElement = obj.videoElement,
+        keepCameraOn = obj.keepCameraOn,
         webcamVideoElement = obj.webcamVideoElement,
         cameraStream = obj.cameraStream,
         gifWidth = obj.gifWidth,
@@ -100,7 +101,8 @@ define([
                 'cameraStream': cameraStream,
                 'videoElement': videoElement,
                 'webcamVideoElement': webcamVideoElement,
-                'savedRenderingContexts': renderingContextsToSave
+                'savedRenderingContexts': renderingContextsToSave,
+                'keepCameraOn': keepCameraOn
               });
             });
           }

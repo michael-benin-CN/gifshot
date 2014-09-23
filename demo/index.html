@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="build/gifshot.js"></script>
+    <script src="./gifshot.js"></script>
+    <!-- // <script src="./gifshot.custom.js"></script> -->
   </head>
 
   <body>
@@ -81,15 +82,6 @@
     </form>
 
   <script>
-function downloadURI(uri, name) {
-  var link = document.createElement("a");
-  link.download = name;
-  link.href = uri;
-  link.click();
-}
-  </script>
-
-  <script>
     var form = document.querySelector("form"),
         interval = document.querySelector("#interval"),
         numFrames = document.querySelector("#numFrames"),
@@ -137,9 +129,6 @@ function downloadURI(uri, name) {
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
-          setTimeout(function() {
-            // downloadURI(image, 'examplegif.gif');
-          }, 300);
         } else {
           console.log('obj', obj);
           console.log('obj.error', obj.error);
@@ -171,9 +160,6 @@ function downloadURI(uri, name) {
             animatedImage = document.createElement('img');
           animatedImage.src = image;
           document.body.appendChild(animatedImage);
-          setTimeout(function() {
-            // downloadURI(image, 'examplegif.gif');
-          }, 300);
         }
       });
     }
