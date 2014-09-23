@@ -1235,7 +1235,7 @@ screenShot = {
   getWebcamGIF: function (obj, callback) {
     callback = utils.isFunction(callback) ? callback : function () {
     };
-    var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+    var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
         'sampleInterval': sampleInterval,
         'numWorkers': numWorkers,
         'width': gifWidth,
@@ -1274,7 +1274,8 @@ screenShot = {
               'cameraStream': cameraStream,
               'videoElement': videoElement,
               'webcamVideoElement': webcamVideoElement,
-              'savedRenderingContexts': renderingContextsToSave
+              'savedRenderingContexts': renderingContextsToSave,
+              'keepCameraOn': keepCameraOn
             });
           });
         }
@@ -1475,11 +1476,11 @@ videoStream = {
 };
 stopVideoStreaming = function (obj) {
   obj = utils.isObject(obj) ? obj : {};
-  var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement;
+  var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, keepCameraOn = obj.keepCameraOn;
   videoStream.stopVideoStreaming({
     'cameraStream': cameraStream,
     'videoElement': videoElement,
-    'keepCameraOn': options.keepCameraOn,
+    'keepCameraOn': keepCameraOn,
     'webcamVideoElement': webcamVideoElement
   });
 };
@@ -1510,7 +1511,7 @@ createAndGetGIF = function (obj, callback) {
   videoElement.play();
   setTimeout(function () {
     screenShot.getWebcamGIF(options, function (obj) {
-      if (!images && !video) {
+      if ((!images || !images.length) && (!video || !video.length)) {
         stopVideoStreaming(obj);
       }
       completeCallback(obj);

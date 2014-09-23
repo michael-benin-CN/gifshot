@@ -1,29 +1,29 @@
 var chai = require('chai'),
   expect = chai.expect,
-  gifshot = require('./gifshot'),
+  gifshot = require('./gifshot.test'),
   gifshotUtils = gifshot.utils;
 
 describe('gifshot', function() {
 
   describe('#utils', function() {
 
-    it('should check gifshotUtils is an object', function() { 
+    it('should check gifshotUtils is an object', function() {
       expect(gifshotUtils).not.to.equal(undefined);
     });
 
-    it('should check URL is undefined', function() { 
+    it('should check URL is undefined', function() {
       expect(gifshotUtils.URL).to.equal(undefined);
     });
 
-    it('should check getUserMedia is undefined', function() { 
+    it('should check getUserMedia is undefined', function() {
       expect(gifshotUtils.getUserMedia).to.equal(undefined);
     });
 
-    it('should check Blob is undefined', function() { 
+    it('should check Blob is undefined', function() {
       expect(gifshotUtils.Blob).to.equal(undefined);
     });
 
-    it('should check btoa is a function', function() { 
+    it('should check btoa is a function', function() {
       expect(gifshotUtils.isFunction(gifshotUtils.btoa)).to.equal(true);
     });
 
@@ -110,7 +110,7 @@ describe('gifshot', function() {
       expect(gifshotUtils.isFunction(num1)).to.equal(false);
     });
 
-    it('should correctly detect strings', function() { 
+    it('should correctly detect strings', function() {
       expect(gifshotUtils.isElement({})).to.equal(false);
     });
 
@@ -203,29 +203,29 @@ describe('gifshot', function() {
       expect(mergedOptions.nestedTest.test).to.equal('this is a test');
     });
 
-    it('should test the progress callback', function(){
+    it('should test the progress callback', function() {
       expect(gifshot.defaultOptions.progressCallback()).to.equal(undefined);
       expect(gifshot.defaultOptions.completeCallback()).to.equal(undefined);
     });
 
-    it('should set css attributes', function() { 
+    it('should set css attributes', function() {
       expect(gifshotUtils.setCSSAttr()).to.equal(undefined);
     });
 
-    it('should remove an element', function() { 
+    it('should remove an element', function() {
       expect(gifshotUtils.removeElement()).to.equal(undefined);
     });
 
-    it('should create a web worker', function() { 
+    it('should create a web worker', function() {
       expect(gifshotUtils.isEmptyObject(gifshotUtils.createWebWorker())).to.equal(true);
     });
 
-    it('should get file extension', function() { 
+    it('should get file extension', function() {
       expect(gifshotUtils.getExtension("test.gif")).to.equal("gif");
     });
 
-    it('should resize text', function() { 
-        expect(gifshotUtils.getFontSize("test", 200, 18, 20)).to.equal(undefined); 
+    it('should resize text', function() {
+      expect(gifshotUtils.getFontSize("test", 200, 18, 20)).to.equal(undefined);
     });
 
 
@@ -247,7 +247,7 @@ describe('gifshot', function() {
 
     });
 
-    describe('#takeSnapShot', function() { 
+    describe('#takeSnapShot', function() {
       it('should have a takeSnapShot method', function() {
         expect(gifshot.takeSnapShot).not.to.equal(undefined);
       });
@@ -261,13 +261,13 @@ describe('gifshot', function() {
 
     });
 
-    describe('#stopVideoStreaming', function() { 
+    describe('#stopVideoStreaming', function() {
       it('should have a stopVideoStreaming method', function() {
         expect(gifshot.stopVideoStreaming).not.to.equal(undefined);
       });
     });
 
-    describe('#isSupported', function() { 
+    describe('#isSupported', function() {
       it('should have an isSupported method', function() {
         expect(gifshot.isSupported).not.to.equal(undefined);
       });
@@ -278,7 +278,7 @@ describe('gifshot', function() {
 
     });
 
-    describe('#isWebCamGIFSupported', function() { 
+    describe('#isWebCamGIFSupported', function() {
       it('should have an isWebCamGIFSupported method', function() {
         expect(gifshot.isWebCamGIFSupported).not.to.equal(undefined);
       });
@@ -288,7 +288,7 @@ describe('gifshot', function() {
       });
     });
 
-    describe('#isExistingVideoGIFSupported', function() { 
+    describe('#isExistingVideoGIFSupported', function() {
       it('should have an isExistingVideoGIFSupported method', function() {
         expect(gifshot.isExistingVideoGIFSupported).not.to.equal(undefined);
       });
@@ -300,7 +300,7 @@ describe('gifshot', function() {
     });
 
 
-    describe('#isExistingImagesGIFSupported', function() { 
+    describe('#isExistingImagesGIFSupported', function() {
       it('should have an isExistingImagesGIFSupported method', function() {
         expect(gifshot.isExistingImagesGIFSupported).not.to.equal(undefined);
       });
@@ -312,22 +312,22 @@ describe('gifshot', function() {
 
   });
 
-  describe('#error', function() { 
+  describe('#error', function() {
     var error = gifshot.error;
 
-    it('should check the error object', function() { 
-        expect(gifshotUtils.isObject(error.validate())).to.equal(true);
+    it('should check the error object', function() {
+      expect(gifshotUtils.isObject(error.validate())).to.equal(true);
     });
 
-    it('should check is valid', function() { 
-        expect(error.isValid()).to.equal(false);
+    it('should check is valid', function() {
+      expect(error.isValid()).to.equal(false);
     });
 
-    it('should check is valid', function() { 
-        expect(error.isValid({
-          'getUserMedia': true,
-          'canvas': true
-        })).to.equal(false);
+    it('should check is valid', function() {
+      expect(error.isValid({
+        'getUserMedia': true,
+        'canvas': true
+      })).to.equal(false);
     });
 
   });
