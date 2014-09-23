@@ -18,7 +18,7 @@ define([
       options = obj.options,
       skipObj = {
         'getUserMedia': true,
-        'window.URL': tru
+        'window.URL': true
       },
       errorObj = error.validate(skipObj),
       loadedImages = 0,
