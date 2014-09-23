@@ -58,7 +58,7 @@ define([
 
     setTimeout(function() {
       screenShot.getWebcamGIF(options, function(obj) {
-        if (!images && !video) {
+        if ((!images || !images.length) && (!video || !video.length)) {
           stopVideoStreaming(obj);
         }
         completeCallback(obj);
