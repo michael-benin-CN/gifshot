@@ -340,10 +340,6 @@ gifshot.js would not have been possible without the help/inspiration of the foll
  * Copyright (c) Dean McNamee, 2013 - [MIT License](https://github.com/deanm/omggif)
 
 
-- [Greg Franko](https://github.com/gfranko)'s [AMDclean](https://github.com/gfranko/amdclean)
- * A build tool that converts AMD and/or CommonJS code to standard JavaScript
- * Copyright (c) 2014 Greg Franko - [MIT license](https://github.com/gfranko/amdclean/blob/master/LICENSE.txt).
-
 ###Inspiration
 
 - [Soledad Penadés](https://github.com/sole)'s [gumhelper.js](https://github.com/sole/gumhelper)
