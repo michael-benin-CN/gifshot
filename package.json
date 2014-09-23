@@ -22,7 +22,7 @@
     }
   ],
   "scripts": {
-    "preview": "node server/server.js",
+    "preview": "node demo/server/server.js",
     "build": "gulp",
     "watch": "gulp watch"
   },
@@ -30,12 +30,14 @@
     "amdclean": "latest",
     "chai": "^1.9.1",
     "express": "^4.2.0",
-    "gulp": "^3.6.2",
+    "gulp": "^3.8.8",
     "gulp-insert": "^0.3.0",
+    "gulp-install": "^0.2.0",
     "gulp-istanbul": "^0.3.1",
     "gulp-jshint": "^1.6.0",
     "gulp-mocha": "^1.1.0",
     "gulp-rename": "^1.2.0",
+    "gulp-rimraf": "^0.1.0",
     "gulp-uglify": "^0.3.0",
     "requirejs": "^2.1.11"
   },
