@@ -11,7 +11,6 @@ var gulp = require('gulp'),
   istanbul = require('gulp-istanbul'),
   jshint = require('gulp-jshint'),
   rimraf = require('gulp-rimraf'),
-  symlink = require('gulp-symlink'),
   _ = require('lodash'),
   rjs = require('requirejs'),
   amdclean = require('amdclean'),
@@ -240,11 +239,6 @@ gulp.task('custom-build', function() {
   }, function(err) {
     return cb(err); // return error
   });
-});
-
-gulp.task('hook', function() {
-  return gulp.src('.pre-commit')
-    .pipe(symlink('.git/hooks/', 'pre-commit'));
 });
 
 // The default build task (called when you run `gulp`)
