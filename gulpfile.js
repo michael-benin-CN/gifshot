@@ -41,7 +41,7 @@ var gulp = require('gulp'),
       // Wraps the library in an IIFE (Immediately Invoked Function Expression)
       'wrap': {
         'start': ';(function(window, document, navigator, undefined) {\n',
-        'end': '\n}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));'
+        'end': '\n}(typeof window !== "undefined" ? window : {}, typeof document !== "undefined" ? document : { createElement: function() {} }, typeof window !== "undefined" ? window.navigator : {}));'
       },
       'escodegen': {
         'comment': false

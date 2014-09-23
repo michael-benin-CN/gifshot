@@ -1636,4 +1636,4 @@ API = function () {
     window.gifshot = API;
   }
 }());
-}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));
+}(typeof window !== "undefined" ? window : {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));

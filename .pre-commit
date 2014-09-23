@@ -1,0 +1,12 @@
+#!/bin/sh
+ 
+# Run the gulp build on every commit
+error=$(gulp)
+
+if [[ $? -ne 0 ]] ; then
+  echo "$error"
+  exit 1
+fi
+ 
+# Everything is ok
+exit 0
