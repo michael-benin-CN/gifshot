@@ -202,7 +202,7 @@ define(function() {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
     'getFontSize': function(text, containerWidth, maxFontSize, minFontSize) {
-      if(!document.body) {
+      if (!document.body) {
         return;
       }
 

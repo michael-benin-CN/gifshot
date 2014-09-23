@@ -22,7 +22,6 @@
     "preview": "node demo/server/server.js",
     "build": "gulp",
     "watch": "gulp watch",
-    "validate": "gulp build",
     "test": "gulp test"
   },
   "precommit": [
