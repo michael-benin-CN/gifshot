@@ -13,19 +13,20 @@
     "WebRTC",
     "getUserMedia"
   ],
-  "contributors": [
-    {
-      "name": "Chase West"
-    },
-    {
-      "name": "Greg Franko"
-    }
-  ],
+  "contributors": [{
+    "name": "Chase West"
+  }, {
+    "name": "Greg Franko"
+  }],
   "scripts": {
     "preview": "node demo/server/server.js",
     "build": "gulp",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "test": "gulp test"
   },
+  "precommit": [
+    "build"
+  ],
   "devDependencies": {
     "amdclean": "latest",
     "chai": "^1.9.1",
@@ -39,7 +40,9 @@
     "gulp-rename": "^1.2.0",
     "gulp-rimraf": "^0.1.0",
     "gulp-uglify": "^0.3.0",
+    "jshint": "^2.5.6",
     "lodash": "^2.4.1",
+    "precommit-hook": "^1.0.7",
     "requirejs": "^2.1.11"
   },
   "engine": {
