@@ -10,10 +10,10 @@ var gulp = require('gulp'),
   mocha = require('gulp-mocha'),
   istanbul = require('gulp-istanbul'),
   jshint = require('gulp-jshint'),
+  rimraf = require('gulp-rimraf'),
   _ = require('lodash'),
   rjs = require('requirejs'),
   amdclean = require('amdclean'),
-  rimraf = require('gulp-rimraf'),
   // end of Third-party dependencies
   fs = require('fs'),
   // The package.json object
@@ -41,7 +41,7 @@ var gulp = require('gulp'),
       // Wraps the library in an IIFE (Immediately Invoked Function Expression)
       'wrap': {
         'start': ';(function(window, document, navigator, undefined) {\n',
-        'end': '\n}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));'
+        'end': '\n}(typeof window !== "undefined" ? window : {}, typeof document !== "undefined" ? document : { createElement: function() {} }, typeof window !== "undefined" ? window.navigator : {}));'
       },
       'escodegen': {
         'comment': false
