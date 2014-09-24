@@ -1,7 +1,7 @@
 ![](http://i.imgur.com/I17GUX9.gif)
 =======
 
-JavaScript library that can create animated GIFs from media streams (e.g. webcam), existing videos (e.g. mp4), or existing images (e.g. png)
+JavaScript library that can create animated GIFs from media streams (e.g. webcam), videos (e.g. mp4), or images (e.g. png)
 
 
 ## How
