@@ -28,6 +28,6 @@ For more details and examples, check out the full API documentation and our exte
 
 Gifshot was originally created during a Yahoo Sports team hackathon. The hackathon project allowed Yahoo Fantasy users to talk "smack" to other league members, by creating and publishing funny animated GIFs of themselves. After testing this feature internally, we soon learned what the internet has known for over 25 years; animated GIFs are fun.
 
-The Yahoo Sports team recently released this feature to all Yahoo Fantasy leagues, so try going to your team matchup page and clicking on the red record icon at the bottom right corner of your page to start creating your GIFs! If you aren't in a Yahoo Fantasy Football league yet, make sure to not miss out on the fun and [create an account](http://football.fantasysports.yahoo.com/f1/signup/) now.
+The Yahoo Sports team recently released this feature to all Yahoo Fantasy leagues, so try going to your team matchup page and clicking on the red record icon at the bottom right corner of your page to start creating your GIFs! If you aren't in a Yahoo Fantasy league yet, make sure to not miss out on the fun and [create an account](http://sports.yahoo.com/fantasy/) now.
 
 Happy GIF'ing!
