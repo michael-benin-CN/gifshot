@@ -24,8 +24,8 @@
             <span class="gifshot-header-text">Demo</span>
           </span>
           <span class="options-button-group">
-            <button type="button" class="btn btn-primary">Create GIF</button>
-            <button type="button" id="snapShot" class="btn btn-secondary">Take Snapshot</button>
+            <button type="button" class="btn btn-primary create-gif-button">Create GIF</button>
+            <button type="button" class="btn btn-secondary take-snapshot-button">Take Snapshot</button>
           </span>
           <!-- main-header -->
           <header class="main-navigation navbar demo-navigation">
@@ -39,7 +39,7 @@
       <section class="demo-section v-center">
         <div>
           <div class="row">
-            <div class="col-md-3 options-section">
+            <div class="col-md-2 options-section">
               <h3>Options</h3>
               <form class="options-form" action="">
                 <div class="form-group">
@@ -52,11 +52,11 @@
                 </div>
                 <div class="form-group">
                   <label for="gifWidth">GIF Width</label>
-                  <input name="gifWidth" id="gifWidth" class="form-control" value="200" size="5"></input>
+                  <input name="gifWidth" id="gifWidth" class="form-control" value="200" size="5" type="number"></input>
                 </div>
                 <div class="form-group">
                   <label for="gifHeight">GIF Height</label>
-                  <input name="gifHeight" id="gifHeight" class="form-control" value="200" size="5"></input>
+                  <input name="gifHeight" id="gifHeight" class="form-control" value="200" size="5" type="number"></input>
                 </div>
                 <div class="form-group">
                   <label for="interval">Interval</label>
@@ -120,21 +120,21 @@
                 </div>
               </form>
             </div>
-            <div class="col-md-4 text-center preview-section">
-              <section class="main-header">
+            <div class="col-md-5 text-center preview-section">
+              <section class="gifshot-image-preview-section">
                 <h3>
                   Preview
                 </h3>
               </section>
-              <!-- <progress max="1" value="0"></progress> -->
+              <progress max="1" value="0"></progress>
             </div>
             <div class="col-md-5 text-center code-section">
-              <section class="main-header">
+              <section>
                 <h3>
                   Code
                 </h3>
-                <pre>
-                  <code class="language-js">
+                <pre class="language-javascript">
+                  <code>
                     var test = true;
                   </code>
                 </pre>
@@ -154,7 +154,8 @@
           </p>
         </div>
       </footer>
-      <script src="js/gifshot.min.js"></script>
-      <script src="js/prism.min.js"></script>
+      <script src="js/dependencies/gifshot.min.js"></script>
+      <script src="js/dependencies/prism.min.js"></script>
+      <script src="js/demo.js"></script>
     </body>
 </html>
