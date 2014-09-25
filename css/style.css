@@ -92,6 +92,40 @@ p {
   /* 31px */
 
 }
+.btn {
+  border: none;
+  background: #bdc3c7;
+  color: #ffffff;
+  padding: 9px 12px 10px;
+  line-height: 22px;
+  text-decoration: none;
+  text-shadow: none;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: 0.25s;
+  -moz-transition: 0.25s;
+  -o-transition: 0.25s;
+  transition: 0.25s;
+}
+.btn:hover,
+.btn:focus {
+  background-color: #cacfd2;
+  color: #ffffff;
+  outline: none;
+  -webkit-transition: 0.25s;
+  -moz-transition: 0.25s;
+  -o-transition: 0.25s;
+  transition: 0.25s;
+}
+.btn.btn-large {
+  font-size: 16px;
+  line-height: 20px;
+  padding: 12px 18px 13px;
+}
 .lead {
   font-size: 28px;
   line-height: 1.5;
@@ -548,9 +582,6 @@ section * {
   font-size: 60px;
   color: #2c3e50;
 }
-.gifshot-images {
-  overflow-x: auto;
-}
 .gifshot-images .row {
   white-space: nowrap;
 }
@@ -623,5 +654,8 @@ section * {
   }
   .teammate {
     margin-left: 0px;
+  }
+  .gifshot-images {
+    overflow-x: auto;
   }
 }
