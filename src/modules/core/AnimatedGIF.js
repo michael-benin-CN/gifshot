@@ -43,7 +43,7 @@ define([
     },
     'workerMethods': frameWorkerCode(),
     'initializeWebWorkers': function(options) {
-      var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();',
+      var processFrameWorkerCode = NeuQuant.toString() + '(' + frameWorkerCode.toString() + '());',
         webWorkerObj,
         objectUrl,
         webWorker,
