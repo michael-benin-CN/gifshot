@@ -1,7 +1,7 @@
 ![](http://i.imgur.com/I17GUX9.gif)
 =======
 
-JavaScript library that can create Animated GIFs from video streams (e.g. webcam), existing videos (e.g. mp4), or existing images
+JavaScript library that can create animated GIFs from media streams, videos, or images
 
 
 ## How
@@ -339,10 +339,6 @@ gifshot.js would not have been possible without the help/inspiration of the foll
  * Encodes a GIF into the GIF89 spec
  * Copyright (c) Dean McNamee, 2013 - [MIT License](https://github.com/deanm/omggif)
 
-
-- [Greg Franko](https://github.com/gfranko)'s [AMDclean](https://github.com/gfranko/amdclean)
- * A build tool that converts AMD and/or CommonJS code to standard JavaScript
- * Copyright (c) 2014 Greg Franko - [MIT license](https://github.com/gfranko/amdclean/blob/master/LICENSE.txt).
 
 ###Inspiration
 
