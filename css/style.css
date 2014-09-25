@@ -546,6 +546,7 @@ section * {
 .gifshot-brand {
   font-family: 'Grand Hotel',cursive;
   font-size: 60px;
+  color: #2c3e50;
 }
 .gifshot-images {
   overflow-x: auto;
