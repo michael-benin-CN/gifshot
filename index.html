@@ -1,9 +1,172 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="build/gifshot.js"></script>
-  </head>
 
-  <body>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>gifshot.js - JavaScript library that can create animated GIFs from media streams (e.g. webcam), videos (e.g. mp4), or images (e.g. png)</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <!-- Third Party CSS Dependencies -->
+        <link rel="stylesheet" href="css/dependencies/bootstrap.css">
+        <link rel="stylesheet" href="css/dependencies/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/dependencies/flat-ui.css">
+
+        <!-- Custom CSS styles -->
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+
+    <body>
+      <section class="main-header">
+        <h3>
+          <span class="gifshot-brand">
+              gifshot.js
+          </span>
+        </h3>
+        <p class="lead">
+        JavaScript library that can create animated GIFs from media streams, videos, or images
+        </p>
+      </section>
+      <!-- main-header -->
+      <header class="main-navigation navbar">
+        <div class="container text-center">
+          <a class="active" href="index.html">HOME</a>
+          <a href="demos.html">DEMOS</a>
+          <a href="https://github.com/yahoo/gifshot">CODE</a>
+          <a href="https://github.com/yahoo/gifshot#api-methods">DOCS</a>          
+        </div>
+      </header>
+      <section class="main-header-sub v-center">
+          <div>
+              <div class="background">&nbsp;</div>
+              <div class="container">
+                <div class="gifshot-images row text-center">
+                  <div class="col-md-4">
+                    <img class="hl" src="images/gifshot-10.gif" alt="">
+                    <img class="hl" src="images/gifshot-12.gif" alt="">
+                    <img class="hl" src="images/gifshot-9.gif" alt="">
+                  </div>
+                  <div class="col-md-4">
+                    <img class="hl" src="images/gifshot-11.gif" alt="">
+                    <img class="hl" src="images/gifshot.gif" alt="">
+                    <img class="hl" src="images/gifshot-20.gif" alt="">
+                  </div>
+                  <div class="col-md-4">
+                    <img class="hl" src="images/gifshot-19.gif" alt="">
+                    <img class="hl" src="images/gifshot-18.gif" alt="">
+                    <img class="hl" src="images/gifshot-17.gif" alt="">
+                  </div>
+                </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- features-section  -->
+      <section class="features-section v-center">
+        <div>
+          <div class="container">
+            <h3>
+              Why Use Gifshot?
+            </h3>
+            <div class="row features">
+              <div class="span4 offset2">
+                <h6>Easy to Integrate</h6>
+                <p>The client-side nature of the library makes it extremely portable and easy to integrate into almost any website (sort of like animated GIFs themselves).</p>
+              </div>
+              <div class="span4 offset1">
+                <h6>Efficient</h6>
+                <p>By harnessing the power of web workers, you get fast GIF creation that doesn't block the UI. An image quantization algorithm is also used to reduce the number of colors required to represent the image.
+                </p>
+              </div>
+            </div>
+
+            <div class="row features">
+              <div class="span4 offset2">
+                <h6>Powerful</h6>
+                <p>Leverages cutting edge browser APIs including WebRTC, FileSystem, Video, Canvas, Web Workers, Typed Arrays, and Base 64 Encoding to support over 20 options.
+                </p>
+              </div>
+              <div class="span4 offset1">
+                <h6>Customizable</h6>
+                <p>Custom builds can be used to only include the specific functionality needed for your project.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- get-started-section  -->
+      <section class="get-started-section">
+        <center>
+          <a class="btn btn-large get-started" href="https://github.com/yahoo/gifshot#quick-start">Get Started!</a>
+        </center>
+        <hr>
+      </section>
+
+      <!-- background-section  -->
+      <section class="background-section v-center">
+        <div>
+          <div class="container">
+            <h3>
+              Why Was Gifshot Created?
+            </h3>
+            <div class="row">
+              <a href="http://sports.yahoo.com">
+                <img class="background-yahoo-sports" src="images/yahoo_sports_logo.jpeg" alt="Yahoo Sports">
+              </a>
+              <p>
+                Gifshot was originally created during a Yahoo Sports team hackathon. The hackathon project allowed Yahoo Fantasy users to talk "<i>smack</i>" to other league members, by creating and publishing funny animated GIFs of themselves. After testing this feature internally, we soon learned what the internet has known for over 25 years; <b>animated GIFs are fun</b>.
+
+                <br><br>
+
+                The Yahoo Sports team recently released this feature to all Yahoo Fantasy leagues, so try going to your team matchup page and clicking on the red record icon at the bottom right corner of your page to start creating your GIFs! If you aren't in a Yahoo Fantasy league yet, make sure to not miss out on the fun and <a href="http://sports.yahoo.com/fantasy/">create an account</a> now.
+              </p>
+            </div>
+          </div>
+        </div>
+        <hr>
+      </section>
+
+      <!-- team-section  -->
+      <section class="team-section v-center">
+        <div>
+          <div class="container">
+            <h3>
+              The Gifshot Team
+            </h3>
+            <div class="row">
+              <div class="teammate">
+                <a href="https://github.com/ChaseWest">
+                  <img class="avatar" src="images/chasewest.jpeg" alt="Chase West">
+                  <span class="name">Chase West</span>
+                </a>
+              </div>
+
+              <div class="teammate">
+                <a href="https://github.com/gfranko">
+                  <img class="avatar" src="images/gregfranko.jpeg" alt="Greg Franko">
+                  <span class="name">Greg Franko</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- footer  -->
+      <footer class="footer v-center">
+        <div class="container">
+          <h4>Made by <a href="http://sports.yahoo.com">Yahoo Sports</a></h4>
+          <p style="margin: 0">
+            All code on this site is licensed under the
+            <a href="https://github.com/yahoo/gifshot/LICENSE.md">Yahoo MIT License</a> unless stated.
+          </p>
+        </div>
+      </footer>
+    </body>
 </html>
