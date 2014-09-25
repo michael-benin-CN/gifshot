@@ -94,7 +94,6 @@ p {
 }
 .btn {
   border: none;
-  background: #bdc3c7;
   color: #ffffff;
   padding: 9px 12px 10px;
   line-height: 22px;
@@ -207,7 +206,6 @@ input[type="color"],
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: normal;
-  color: #eeeeee;
   text-decoration: none;
 }
 a:hover,
@@ -293,6 +291,12 @@ section * {
   padding-bottom: 0;
   z-index: 100;
   width: 100%;
+}
+.main-navigation.demo-navigation {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
 }
 .main-navigation a {
   color: #bdc3c7;
@@ -573,10 +577,37 @@ section * {
 .get-started {
   background-color: #005580;
 }
-.gifshot-logo {
-  width: 114px !important;
-  height: 257px !important;
+.fixed-title {
+    box-shadow: 0 0 2px 1px rgba(0,0,0,.1);
+    background: #fff;
+    line-height: 60px;
+    font-size: 28px;
+    position: fixed;
+    color: #66696a;
+    height: 60px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3
 }
+
+.gifshot-logo {
+    text-decoration: none;
+    color: inherit;
+    font-family: 'Grand Hotel',cursive;
+    font-size: 28px;
+    padding-left: 10px;
+}
+
+.gifshot-header-text-container {
+  position: absolute;
+  left: 20px;
+}
+
+.gifshot-header-text {
+  font-weight: 100;
+}
+
 .gifshot-brand {
   font-family: 'Grand Hotel',cursive;
   font-size: 60px;
@@ -643,6 +674,61 @@ section * {
   width: 100px;
   float: right;
   padding-left: 20px;
+}
+
+/* Options Section */
+
+.options-section {
+  background: #2c3e50;
+}
+.options-section label {
+  color: white;
+}
+.options-section h3 {
+  text-align: center;
+  color: white;
+  margin: 0 0 30px;
+  padding-top: 20px;
+}
+.options-section button {
+  margin: 0 5px;
+}
+.options-button-group {
+  text-align: center;
+}
+.options-form {
+  padding: 0 50px;
+}
+
+/* Preview Section */
+
+.preview-section h3 {
+  color: #2c3e50;
+  margin: 0 0 30px;
+  padding-top: 20px;
+}
+
+/* Code Section */
+
+.code-section h3 {
+  color: #2c3e50;
+  margin: 0 0 30px;
+  padding-top: 20px;
+}
+
+/* Demo Section */
+
+.demo-section {
+  padding-top: 60px;
+}
+
+.code-section,
+.options-section,
+.preview-section {
+  height: 100vh;
+  overflow-y: auto;
+  border-bottom: 1px solid #eee;
+  border-right: 1px dotted rgba(0,0,0,.2);
 }
 
 @media (max-width: 698px) {
