@@ -547,6 +547,16 @@ section * {
   font-family: 'Grand Hotel',cursive;
   font-size: 60px;
 }
+.gifshot-images {
+  overflow-x: auto;
+}
+.gifshot-images .row {
+  white-space: nowrap;
+}
+.gifshot-images .hl {
+  display: inline-block;
+  white-space: nowrap;
+}
 /* Team Section */
 
 .team-section {
@@ -604,7 +614,7 @@ section * {
 }
 
 @media (max-width: 698px) {
-  .gifshot-images {
+  .background-yahoo-sports {
     display: none;
   }
   .features-section {
