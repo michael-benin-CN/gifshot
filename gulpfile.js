@@ -33,7 +33,7 @@ var gulp = require('gulp'),
     'amdclean': {
       // Will not transform conditional AMD checks - Libraries use this to provide optional AMD support
       'transformAMDChecks': false,
-      'aggressiveOptimizations': true,
+      'aggressiveOptimizations': false,
       'createAnonymousAMDModule': true,
       'prefixTransform': function(moduleName) {
         return moduleName.substring(moduleName.indexOf('_') + 1, moduleName.length);
