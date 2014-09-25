@@ -704,15 +704,18 @@ section * {
 
 .preview-section h3 {
   color: #2c3e50;
-  margin: 0 0 30px;
+  margin: 0;
   padding-top: 20px;
 }
 
 /* Code Section */
 
+.code-section {
+  background: #f5f2f0;
+}
 .code-section h3 {
   color: #2c3e50;
-  margin: 0 0 30px;
+  margin: 0;
   padding-top: 20px;
 }
 
@@ -726,9 +729,30 @@ section * {
 .options-section,
 .preview-section {
   height: 100vh;
-  overflow-y: auto;
+  overflow: auto;
   border-bottom: 1px solid #eee;
   border-right: 1px dotted rgba(0,0,0,.2);
+}
+
+.language-javascript {
+  border: none;
+}
+
+@media (max-width: 992px) {
+  .demo-navigation {
+    display: none;
+  }
+  .gifshot-header-text {
+    display: none;
+  }
+  .fixed-title {
+    text-align: right;
+  }
+  .code-section,
+  .options-section,
+  .preview-section {
+    height: 400px;
+  }
 }
 
 @media (max-width: 698px) {
@@ -743,5 +767,14 @@ section * {
   }
   .gifshot-images {
     overflow-x: auto;
+  }
+  .demo-navigation {
+    display: none;
+  }
+  .gifshot-header-text {
+    display: none;
+  }
+  .fixed-title {
+    text-align: right;
   }
 }
