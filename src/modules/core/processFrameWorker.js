@@ -10,7 +10,7 @@
 define([
   'dependencies/NeuQuant'
 ], function(NeuQuant) {
-  var workerCode = function worker() {
+  var workerCode = function () {
     try {
       self.onmessage = function(ev) {
         var data = ev.data,

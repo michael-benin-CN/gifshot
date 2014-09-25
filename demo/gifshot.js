@@ -193,7 +193,7 @@ utils = function () {
   };
   return utils;
 }();
-error = function () {
+error = function (utils) {
   var error = {
     'validate': function (skipObj) {
       skipObj = utils.isObject(skipObj) ? skipObj : {};
@@ -258,7 +258,7 @@ error = function () {
     }
   };
   return error;
-}();
+}(utils);
 defaultOptions = {
   'sampleInterval': 10,
   'numWorkers': 2,
@@ -704,7 +704,7 @@ NeuQuant = function () {
   }
   return NeuQuant;
 }();
-processFrameWorker = function () {
+processFrameWorker = function (NeuQuant) {
   var workerCode = function worker() {
     try {
       self.onmessage = function (ev) {
@@ -757,7 +757,7 @@ processFrameWorker = function () {
     return workerMethods;
   };
   return workerCode;
-}();
+}(NeuQuant);
 gifWriter = function gifWriter(buf, width, height, gopts) {
   var p = 0;
   gopts = gopts === undefined ? {} : gopts;
@@ -956,7 +956,7 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
     return p;
   }
 };
-AnimatedGIF = function (frameWorkerCode, GifWriter) {
+AnimatedGIF = function (utils, frameWorkerCode, NeuQuant, GifWriter) {
   var AnimatedGIF = function (options) {
     options = utils.isObject(options) ? options : {};
     this.canvas = null;
@@ -983,7 +983,7 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     },
     'workerMethods': frameWorkerCode(),
     'initializeWebWorkers': function (options) {
-      var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
+      var processFrameWorkerCode = NeuQuant.toString() + '(' + frameWorkerCode.toString() + '());', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
       numWorkers = options.numWorkers;
       while (++x < numWorkers) {
         webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
@@ -1176,7 +1176,7 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     }
   };
   return AnimatedGIF;
-}(processFrameWorker, gifWriter);
+}(utils, processFrameWorker, NeuQuant, gifWriter);
 getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
   animatedGifInstance.getBase64GIF(function (image) {
     callback({
@@ -1610,7 +1610,7 @@ takeSnapShot = function (userOptions, callback) {
     });
   createGIF(options, callback);
 };
-API = function () {
+API = function (utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming) {
   var gifshot = {
     'utils': utils,
     'error': error,
@@ -1624,8 +1624,8 @@ API = function () {
     'isExistingImagesGIFSupported': isExistingImagesGIFSupported
   };
   return gifshot;
-}();
-(function () {
+}(utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming);
+(function (API) {
   if (typeof define === 'function' && define.amd) {
     define([], function () {
       return API;
@@ -1635,5 +1635,5 @@ API = function () {
   } else {
     window.gifshot = API;
   }
-}());
+}(API));
 }(typeof window !== "undefined" ? window : {}, typeof document !== "undefined" ? document : { createElement: function() {} }, typeof window !== "undefined" ? window.navigator : {}));
