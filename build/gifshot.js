@@ -705,7 +705,7 @@ NeuQuant = function () {
   return NeuQuant;
 }();
 processFrameWorker = function (NeuQuant) {
-  var workerCode = function worker() {
+  var workerCode = function () {
     try {
       self.onmessage = function (ev) {
         var data = ev.data, response = workerMethods.run(data);
