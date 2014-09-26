@@ -275,7 +275,7 @@ defaultOptions = {
   'fontWeight': 'normal',
   'fontSize': '16px',
   'fontFamily': 'sans-serif',
-  'fontColor': '#FFF',
+  'fontColor': '#ffffff',
   'textAlign': 'center',
   'textBaseline': 'bottom',
   'textXCoordinate': null,
