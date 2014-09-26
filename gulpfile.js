@@ -170,7 +170,7 @@ gulp.task('copy', ['concat', 'lint', 'test'], function() {
   gulp.src(['src/gifshot.js'])
     .pipe(insert.prepend(licenseText))
     .pipe(gulp.dest('build'))
-    .pipe(gulp.dest('demo'))
+    .pipe(gulp.dest('demo/js/dependencies'))
 });
 
 // Uglify.js task that minifies build/gifshot.js and adds gifshot.min.js to the build folder

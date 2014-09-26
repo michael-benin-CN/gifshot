@@ -1,172 +1,182 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <script src="./gifshot.js"></script>
-    <!-- // <script src="./gifshot.custom.js"></script> -->
-  </head>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Gifshot Demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <body>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-    <!-- <video id='video' src="example.mp4" style="width:200px;height:200px;"></video> -->
+        <!-- Third Party CSS Dependencies -->
+        <link rel="stylesheet" href="css/dependencies/bootstrap.css">
+        <link rel="stylesheet" href="css/dependencies/prism.css">
 
-<!--     <video width="456" height="360">
-        <source src="example.mp4" type="video/mp4" />
-    </video> -->
+        <!-- Custom CSS styles -->
+        <link rel="stylesheet" href="css/style.css">
+    </head>
 
-    <form action="">
-        <label for="gifText">GIF Text</label>
-        <input name="gifText" id="gifText" value="" size="30"></input>
+    <body>
+        <!-- fixed-title -->
+        <nav class="fixed-title text-center" role="navigation">
+          <span class="gifshot-header-text-container">
+            <a class="gifshot-logo" href="index.html" role="banner">gifshot.js</a>
+            <span class="gifshot-header-text">Demo</span>
+          </span>
+          <span class="options-button-group">
+            <button type="button" id="create-gif" class="btn btn-large btn-primary create-gif-button">Create GIF</button>
+          </span>
+        </nav>
+      <!-- demo-section  -->
+      <section class="demo-section v-center">
+        <div>
+          <div class="row">
+            <div class="col-md-2 options-section">
+              <h3>Options</h3>
+              <form class="options-form" action="">
+                <div class="form-group">
+                  <label for="GIFSource">GIF Source</label>
+                  <select name="GIFSource" id="GIFSource" class="form-control">
+                    <option value="webcam">webcam</option>
+                    <option value="video">video</option>
+                    <option value="images">images</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="GIFType">GIF type</label>
+                  <select name="GIFType" id="GIFType" class="form-control">
+                    <option value="animated">Animated</option>
+                    <option value="snapshot">Snap Shot</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="gifWidth">GIF Width</label>
+                  <input name="gifWidth" id="gifWidth" class="form-control" value="200" size="5" type="number"></input>
+                </div>
+                <div class="form-group">
+                  <label for="gifHeight">GIF Height</label>
+                  <input name="gifHeight" id="gifHeight" class="form-control" value="200" size="5" type="number"></input>
+                </div>
+                <div class="form-group">
+                  <label for="interval">Interval</label>
+                  <input name="interval" id="interval" class="form-control" value=".1" size="5" type="number"></input>
+                </div>
+                <div class="form-group">
+                  <label for="numFrames">Number of Frames</label>
+                  <input name="numFrames" id="numFrames" class="form-control" value="10" size="5" type="number"></input>
+                </div>
+                <div class="form-group">
+                  <label for="gifText">GIF Text</label>
+                  <input name="gifText" id="gifText" class="form-control" value="" size="30"></input>
+                </div>
+                <div class="form-group">
+                  <label for="fontWeight">Font Weight</label>
+                  <select name="fontWeight" id="fontWeight" class="form-control">
+                    <option value="normal">normal</option>
+                    <option value="bold">bold</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="fontSize">Font Size</label>
+                  <input name="fontSize" id="fontSize" class="form-control" value="16px" size="5"></input>
+                </div>
+                <div class="form-group">
+                  <label for="fontFamily">Font Family</label>
+                  <select name="fontFamily" id="fontFamily" class="form-control">
+                    <option value="sans-serif">sans-serif</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Calibri">Calibri</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="fontColor">Font Color</label>
+                  <input type="color" name="fontColor" id="fontColor" class="form-control" value="#FFFFFF" size="5"></input>
+                </div>
+                <div class="form-group">
+                  <label for="textAlign">Text Align</label>
+                  <select name="textAlign" id="textAlign" class="form-control">
+                    <option value="center">center</option>
+                    <option value="left">left</option>
+                    <option value="right">right</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="textBaseline">Text Baseline</label>
+                  <select name="textBaseline" id="textBaseline" class="form-control">
+                    <option value="bottom">bottom</option>
+                    <option value="center">center</option>
+                    <option value="top">top</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="sampleInterval">Sample Interval</label>
+                  <input name="sampleInterval" id="sampleInterval" class="form-control" value="10" size="5" type="number"></input>
+                </div>
+                <div class="form-group">
+                  <label for="numWorkers">Num Workers</label>
+                  <input name="numWorkers" id="numWorkers" class="form-control" value="2" size="5" type="number"></input>
+                </div>
+              </form>
+            </div>
+            <div class="col-md-5 text-center code-section">
+              <section>
+                <h3>
+                  Code
+                </h3>
+                <pre class="language-javascript">
+                  <code class="gifshot-code"></code>
+                </pre>
+              </section>
+            </div>
+            <div class="col-md-5 text-center preview-section">
+              <h3>
+                Preview
+              </h3>
+              <section class="gifshot-image-preview-section"></section>
+              <div class="placeholder-div hidden">
+                <span class="placeholder-div-dimensions"></span>
+              </div>
+              <progress max="1" value="0" class="gifshot-progress-bar hidden"></progress>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <!-- <label for="fontColor">Font Color</label> -->
-        <input type="color" name="fontColor" id="fontColor" value="#FFF" size="5"></input>
-        <br><br>
-      <div>
-        <label for="interval">Interval</label>
-        <input name="interval" id="interval" value=".1" size="5"></input>
-
-        <label for="numFrames">Number of Frames</label>
-        <input name="numFrames" id="numFrames" value="10" size="5"></input>
-
-        <label for="gifHeight">GIF Height</label>
-        <input name="gifHeight" id="gifHeight" value="200" size="5"></input>
-
-        <label for="gifWidth">GIF Width</label>
-        <input name="gifWidth" id="gifWidth" value="200" size="5"></input>
-
-        <!-- <br><br> -->
-
-        <label for="fontWeight">Font Weight</label>
-        <select name="fontWeight" id="fontWeight">
-          <option value="normal">normal</option>
-          <option value="bold">bold</option>
-        </select>
-
-        <label for="fontSize">Font Size</label>
-        <input name="fontSize" id="fontSize" value="16px" size="5"></input>
-
-        <label for="fontFamily">Font Family</label>
-        <select name="fontFamily" id="fontFamily">
-          <option value="sans-serif">sans-serif</option>
-          <option value="Arial">Arial</option>
-          <option value="Calibri">Calibri</option>
-          <option value="Times New Roman">Times New Roman</option>
-        </select>
-
-        <label for="textAlign">Text Align</label>
-        <select name="textAlign" id="textAlign">
-          <option value="center">center</option>
-          <option value="left">left</option>
-          <option value="right">right</option>
-        </select>
-
-        <label for="textBaseline">Text Baseline</label>
-        <select name="textBaseline" id="textBaseline">
-          <option value="bottom">bottom</option>
-          <option value="center">center</option>
-          <option value="top">top</option>
-        </select>
-        <br><br>
-
-<!--         <label for="video">Show Video Example</label>
-        <input type="checkbox" name="video" id="video"></input>
-
-        <label for="images">Show Images Example</label>
-        <input type="checkbox" name="images" id="images"></input> -->
-
-        <!-- <br><br> -->
-      </div>
-
-        <button type="submit">Create GIF</button>
-        <button type="button" id="snapShot">Take Snapshot</button>
-        <progress max="1" value="0"></progress>
-    </form>
-
-  <script>
-    var form = document.querySelector("form"),
-        interval = document.querySelector("#interval"),
-        numFrames = document.querySelector("#numFrames"),
-        gifHeight = document.querySelector("#gifHeight"),
-        gifWidth = document.querySelector("#gifWidth"),
-        progressBar = document.querySelector("progress"),
-        snapShot = document.querySelector("#snapShot"),
-        text = document.querySelector('#gifText'),
-        fontWeight = document.querySelector('#fontWeight'),
-        fontSize = document.querySelector('#fontSize'),
-        fontFamily = document.querySelector('#fontFamily'),
-        fontColor = document.querySelector('#fontColor'),
-        textAlign = document.querySelector('#textAlign'),
-        textBaseline = document.querySelector('#textBaseline'),
-        video = document.querySelector('#video'),
-        images = document.querySelector('#images');
-
-    form.onsubmit = function(e){
-      e.preventDefault();
-
-      gifshot.createGIF({
-        // 'keepCameraOn': true,
-        // 'webcamVideoElement': document.querySelector('video'),
-        // 'video': ['example.mp4', 'example.ogv'],
-        // 'video': document.querySelector('video'),
-        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://www.google.com/think/images/google-trends_tools_sm.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
-        'text': text.value || '',
-        'fontWeight': fontWeight.value || 'normal',
-        'fontColor': '#FFF',
-        'fontSize': fontSize.value || '22px',
-        'fontFamily': fontFamily.value || 'sans-serif',
-        'fontColor': fontColor.value || '#FFF',
-        'textBaseline': textBaseline.value || 'bottom',
-        'textAlign': textAlign.value || 'center',
-        'interval': +interval.value || 0.2,
-        'numFrames': +numFrames.value || 15,
-        'gifHeight': +gifHeight.value || 400,
-        'gifWidth':  +gifWidth.value || 400,
-        'progressCallback': function(captureProgress){
-            progressBar.value = captureProgress;
-        }
-      }, function(obj) {
-      	if(!obj.error) {
-          var image = obj.image,
+      <!-- footer  -->
+      <footer class="footer v-center">
+        <div class="container">
+          <h4>Made by <a href="http://sports.yahoo.com">Yahoo Sports</a></h4>
+          <p style="margin: 0">
+            All code on this site is licensed under the
+            <a href="https://github.com/yahoo/gifshot/blob/master/LICENSE.txt">Yahoo MIT License</a> unless stated.
+          </p>
+        </div>
+      </footer>
+      <script src="js/dependencies/gifshot.js"></script>
+      <script src="js/dependencies/prism.min.js"></script>
+      <script src="js/dependencies/esprima.min.js"></script>
+      <script src="js/dependencies/escodegen.min.js"></script>
+      <script src="js/dependencies/lodash.min.js"></script>
+      <script class="gifshot-code-template" type="text/template">
+        gifshot.<%- method %>({
+          <% _.forEach(selectedOptions, function(val, key) {
+            if(gifshot.defaultOptions[key] !== val) { %>
+              <%= key %>: <% if(_.isString(val)) { %>'<%= val %>' <% }
+              else if(_.isArray(val)) { %>
+                <%= JSON.stringify(val) %> <% }
+              else { %> <%= val %> <%} %>,
+            <% } %>
+          <% }); %>
+        }, function(obj) {
+          if(!obj.error) {
+            var image = obj.image,
             animatedImage = document.createElement('img');
-          animatedImage.src = image;
-          document.body.appendChild(animatedImage);
-        } else {
-          console.log('obj', obj);
-          console.log('obj.error', obj.error);
-          console.log('obj.errorCode', obj.errorCode);
-          console.log('obj.errorMsg', obj.errorMsg);
-        }
-      });
-    }
-
-    snapShot.onclick = function(e){
-      gifshot.takeSnapShot({
-        // 'video': ['example.mp4', 'example.ogv'],
-        // 'images': ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
-        'text': text.value || '',
-        'fontWeight': fontWeight.value || 'normal',
-        'fontColor': '#FFF',
-        'fontSize': fontSize.value || '16px',
-        'fontFamily': fontFamily.value || 'sans-serif',
-        'fontColor': fontColor.value || '#FFF',
-        'textBaseline': textBaseline.value || 'bottom',
-        'textAlign': textAlign.value || 'center',
-        'interval': +interval.value || 0.2,
-        'numFrames': +numFrames.value || 15,
-        'gifHeight': +gifHeight.value || 400,
-        'gifWidth':  +gifWidth.value || 400
-      } ,function(obj) {
-        if(!obj.error) {
-          var image = obj.image,
-            animatedImage = document.createElement('img');
-          animatedImage.src = image;
-          document.body.appendChild(animatedImage);
-        }
-      });
-    }
-
-  </script>
-
-
-
-  </body>
+            animatedImage.src = image;
+            document.body.appendChild(animatedImage);
+          }
+        });
+      </script>
+      <script src="js/demo.js"></script>
+    </body>
 </html>

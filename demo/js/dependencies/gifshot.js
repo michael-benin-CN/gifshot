@@ -193,7 +193,7 @@ utils = function () {
   };
   return utils;
 }();
-error = function () {
+error = function (utils) {
   var error = {
     'validate': function (skipObj) {
       skipObj = utils.isObject(skipObj) ? skipObj : {};
@@ -258,7 +258,7 @@ error = function () {
     }
   };
   return error;
-}();
+}(utils);
 defaultOptions = {
   'sampleInterval': 10,
   'numWorkers': 2,
@@ -275,7 +275,7 @@ defaultOptions = {
   'fontWeight': 'normal',
   'fontSize': '16px',
   'fontFamily': 'sans-serif',
-  'fontColor': '#FFF',
+  'fontColor': '#ffffff',
   'textAlign': 'center',
   'textBaseline': 'bottom',
   'textXCoordinate': null,
@@ -289,6 +289,13 @@ defaultOptions = {
 };
 isSupported = function () {
   return error.isValid();
+};
+isWebCamGIFSupported = function () {
+  return error.isValid();
+};
+isExistingImagesGIFSupported = function () {
+  var skipObj = { 'getUserMedia': true };
+  return error.isValid(skipObj);
 };
 isExistingVideoGIFSupported = function (codecs) {
   var isSupported = false, hasValidCodec = false;
@@ -697,8 +704,8 @@ NeuQuant = function () {
   }
   return NeuQuant;
 }();
-processFrameWorker = function () {
-  var workerCode = function worker() {
+processFrameWorker = function (NeuQuant) {
+  var workerCode = function () {
     try {
       self.onmessage = function (ev) {
         var data = ev.data, response = workerMethods.run(data);
@@ -750,7 +757,7 @@ processFrameWorker = function () {
     return workerMethods;
   };
   return workerCode;
-}();
+}(NeuQuant);
 gifWriter = function gifWriter(buf, width, height, gopts) {
   var p = 0;
   gopts = gopts === undefined ? {} : gopts;
@@ -949,7 +956,7 @@ gifWriter = function gifWriter(buf, width, height, gopts) {
     return p;
   }
 };
-AnimatedGIF = function (frameWorkerCode, GifWriter) {
+AnimatedGIF = function (utils, frameWorkerCode, NeuQuant, GifWriter) {
   var AnimatedGIF = function (options) {
     options = utils.isObject(options) ? options : {};
     this.canvas = null;
@@ -976,7 +983,7 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     },
     'workerMethods': frameWorkerCode(),
     'initializeWebWorkers': function (options) {
-      var processFrameWorkerCode = NeuQuant.toString() + frameWorkerCode.toString() + 'worker();', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
+      var processFrameWorkerCode = NeuQuant.toString() + '(' + frameWorkerCode.toString() + '());', webWorkerObj, objectUrl, webWorker, numWorkers, x = -1, workerError = '';
       numWorkers = options.numWorkers;
       while (++x < numWorkers) {
         webWorkerObj = utils.createWebWorker(processFrameWorkerCode);
@@ -1169,7 +1176,7 @@ AnimatedGIF = function (frameWorkerCode, GifWriter) {
     }
   };
   return AnimatedGIF;
-}(processFrameWorker, gifWriter);
+}(utils, processFrameWorker, NeuQuant, gifWriter);
 getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
   animatedGifInstance.getBase64GIF(function (image) {
     callback({
@@ -1178,6 +1185,50 @@ getBase64GIF = function getBase64GIF(animatedGifInstance, callback) {
       'errorMsg': '',
       'image': image
     });
+  });
+};
+existingImages = function (obj) {
+  var images = obj.images, imagesLength = obj.imagesLength, callback = obj.callback, options = obj.options, skipObj = {
+      'getUserMedia': true,
+      'window.URL': true
+    }, errorObj = error.validate(skipObj), loadedImages = 0, tempImage, ag;
+  if (errorObj.error) {
+    return callback(errorObj);
+  }
+  ag = new AnimatedGIF(options);
+  utils.each(images, function (index, currentImage) {
+    if (utils.isElement(currentImage)) {
+      currentImage.crossOrigin = 'Anonymous';
+      ag.addFrame(currentImage, currentImage.src, options);
+      loadedImages += 1;
+      if (loadedImages === imagesLength) {
+        getBase64GIF(ag, callback);
+      }
+    } else if (utils.isString(currentImage)) {
+      tempImage = document.createElement('img');
+      tempImage.crossOrigin = 'Anonymous';
+      tempImage.onerror = function (e) {
+        if (imagesLength > 0) {
+          imagesLength -= 1;
+        }
+      };
+      tempImage.src = currentImage;
+      utils.setCSSAttr(tempImage, {
+        'position': 'fixed',
+        'opacity': '0'
+      });
+      (function (tempImage, ag, currentImage) {
+        tempImage.onload = function () {
+          ag.addFrame(tempImage, currentImage, options);
+          utils.removeElement(tempImage);
+          loadedImages += 1;
+          if (loadedImages === imagesLength) {
+            getBase64GIF(ag, callback);
+          }
+        };
+      }(tempImage, ag, currentImage));
+      document.body.appendChild(tempImage);
+    }
   });
 };
 screenShot = {
@@ -1423,6 +1474,16 @@ videoStream = {
     }
   }
 };
+stopVideoStreaming = function (obj) {
+  obj = utils.isObject(obj) ? obj : {};
+  var options = utils.isObject(obj.options) ? obj.options : {}, cameraStream = obj.cameraStream, videoElement = obj.videoElement, webcamVideoElement = obj.webcamVideoElement, keepCameraOn = obj.keepCameraOn;
+  videoStream.stopVideoStreaming({
+    'cameraStream': cameraStream,
+    'videoElement': videoElement,
+    'keepCameraOn': keepCameraOn,
+    'webcamVideoElement': webcamVideoElement
+  });
+};
 createAndGetGIF = function (obj, callback) {
   var options = obj.options || {}, images = options.images, video = options.video, numFrames = options.numFrames, interval = options.interval, wait = options.video ? 0 : interval * 10000, cameraStream = obj.cameraStream, videoElement = obj.videoElement, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, gifWidth = options.gifWidth, gifHeight = options.gifHeight, cropDimensions = screenShot.getCropDimensions({
       'videoWidth': videoWidth,
@@ -1488,6 +1549,26 @@ existingVideo = function (obj) {
     'existingVideo': existingVideo
   });
 };
+existingWebcam = function (obj) {
+  var lastCameraStream = obj.lastCameraStream, callback = obj.callback, webcamVideoElement = obj.webcamVideoElement, options = obj.options;
+  if (!isWebCamGIFSupported()) {
+    return callback(error.validate());
+  }
+  if (options.savedRenderingContexts.length) {
+    screenShot.getWebcamGIF(options, function (obj) {
+      callback(obj);
+    });
+    return;
+  }
+  videoStream.startVideoStreaming(function (obj) {
+    obj.options = options || {};
+    createAndGetGIF(obj, callback);
+  }, {
+    'lastCameraStream': lastCameraStream,
+    'callback': callback,
+    'webcamVideoElement': webcamVideoElement
+  });
+};
 createGIF = function (userOptions, callback) {
   callback = utils.isFunction(userOptions) ? userOptions : callback;
   userOptions = utils.isObject(userOptions) ? userOptions : {};
@@ -1529,7 +1610,7 @@ takeSnapShot = function (userOptions, callback) {
     });
   createGIF(options, callback);
 };
-API = function () {
+API = function (utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming) {
   var gifshot = {
     'utils': utils,
     'error': error,
@@ -1543,8 +1624,8 @@ API = function () {
     'isExistingImagesGIFSupported': isExistingImagesGIFSupported
   };
   return gifshot;
-}();
-(function () {
+}(utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming);
+(function (API) {
   if (typeof define === 'function' && define.amd) {
     define([], function () {
       return API;
@@ -1554,5 +1635,5 @@ API = function () {
   } else {
     window.gifshot = API;
   }
-}());
-}(this || {}, typeof document !== "undefined" ? document : { createElement: function() {} }, this.navigator || {}));
+}(API));
+}(typeof window !== "undefined" ? window : {}, typeof document !== "undefined" ? document : { createElement: function() {} }, typeof window !== "undefined" ? window.navigator : {}));
