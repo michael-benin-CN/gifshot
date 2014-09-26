@@ -20,12 +20,11 @@
         <!-- fixed-title -->
         <nav class="fixed-title text-center" role="navigation">
           <span class="gifshot-header-text-container">
-            <a class="gifshot-logo" href="http://index.com/" role="banner">gifshot.js</a>
+            <a class="gifshot-logo" href="index.html" role="banner">gifshot.js</a>
             <span class="gifshot-header-text">Demo</span>
           </span>
           <span class="options-button-group">
-            <button type="button" class="btn btn-primary create-gif-button">Create GIF</button>
-            <button type="button" class="btn btn-secondary take-snapshot-button">Take Snapshot</button>
+            <button type="button" id="create-gif" class="btn btn-large btn-primary create-gif-button">Create GIF</button>
           </span>
           <!-- main-header -->
           <header class="main-navigation navbar demo-navigation">
@@ -48,6 +47,13 @@
                     <option value="webcam">webcam</option>
                     <option value="video">video</option>
                     <option value="images">images</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="GIFType">GIF type</label>
+                  <select name="GIFType" id="GIFType" class="form-control">
+                    <option value="animated">Animated</option>
+                    <option value="snapshot">Snap Shot</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -120,25 +126,22 @@
                 </div>
               </form>
             </div>
-            <div class="col-md-5 text-center preview-section">
-              <section class="gifshot-image-preview-section">
-                <h3>
-                  Preview
-                </h3>
-              </section>
-              <progress max="1" value="0"></progress>
-            </div>
             <div class="col-md-5 text-center code-section">
               <section>
                 <h3>
                   Code
                 </h3>
                 <pre class="language-javascript">
-                  <code>
-                    var test = true;
-                  </code>
+                  <code class="gifshot-code"></code>
                 </pre>
               </section>
+            </div>
+            <div class="col-md-5 text-center preview-section">
+              <h3>
+                Preview
+              </h3>
+              <section class="gifshot-image-preview-section"></section>
+              <progress max="1" value="0" class="gifshot-progress-bar hidden"></progress>
             </div>
           </div>
         </div>
@@ -156,6 +159,26 @@
       </footer>
       <script src="js/dependencies/gifshot.min.js"></script>
       <script src="js/dependencies/prism.min.js"></script>
+      <script src="js/dependencies/esprima.min.js"></script>
+      <script src="js/dependencies/escodegen.min.js"></script>
+      <script src="js/dependencies/lodash.min.js"></script>
+      <script class="gifshot-code-template" type="text/template">
+        gifshot.<%- method %>({
+          <% _.forEach(selectedOptions, function(val, key) { %>
+            <%= key %>: <% if(_.isString(val)) { %>'<%= val %>' <% }
+            else if(_.isArray(val)) { %>
+              <%= JSON.stringify(val) %> <% }
+            else { %> <%= val %> <%} %>,
+          <% }); %>
+        }, function(obj) {
+          if(!obj.error) {
+            var image = obj.image,
+            animatedImage = document.createElement('img');
+            animatedImage.src = image;
+            document.body.appendChild(animatedImage);
+          }
+        });
+      </script>
       <script src="js/demo.js"></script>
     </body>
 </html>
