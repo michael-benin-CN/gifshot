@@ -112,6 +112,7 @@ p {
 }
 .btn:hover,
 .btn:focus {
+  color: white;
   outline: none;
   -webkit-transition: 0.25s;
   -moz-transition: 0.25s;
