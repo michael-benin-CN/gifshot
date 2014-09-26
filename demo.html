@@ -98,7 +98,7 @@
                 </div>
                 <div class="form-group">
                   <label for="fontColor">Font Color</label>
-                  <input type="color" name="fontColor" id="fontColor" class="form-control" value="#FFF" size="5"></input>
+                  <input type="color" name="fontColor" id="fontColor" class="form-control" value="#FFFFFF" size="5"></input>
                 </div>
                 <div class="form-group">
                   <label for="textAlign">Text Align</label>
@@ -167,11 +167,13 @@
       <script src="js/dependencies/lodash.min.js"></script>
       <script class="gifshot-code-template" type="text/template">
         gifshot.<%- method %>({
-          <% _.forEach(selectedOptions, function(val, key) { %>
-            <%= key %>: <% if(_.isString(val)) { %>'<%= val %>' <% }
-            else if(_.isArray(val)) { %>
-              <%= JSON.stringify(val) %> <% }
-            else { %> <%= val %> <%} %>,
+          <% _.forEach(selectedOptions, function(val, key) {
+            if(gifshot.defaultOptions[key] !== val) { %>
+              <%= key %>: <% if(_.isString(val)) { %>'<%= val %>' <% }
+              else if(_.isArray(val)) { %>
+                <%= JSON.stringify(val) %> <% }
+              else { %> <%= val %> <%} %>,
+            <% } %>
           <% }); %>
         }, function(obj) {
           if(!obj.error) {
