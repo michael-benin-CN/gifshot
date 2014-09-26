@@ -37,12 +37,14 @@
         'textAlign': textAlign.value,
         'textBaseline': textBaseline.value,
         'sampleInterval': +sampleInterval.value,
-        'numWorkers': numWorkers.value
+        'numWorkers': +numWorkers.value
       }
     },
     passedOptions,
-    updateCodeBlock = function() {
-      var selectedOptions = getSelectedOptions(),
+    updateCodeBlock = function(obj) {
+      obj = obj || {};
+      var targetElem = obj.targetElem,
+        selectedOptions = getSelectedOptions(),
         options = (function() {
           var obj = {};
 
@@ -69,19 +71,21 @@
 
       Prism.highlightElement(gifshotCode);
 
-      if(selectedOptions.gifHeight && selectedOptions.gifWidth) {
-        gifshotImagePreview.innerHTML = '';
-        placeholderDiv.style.height = selectedOptions.gifHeight + 'px';
-        placeholderDiv.style.width = selectedOptions.gifWidth + 'px';
-        placeholderDivDimensions.innerHTML = selectedOptions.gifWidth + ' x ' + selectedOptions.gifHeight;
-        if(selectedOptions.gifWidth < 60 || selectedOptions.gifHeight < 20) {
-          placeholderDivDimensions.classList.add('hidden');
+      if (targetElem && (targetElem.id === 'gifWidth' || targetElem.id === 'gifHeight')) {
+        if(selectedOptions.gifHeight && selectedOptions.gifWidth) {
+          gifshotImagePreview.innerHTML = '';
+          placeholderDiv.style.height = selectedOptions.gifHeight + 'px';
+          placeholderDiv.style.width = selectedOptions.gifWidth + 'px';
+          placeholderDivDimensions.innerHTML = selectedOptions.gifWidth + ' x ' + selectedOptions.gifHeight;
+          if(selectedOptions.gifWidth < 60 || selectedOptions.gifHeight < 20) {
+            placeholderDivDimensions.classList.add('hidden');
+          } else {
+            placeholderDivDimensions.classList.remove('hidden');
+          }
+          placeholderDiv.classList.remove('hidden');
         } else {
-          placeholderDivDimensions.classList.remove('hidden');
+          placeholderDiv.classList.add('hidden');
         }
-        placeholderDiv.classList.remove('hidden');
-      } else {
-        placeholderDiv.classList.add('hidden');
       }
     },
     bindEvents = function() {
@@ -116,14 +120,20 @@
       }, false);
 
       document.addEventListener('change', function(e) {
-        updateCodeBlock();
+        updateCodeBlock({
+          targetElem: e.target
+        });
       });
 
       document.addEventListener('keyup', function(e) {
-        updateCodeBlock();
+        updateCodeBlock({
+          targetElem: e.target
+        });
       });
     };
 
     bindEvents();
-    updateCodeBlock();
+    updateCodeBlock({
+      targetElem: gifWidth
+    });
 }(window, document));
