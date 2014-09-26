@@ -618,6 +618,7 @@ section * {
 .gifshot-images .hl {
   display: inline-block;
   white-space: nowrap;
+  padding-right: 5px;
 }
 /* Team Section */
 
