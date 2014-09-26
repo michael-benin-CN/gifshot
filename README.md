@@ -258,7 +258,7 @@ gifshot.takeSnapShot(function(obj) {
 // The font family of the text that covers the animated gif
 'fontFamily': 'sans-serif',
 // The font color of the text that covers the animated gif
-'fontColor': '#FFF',
+'fontColor': '#ffffff',
 // The horizontal text alignment of the text that covers the animated gif
 'textAlign': 'center',
 // The vertical text alignment of the text that covers the animated gif
