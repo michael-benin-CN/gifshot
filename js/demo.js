@@ -110,6 +110,7 @@
             progressBar.classList.add('hidden');
             progressBar.value = 0;
 
+            placeholderDiv.classList.add('hidden');
             gifshotImagePreview.innerHTML = '';
             gifshotImagePreview.appendChild(animatedImage);
           } else {
