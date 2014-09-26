@@ -17,6 +17,8 @@
     sampleInterval = document.querySelector('#sampleInterval'),
     numWorkers = document.querySelector('#numWorkers'),
     gifshotImagePreview = document.querySelector('.gifshot-image-preview-section'),
+    placeholderDiv = document.querySelector('.placeholder-div'),
+    placeholderDivDimensions = document.querySelector('.placeholder-div-dimensions'),
     gifshotCode = document.querySelector('.gifshot-code'),
     gifshotCodeTemplate = document.querySelector('.gifshot-code-template'),
     getSelectedOptions = function() {
@@ -66,12 +68,28 @@
       gifshotCode.innerHTML = code;
 
       Prism.highlightElement(gifshotCode);
+
+      if(selectedOptions.gifHeight && selectedOptions.gifWidth) {
+        gifshotImagePreview.innerHTML = '';
+        placeholderDiv.style.height = selectedOptions.gifHeight + 'px';
+        placeholderDiv.style.width = selectedOptions.gifWidth + 'px';
+        placeholderDivDimensions.innerHTML = selectedOptions.gifWidth + ' x ' + selectedOptions.gifHeight;
+        if(selectedOptions.gifWidth < 60 || selectedOptions.gifHeight < 20) {
+          placeholderDivDimensions.classList.add('hidden');
+        } else {
+          placeholderDivDimensions.classList.remove('hidden');
+        }
+        placeholderDiv.classList.remove('hidden');
+      } else {
+        placeholderDiv.classList.add('hidden');
+      }
     },
     bindEvents = function() {
       createGIFButton.addEventListener('click', function(e) {
         passedOptions = _.merge(_.clone(getSelectedOptions()), {
           'progressCallback': function(captureProgress) {
             gifshotImagePreview.innerHTML = '';
+            placeholderDiv.classList.add('hidden');
             progressBar.classList.remove('hidden');
             progressBar.value = captureProgress;
           }
