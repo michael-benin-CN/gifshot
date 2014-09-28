@@ -768,6 +768,60 @@ section * {
   height: 20px;
 }
 
+/* Select styling */
+.select-button {
+  border: 1px solid #bbb;
+  border-radius: .3em;
+  box-shadow: 0 1px 0 1px rgba(0,0,0,.04);
+  background: #eee;
+}
+
+.select-dropdown {
+  position: relative;
+  display: block;
+  margin-top: 0.5em;
+  padding: 0;
+}
+
+/* This is the native select, we're making everything the text invisible so we can see the button styles in the wrapper */
+.select-dropdown select {
+  cursor: pointer;
+  width: 100%;
+  margin: 0;
+  background: none;
+  border: 1px solid transparent;
+  outline: none;
+  /* Prefixed box-sizing rules necessary for older browsers */
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  /* Remove select styling */
+  appearance: none;
+  -webkit-appearance: none;
+  /* Magic font size number to prevent iOS text zoom */
+  font-size: 16px;
+  /* General select styles: change as needed */
+  line-height: 1.3;
+}
+
+/* Custom arrow sits on top of the select - could be an image, SVG, icon font, etc. or the arrow could just baked into the bg image on the select */
+.select-dropdown::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 8px;
+  top: 50%;
+  right: 1em;
+  margin-top:-4px;
+  background-image: url(../images/select-arrow.png);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  padding: 0;
+  z-index: 2;
+  /* These hacks make the select behind the arrow clickable in some browsers */
+  pointer-events:none;
+}
+
 /* remove standard styling 
  * for all HTML5 progress enabled browsers
  */
