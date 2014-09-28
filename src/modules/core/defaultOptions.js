@@ -20,6 +20,8 @@ define({
   'text': '',
   'fontWeight': 'normal',
   'fontSize': '16px',
+  'minFontSize': '10px',
+  'resizeFont': false,
   'fontFamily': 'sans-serif',
   'fontColor': '#ffffff',
   'textAlign': 'center',

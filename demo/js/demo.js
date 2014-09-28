@@ -31,7 +31,7 @@
         'numFrames': +numFrames.value,
         'text': text.value,
         'fontWeight': fontWeight.value,
-        'fontSize': fontSize.value,
+        'fontSize': fontSize.value + 'px',
         'fontFamily': fontFamily.value,
         'fontColor': fontColor.value,
         'textAlign': textAlign.value,
@@ -110,6 +110,7 @@
             progressBar.classList.add('hidden');
             progressBar.value = 0;
 
+            placeholderDiv.classList.add('hidden');
             gifshotImagePreview.innerHTML = '';
             gifshotImagePreview.appendChild(animatedImage);
           } else {

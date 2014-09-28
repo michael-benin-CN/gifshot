@@ -201,32 +201,37 @@ define(function() {
     'getExtension': function(src) {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
-    'getFontSize': function(text, containerWidth, maxFontSize, minFontSize) {
-      if (!document.body) {
-        return;
+    'getFontSize': function(options) {
+      options = options || {};
+
+      if (!document.body || (options.resizeFont === false)) {
+        return options.fontSize;
       }
 
-      var div = document.createElement("div"),
-        span = document.createElement("span"),
-        fontSize = maxFontSize;
+      var text = options.text,
+        containerWidth = options.gifWidth, 
+        fontSize = parseInt(options.fontSize, 10),
+        minFontSize = parseInt(options.minFontSize, 10),
+        div = document.createElement('div'),
+        span = document.createElement('span');
 
-      div.setAttribute("width", containerWidth);
+      div.setAttribute('width', containerWidth);
       div.appendChild(span);
 
       span.innerHTML = text;
-      span.style.fontSize = maxFontSize + "px";
-      span.style.textIndent = "-9999px";
-      span.style.visibility = "hidden";
+      span.style.fontSize = fontSize + 'px';
+      span.style.textIndent = '-9999px';
+      span.style.visibility = 'hidden';
 
       document.body.appendChild(span);
 
       while (span.offsetWidth > containerWidth && fontSize >= minFontSize) {
-        span.style.fontSize = --fontSize + "px";
+        span.style.fontSize = --fontSize + 'px';
       }
 
       document.body.removeChild(span);
 
-      return fontSize + "px";
+      return fontSize + 'px';
 
     },
     'webWorkerError': false

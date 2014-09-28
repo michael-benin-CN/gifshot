@@ -171,15 +171,16 @@ utils = function () {
     'getExtension': function (src) {
       return src.substr(src.lastIndexOf('.') + 1, src.length);
     },
-    'getFontSize': function (text, containerWidth, maxFontSize, minFontSize) {
-      if (!document.body) {
-        return;
+    'getFontSize': function (options) {
+      options = options || {};
+      if (!document.body || options.resizeFont === false) {
+        return options.fontSize;
       }
-      var div = document.createElement('div'), span = document.createElement('span'), fontSize = maxFontSize;
+      var text = options.text, containerWidth = options.gifWidth, fontSize = parseInt(options.fontSize, 10), minFontSize = parseInt(options.minFontSize, 10), div = document.createElement('div'), span = document.createElement('span');
       div.setAttribute('width', containerWidth);
       div.appendChild(span);
       span.innerHTML = text;
-      span.style.fontSize = maxFontSize + 'px';
+      span.style.fontSize = fontSize + 'px';
       span.style.textIndent = '-9999px';
       span.style.visibility = 'hidden';
       document.body.appendChild(span);
@@ -274,6 +275,8 @@ defaultOptions = {
   'text': '',
   'fontWeight': 'normal',
   'fontSize': '16px',
+  'minFontSize': '10px',
+  'resizeFont': false,
   'fontFamily': 'sans-serif',
   'fontColor': '#ffffff',
   'textAlign': 'center',
@@ -1116,7 +1119,7 @@ AnimatedGIF = function (utils, frameWorkerCode, NeuQuant, GifWriter) {
     },
     'addFrame': function (element, src, gifshotOptions) {
       gifshotOptions = utils.isObject(gifshotOptions) ? gifshotOptions : {};
-      var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10), fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
+      var self = this, ctx = this.ctx, options = this.options, width = options.width, height = options.height, imageData, gifHeight = gifshotOptions.gifHeight, gifWidth = gifshotOptions.gifWidth, text = gifshotOptions.text, fontWeight = gifshotOptions.fontWeight, fontSize = utils.getFontSize(gifshotOptions), fontFamily = gifshotOptions.fontFamily, fontColor = gifshotOptions.fontColor, textAlign = gifshotOptions.textAlign, textBaseline = gifshotOptions.textBaseline, textXCoordinate = gifshotOptions.textXCoordinate ? gifshotOptions.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? width : width / 2, textYCoordinate = gifshotOptions.textYCoordinate ? gifshotOptions.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? height / 2 : height, font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
       try {
         if (src) {
           element.src = src;
@@ -1232,16 +1235,16 @@ existingImages = function (obj) {
   });
 };
 screenShot = {
-  getWebcamGIF: function (obj, callback) {
+  getWebcamGIF: function (options, callback) {
     callback = utils.isFunction(callback) ? callback : function () {
     };
-    var canvas = document.createElement('canvas'), context, videoElement = obj.videoElement, keepCameraOn = obj.keepCameraOn, webcamVideoElement = obj.webcamVideoElement, cameraStream = obj.cameraStream, gifWidth = obj.gifWidth, gifHeight = obj.gifHeight, videoWidth = obj.videoWidth, videoHeight = obj.videoHeight, sampleInterval = obj.sampleInterval, numWorkers = obj.numWorkers, crop = obj.crop, interval = obj.interval, progressCallback = obj.progressCallback, savedRenderingContexts = obj.savedRenderingContexts, saveRenderingContexts = obj.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : obj.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
+    var canvas = document.createElement('canvas'), context, videoElement = options.videoElement, keepCameraOn = options.keepCameraOn, webcamVideoElement = options.webcamVideoElement, cameraStream = options.cameraStream, gifWidth = options.gifWidth, gifHeight = options.gifHeight, videoWidth = options.videoWidth, videoHeight = options.videoHeight, sampleInterval = options.sampleInterval, numWorkers = options.numWorkers, crop = options.crop, interval = options.interval, progressCallback = options.progressCallback, savedRenderingContexts = options.savedRenderingContexts, saveRenderingContexts = options.saveRenderingContexts, renderingContextsToSave = [], numFrames = savedRenderingContexts.length ? savedRenderingContexts.length : options.numFrames, pendingFrames = numFrames, ag = new AnimatedGIF({
         'sampleInterval': sampleInterval,
         'numWorkers': numWorkers,
         'width': gifWidth,
         'height': gifHeight,
         'delay': interval
-      }), text = obj.text, fontWeight = obj.fontWeight, fontSize = utils.getFontSize(obj.text, obj.gifWidth, 22, 10), fontFamily = obj.fontFamily, fontColor = obj.fontColor, textAlign = obj.textAlign, textBaseline = obj.textBaseline, textXCoordinate = obj.textXCoordinate ? obj.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = obj.textYCoordinate ? obj.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
+      }), text = options.text, fontWeight = options.fontWeight, fontSize = utils.getFontSize(options), fontFamily = options.fontFamily, fontColor = options.fontColor, textAlign = options.textAlign, textBaseline = options.textBaseline, textXCoordinate = options.textXCoordinate ? options.textXCoordinate : textAlign === 'left' ? 1 : textAlign === 'right' ? gifWidth : gifWidth / 2, textYCoordinate = options.textYCoordinate ? options.textYCoordinate : textBaseline === 'top' ? 1 : textBaseline === 'center' ? gifHeight / 2 : gifHeight, font = fontWeight + ' ' + fontSize + ' ' + fontFamily, sourceX = crop ? Math.floor(crop.scaledWidth / 2) : 0, sourceWidth = crop ? videoWidth - crop.scaledWidth : 0, sourceY = crop ? Math.floor(crop.scaledHeight / 2) : 0, sourceHeight = crop ? videoHeight - crop.scaledHeight : 0, captureFrame = function () {
         var framesLeft = pendingFrames - 1;
         if (savedRenderingContexts.length) {
           context.putImageData(savedRenderingContexts[numFrames - pendingFrames], 0, 0);
