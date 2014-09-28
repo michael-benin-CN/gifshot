@@ -1,11 +1,8 @@
 (function() {
-  var POSSIBLE_IMAGES = 21,
+  var POSSIBLE_IMAGES = 23,
     TOTAL_IMAGES = 9,
     COLUMNS = 3,
-    randomNums = _.shuffle(_.range(1, POSSIBLE_IMAGES)).slice(0, TOTAL_IMAGES),
-    isEven = function(num) {
-      return num % 2 === 0;
-    };
+    randomNums = _.shuffle(_.range(1, POSSIBLE_IMAGES)).slice(0, TOTAL_IMAGES);
 
   _.each(randomNums, function(num, iterator) {
     iterator += 1;
