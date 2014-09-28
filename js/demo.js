@@ -31,7 +31,7 @@
         'numFrames': +numFrames.value,
         'text': text.value,
         'fontWeight': fontWeight.value,
-        'fontSize': fontSize.value,
+        'fontSize': fontSize.value + 'px',
         'fontFamily': fontFamily.value,
         'fontColor': fontColor.value,
         'textAlign': textAlign.value,
