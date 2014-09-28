@@ -257,7 +257,7 @@ define([
         gifWidth = gifshotOptions.gifWidth,
         text = gifshotOptions.text,
         fontWeight = gifshotOptions.fontWeight,
-        fontSize = utils.getFontSize(gifshotOptions.text, gifshotOptions.gifWidth, 22, 10), //gifshotOptions.fontSize,
+        fontSize = utils.getFontSize(gifshotOptions),
         fontFamily = gifshotOptions.fontFamily,
         fontColor = gifshotOptions.fontColor,
         textAlign = gifshotOptions.textAlign,

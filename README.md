@@ -16,7 +16,7 @@ gifshot.js uses the following technologies:
 
 - The `canvas` API to create a dynamic image from an HTML5 video, or images
 
-- `Web workers` to process the gif frames
+- `Web workers` to process the GIF frames
 
 - `Typed Arrays` to handle binary image data
 
@@ -220,7 +220,7 @@ gifshot.takeSnapShot(function(obj) {
 'gifWidth': 200,
 // Desired height of the image
 'gifHeight': 200,
-// If this option is used, then a gif will be created using these images
+// If this option is used, then a GIF will be created using these images
 // e.g. ['http://i.imgur.com/2OO33vX.jpg', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'],
 // Note: Make sure these image resources are CORS enabled to prevent any cross-origin JavaScript errors
 // Note: You may also pass a NodeList of existing image elements on the page
@@ -237,7 +237,7 @@ gifshot.takeSnapShot(function(obj) {
 // Another Pro Tip: If you use this option, the video will not be paused, the object url not revoked, and
 // the video will not be removed from the DOM.  You will need to handle this yourself.
 'webcamVideoElement': null,
-// Whether or not you would like the user's camera to stay on after the gif is created
+// Whether or not you would like the user's camera to stay on after the GIF is created
 // Note: The cameraStream Media object is passed back to you in the createGIF() callback function
 'keepCameraOn': false,
 // Expects a cameraStream Media object
@@ -249,33 +249,38 @@ gifshot.takeSnapShot(function(obj) {
 // The number of frames to use to create the animated GIF
 // Note: Each frame is captured every 100 milleseconds of a video
 'numFrames': 10,
-// The text that covers the animated gif
+// The text that covers the animated GIF
 'text': '',
-// The font weight of the text that covers the animated gif
+// The font weight of the text that covers the animated GIF
 'fontWeight': 'normal',
-// The font size of the text that covers the animated gif
+// The font size of the text that covers the animated GIF
 'fontSize': '16px',
-// The font family of the text that covers the animated gif
+// The minimum font size of the text that covers the animated GIF
+// Note: This option is only applied if the text being applied is cut off
+'minFontSize': '10px',
+// Whether or not the animated GIF text will be resized to fit within the GIF container
+'resizeFont': false,
+// The font family of the text that covers the animated GIF
 'fontFamily': 'sans-serif',
-// The font color of the text that covers the animated gif
+// The font color of the text that covers the animated GIF
 'fontColor': '#ffffff',
-// The horizontal text alignment of the text that covers the animated gif
+// The horizontal text alignment of the text that covers the animated GIF
 'textAlign': 'center',
-// The vertical text alignment of the text that covers the animated gif
+// The vertical text alignment of the text that covers the animated GIF
 'textBaseline': 'bottom',
-// The X (horizontal) Coordinate of the text that covers the animated gif (only use this if the default textAlign and textBaseline options don't work for you)
+// The X (horizontal) Coordinate of the text that covers the animated GIF (only use this if the default textAlign and textBaseline options don't work for you)
 'textXCoordinate': null,
-// The Y (vertical) Coordinate of the text that covers the animated gif (only use this if the default textAlign and textBaseline options don't work for you)
+// The Y (vertical) Coordinate of the text that covers the animated GIF (only use this if the default textAlign and textBaseline options don't work for you)
 'textYCoordinate': null,
 // Callback function that provides the current progress of the current image
 'progressCallback': function(captureProgress) {},
 // Callback function that is called when the current image is completed
 'completeCallback': function() {},
 // how many pixels to skip when creating the palette. Default is 10. Less is better, but slower.
-// Note: By adjusting the sample interval, you can either produce extremely high-quality images slowly, or produce good images in
-//       reasonable times. With a sampleInterval of 1, the entire image is used in the learning phase, while with an interval of 10,
-//       a pseudo-random subset of 1/10 of the pixels are used in the learning phase. A sampling factor of 10 gives a substantial
-//       speed-up, with a small quality penalty.
+// Note: By adjusting the sample interval, you can either produce extremely high-quality images slowly, or produce good images in reasonable times.
+// With a sampleInterval of 1, the entire image is used in the learning phase, while with an interval of 10,
+// a pseudo-random subset of 1/10 of the pixels are used in the learning phase. A sampling factor of 10 gives a
+// substantial speed-up, with a small quality penalty.
 'sampleInterval': 10,
 // how many web workers to use to process the animated GIF frames. Default is 2.
 'numWorkers': 2,
