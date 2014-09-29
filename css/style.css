@@ -259,6 +259,7 @@ section * {
 .container {
   position: relative;
   z-index: 2;
+  max-width: 650px;
 }
 .main-header {
   text-align: center;
@@ -627,6 +628,7 @@ section * {
   display: inline-block;
   white-space: nowrap;
   padding-right: 5px;
+  width: 30%;
 }
 /* Team Section */
 
@@ -876,9 +878,6 @@ progress:not([value])::-webkit-progress-bar {
   }
   .teammate {
     margin-left: 0px;
-  }
-  .gifshot-images {
-    overflow-x: auto;
   }
   .demo-navigation {
     display: none;
