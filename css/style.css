@@ -854,9 +854,15 @@ progress:not([value])::-webkit-progress-bar {
   .preview-section {
     height: 400px;
   }
+  .options-button-group {
+    padding-right: 15px;
+  }
 }
 
 @media (max-width: 698px) {
+  body {
+    padding: 0 10px;
+  }
   .background-yahoo-sports {
     display: none;
   }
