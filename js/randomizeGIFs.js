@@ -1,8 +1,8 @@
 (function() {
-  var POSSIBLE_IMAGES = 23,
+  var POSSIBLE_IMAGES = 24,
     TOTAL_IMAGES = 9,
     COLUMNS = 3,
-    randomNums = _.shuffle(_.range(1, POSSIBLE_IMAGES)).slice(0, TOTAL_IMAGES);
+    randomNums = _.shuffle(_.range(1, POSSIBLE_IMAGES + 1)).slice(0, TOTAL_IMAGES);
 
   _.each(randomNums, function(num, iterator) {
     iterator += 1;
