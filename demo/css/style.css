@@ -149,6 +149,7 @@ footer {
 .navbar a.active {
   color: #005580;
 }
+
 body {
   overflow-x: hidden;
   color: #7f8c8d;
@@ -618,6 +619,7 @@ section * {
 .gifshot-images .hl {
   display: inline-block;
   white-space: nowrap;
+  padding-right: 5px;
 }
 /* Team Section */
 
@@ -746,6 +748,10 @@ section * {
   border-right: 1px dotted rgba(0,0,0,.2);
 }
 
+.options-section {
+  overflow-x: hidden;
+}
+
 .language-javascript {
   border: none;
 }
@@ -765,6 +771,27 @@ section * {
   margin: auto;
   width: 100%;
   height: 20px;
+}
+
+.button {
+  border: 1px solid #bbb;
+  border-radius: .3em;
+  box-shadow: 0 1px 0 1px rgba(0,0,0,.04);
+  background: #f3f3f3; /* Old browsers */
+  background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #e5e5e5)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%); /* W3C */
+}
+
+select option {
+  background: #f3f3f3;
+}
+
+select {
+  cursor: pointer;
 }
 
 /* remove standard styling 
