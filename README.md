@@ -4,6 +4,8 @@
 
 Today we are happy to open source gifshot.js, a client-side JavaScript library that can create animated GIFs from media streams (e.g. webcam), videos (e.g. mp4), or images (e.g. png). Gifshot leverages cutting edge browser APIs (sorry IE9 and below) such as WebRTC, FileSystem, Video, Canvas, Web Workers, Typed Arrays, and Base 64 Encoding, to automate the GIF creation process using only client-side JavaScript. The client-side nature of the library makes it extremely portable and easy to integrate into almost any website (sort of like animated GIFs themselves).
 
+![](images/screencastGIF.gif)
+
 Piggybacking on the idea of simplicity, we also created an easy to use API, so that you can start creating GIFs right away.  Let's take a look at an example:
 
 ```javascript
