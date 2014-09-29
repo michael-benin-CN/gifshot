@@ -65,7 +65,7 @@ gifshot.createGIF({}, function(obj) {
 2.  Install [Node.js](http://nodejs.org/)
 3.  Install all local dependencies: `npm install`
 4.  Start up the included node.js preview server: `npm run preview`
-5.  Go to `localhost:8001` to try out gifshot.
+5.  Go to `localhost:8001` to try out gifshot
 
 ![](images/screencastGIF.gif)
 
