@@ -6,7 +6,7 @@ JavaScript library that can create animated GIFs from media streams, videos, or 
 
 ## How
 
-gifshot.js uses the following technologies:
+gifshot uses the following technologies:
 
 - The webRTC `getUserMedia()` API to get permission to use a user's webcam and manipulate the `CameraStream` Media object
 
@@ -39,7 +39,7 @@ gifshot.js uses the following technologies:
 
 
 ## Quick Start
-*  Include `gifshot.js` on your HTML page (`gifshot.js` can be found in the `build` directory)
+*  Include `gifshot` on your HTML page (`gifshot.js` can be found in the `build` directory)
 
 ```html
 <script src='gifshot.js'></script>
@@ -65,7 +65,7 @@ gifshot.createGIF({}, function(obj) {
 2.  Install [Node.js](http://nodejs.org/)
 3.  Install all local dependencies: `npm install`
 4.  Start up the included node.js preview server: `npm run preview`
-5.  Go to `localhost:8001` to try out gifshot.js.
+5.  Go to `localhost:8001` to try out gifshot.
 
 ![](images/screencastGIF.gif)
 
@@ -333,7 +333,7 @@ If your PR is a code change:
 
 ## Credits
 
-gifshot.js would not have been possible without the help/inspiration of the following libraries/awesome people:
+gifshot would not have been possible without the help/inspiration of the following libraries/awesome people:
 
 ###Used
 
