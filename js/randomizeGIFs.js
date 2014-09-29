@@ -1,5 +1,5 @@
 (function() {
-  var POSSIBLE_IMAGES = 24,
+  var POSSIBLE_IMAGES = 25,
     TOTAL_IMAGES = 9,
     COLUMNS = 3,
     randomNums = _.shuffle(_.range(1, POSSIBLE_IMAGES + 1)).slice(0, TOTAL_IMAGES);
