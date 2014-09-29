@@ -67,6 +67,8 @@ gifshot.createGIF({}, function(obj) {
 4.  Start up the included node.js preview server: `npm run preview`
 5.  Go to `localhost:8001` to try out gifshot.js.
 
+![](images/screencastGIF.gif)
+
 
 ## API Methods
 
