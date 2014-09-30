@@ -9,7 +9,6 @@ var gulp = require('gulp'),
   rename = require('gulp-rename'),
   mocha = require('gulp-mocha'),
   istanbul = require('gulp-istanbul'),
-  jshint = require('gulp-jshint'),
   rimraf = require('gulp-rimraf'),
   _ = require('lodash'),
   rjs = require('requirejs'),
@@ -114,18 +113,9 @@ gulp.task('concat', function(cb) {
   });
 });
 
-// JSHint task that checks src/gifshot.js
-gulp.task('lint', ['concat'], function() {
-  gulp.src('src/gifshot.js')
-    .pipe(jshint({
-      'loopfunc': true
-    }))
-    .pipe(jshint.reporter('default'));
-});
-
 // Task that creates a customized gifshot.js file (only including modules that are testable)
 // and runs the Mocha unit tests and Instanbul test coverage
-gulp.task('test', ['concat', 'lint'], function(cb) {
+gulp.task('test', ['concat'], function(cb) {
   var outputFile = 'tests/gifshot.test.js',
     rjsOptions = _.merge(_.clone(configs.rjs), {
       'out': outputFile
@@ -166,7 +156,7 @@ gulp.task('test', ['concat', 'lint'], function(cb) {
 });
 
 // Copies src/gifshot.js to build/gifshot.js and demo/gifshot.js
-gulp.task('copy', ['concat', 'lint', 'test'], function() {
+gulp.task('copy', ['concat', 'test'], function() {
   gulp.src(['src/gifshot.js'])
     .pipe(insert.prepend(licenseText))
     .pipe(gulp.dest('build'))
@@ -174,7 +164,7 @@ gulp.task('copy', ['concat', 'lint', 'test'], function() {
 });
 
 // Uglify.js task that minifies build/gifshot.js and adds gifshot.min.js to the build folder
-gulp.task('minify', ['concat', 'lint', 'test', 'copy'], function() {
+gulp.task('minify', ['concat', 'test', 'copy'], function() {
   gulp.src(['src/gifshot.js'])
     .pipe(uglify())
     .pipe(rename('gifshot.min.js'))
@@ -183,7 +173,7 @@ gulp.task('minify', ['concat', 'lint', 'test', 'copy'], function() {
 });
 
 // Cleanup task that removes certain temporary files
-gulp.task('cleanup', ['concat', 'lint', 'test', 'copy', 'minify'], function() {
+gulp.task('cleanup', ['concat', 'test', 'copy', 'minify'], function() {
   gulp.src(['src/gifshot.js', 'tests/gifshot.test.js'], {
     read: false
   })
@@ -242,7 +232,7 @@ gulp.task('custom-build', function() {
 });
 
 // The default build task (called when you run `gulp`)
-gulp.task('default', ['concat', 'lint', 'test', 'copy', 'minify', 'cleanup']);
+gulp.task('default', ['concat', 'test', 'copy', 'minify', 'cleanup']);
 
 // The watch task that runs the default task on any gifshot module file changes
 gulp.task('watch', function() {

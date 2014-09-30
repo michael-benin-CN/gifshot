@@ -328,7 +328,7 @@ If your PR is a code change:
 5.  Verify that the minified output file has been updated in `build/gifshot.js` and `build/gifshot.min.js` and that no unit tests are failing.
 6.  Send the PR!
 
-**Note:** There is a gulp `watch` task set up that will automatically build, lint, test, and minify gifshot whenever a module inside of the `src/modules` directory is changed.  We recommend using it.
+**Note:** There is a gulp `watch` task set up that will automatically build, test, and minify gifshot whenever a module inside of the `src/modules` directory is changed.  We recommend using it.
 
 
 ## Credits
