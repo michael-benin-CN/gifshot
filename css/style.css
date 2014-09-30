@@ -612,13 +612,6 @@ section * {
   left:0;
 }
 
-.gifshot-header-text {
-  font-weight: 100;
-  margin-left: -25px;
-  display: inline-block;
-  vertical-align: middle;
-}
-
 .gifshot-brand {
   font-family: 'Grand Hotel',cursive;
   font-size: 60px;
