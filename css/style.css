@@ -624,6 +624,10 @@ section * {
   font-size: 60px;
   color: #2c3e50;
 }
+.gifshot-images {
+  min-width: 620px;
+  min-height: 440px;
+}
 .gifshot-images .row {
   white-space: nowrap;
 }
@@ -890,5 +894,74 @@ progress:not([value])::-webkit-progress-bar {
   }
   .fixed-title {
     text-align: right;
+  }
+}
+
+.gifshot-loader {
+  height: 75px;
+  width: 75px;
+  vertical-align: middle;
+  display: inline-block;
+  -webkit-animation: rotation .4s infinite linear;
+  -moz-animation: rotation .4s infinite linear;
+  animation: rotation .4s infinite linear;
+  border: 3px solid rgba(0,0,0,0.2);
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%;
+}
+.gifshot-loader:before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  height: 100%;
+  width: 100%;
+  border: 3px solid transparent;
+  border-top-color: #005580;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%
+}
+.gifshot-images .gifshot-loader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+}
+
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg)
+  }
+  to {
+    -webkit-transform: rotate(359deg)
+  }
+}
+@-moz-keyframes rotation {
+  from {
+    -moz-transform: rotate(0deg)
+  }
+  to {
+    -moz-transform: rotate(359deg)
+  }
+}
+@-o-keyframes rotation {
+  from {
+    -o-transform: rotate(0deg)
+  }
+  to {
+    -o-transform: rotate(359deg)
+  }
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg)
+  }
+  to {
+    transform: rotate(359deg)
   }
 }
