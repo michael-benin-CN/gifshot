@@ -896,8 +896,8 @@ progress:not([value])::-webkit-progress-bar {
     text-align: right;
   }
   .gifshot-images {
-    min-width: inherit;
-    min-height: inherit;
+    min-width: 350px;
+    min-height: 260px;
   }
 }
 
