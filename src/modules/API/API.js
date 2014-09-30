@@ -38,7 +38,8 @@ define([
     'isSupported': isSupported,
     'isWebCamGIFSupported': isWebCamGIFSupported,
     'isExistingVideoGIFSupported': isExistingVideoGIFSupported,
-    'isExistingImagesGIFSupported': isExistingImagesGIFSupported
+    'isExistingImagesGIFSupported': isExistingImagesGIFSupported,
+    'VERSION': '0.0.1'
   };
 
   return gifshot;

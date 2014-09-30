@@ -1624,7 +1624,8 @@ API = function (utils, error, defaultOptions, isSupported, isWebCamGIFSupported,
     'isSupported': isSupported,
     'isWebCamGIFSupported': isWebCamGIFSupported,
     'isExistingVideoGIFSupported': isExistingVideoGIFSupported,
-    'isExistingImagesGIFSupported': isExistingImagesGIFSupported
+    'isExistingImagesGIFSupported': isExistingImagesGIFSupported,
+    'VERSION': '0.0.1'
   };
   return gifshot;
 }(utils, error, defaultOptions, isSupported, isWebCamGIFSupported, isExistingImagesGIFSupported, isExistingVideoGIFSupported, createGIF, takeSnapShot, stopVideoStreaming);
