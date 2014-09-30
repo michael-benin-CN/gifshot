@@ -359,6 +359,11 @@ gifshot would not have been possible without the help/inspiration of the followi
 
 ## Contributors
 
-- [Chase West](https://github.com/ChaseWest) ![](images/chase_west.gif)
-- [Greg Franko](https://github.com/gfranko) ![](images/greg_franko.gif)
-- [Chris Chernoff](https://github.com/chrischernoff) ![](images/chris_chernoff.gif)
+#### [Chase West](https://github.com/ChaseWest)
+![](images/chase_west.gif)
+
+#### [Greg Franko](https://github.com/gfranko)
+![](images/greg_franko.gif)
+
+#### [Chris Chernoff](https://github.com/chrischernoff)
+![](images/chris_chernoff.gif)
