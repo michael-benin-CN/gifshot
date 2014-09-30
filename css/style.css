@@ -614,6 +614,9 @@ section * {
 
 .gifshot-header-text {
   font-weight: 100;
+  margin-left: -25px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .gifshot-brand {
@@ -856,9 +859,6 @@ progress:not([value])::-webkit-progress-bar {
   .demo-navigation {
     display: none;
   }
-  .gifshot-header-text {
-    display: none;
-  }
   .fixed-title {
     text-align: right;
   }
@@ -886,9 +886,6 @@ progress:not([value])::-webkit-progress-bar {
     margin-left: 0px;
   }
   .demo-navigation {
-    display: none;
-  }
-  .gifshot-header-text {
     display: none;
   }
   .fixed-title {
